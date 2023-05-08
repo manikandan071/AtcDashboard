@@ -1,0 +1,16 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "version": "1.14.0",
+    "libraryName": "field-quality-dashboard",
+    "libraryId": "be352a9c-c81c-4771-a6c4-0042d63a6e51",
+    "environment": "spo",
+    "packageManager": "npm",
+    "solutionName": "field-quality-dashboard",
+    "solutionShortDescription": "field-quality-dashboard description",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "field-quality-dashboard-client-side-solution",
+    "id": "be352a9c-c81c-4771-a6c4-0042d63a6e51",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.14.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "field-quality-dashboard description"
+      },
+      "longDescription": {
+        "default": "field-quality-dashboard description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "field-quality-dashboard Feature",
+        "description": "The feature that activates elements of the field-quality-dashboard solution.",
+        "id": "149538f7-34cc-4e8d-9a92-182550273905",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/field-quality-dashboard.sppkg"
+  }
+}

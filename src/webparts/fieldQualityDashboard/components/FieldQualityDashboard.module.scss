@@ -1,0 +1,114 @@
+@import '~office-ui-fabric-react/dist/sass/References.scss';
+
+.filtersection{
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+}
+.noRecordsec{
+  text-align: center;
+  margin-top: 10px;
+}
+.backicon{
+  border-radius: 50px;
+  border: 2px solid #be4545;
+  padding: 5px;
+  color: #be4545;
+  font-weight: bold;
+  cursor: pointer;
+}
+.heading{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0px 0px 0px;
+}
+.generalDetails{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin: 25px 0px 0px 0px;
+}
+.underline:nth-child(1){
+  position: relative;
+  width: 91%;
+  align-items: end;
+}
+.underline:nth-child(2){
+  position: relative;
+    width: 94%;
+    align-items: end;
+}
+.underline:nth-child(3){
+  position: relative;
+    width: 93%;
+    align-items: end;
+}
+.underline:after {
+  position: absolute;
+  content: "";
+  top: 5px;
+  border-bottom: 2px solid #be4545;
+  left: 0;
+  right: 0;
+}
+.resetbtn{
+  background-color: #a83037;
+  color: #fff;
+}
+.resetbtn:hover{
+  background-color: #a83037;
+  color: #fff;
+}
+.pagination{
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.comboBox {
+  div {
+    div {
+      padding: 0px 9px !important;
+      background-color: #fff;
+      margin-right: -9px;
+      height: 28px;
+      font-size: 12px;
+    }
+  }
+}
+
+.fileSection{
+  width: 50%;
+  // display: flex;
+  // flex-wrap: wrap;
+  margin:13px 30px 0px 0px;
+}
+.fileSectionlabel{
+  display: inline-block;
+    width: 100%;
+    // margin: 17px 0px -23px;
+    color: #a55860;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 5px 0;
+}.withFiles{
+    width: 100%;
+    background-color: #f3f2f1;
+    border-radius: 3px;
+    padding: 2px 6px;
+    height: 90px;
+    overflow: auto;
+    box-sizing: border-box;
+    // margin-top: 30px;
+}
+.files{
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  margin: 0px;
+  cursor: pointer;
+}
+.closeicon i{
+  font-size: 10px;
+}
