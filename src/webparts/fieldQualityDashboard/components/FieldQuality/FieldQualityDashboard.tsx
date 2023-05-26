@@ -5615,1738 +5615,2013 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                     </div>
 
                     {isClient ? (
-                      <div className={approvePopupStyles.content}>
-                        {actionplan[0].Generalprecheck ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Generalprecheck :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={actionplan[0].Generalprecheck}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
+                      <>
+                        <div className={approvePopupStyles.content}>
+                          {actionplan[0].Generalprecheck ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Generalprecheck :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={actionplan[0].Generalprecheck}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
 
-                        {actionplan[0].GeneralprecheckComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              GeneralprecheckComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={actionplan[0].GeneralprecheckComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {actionplan[0].Crewdetailsprecheck ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Crewdetailsprecheck :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={actionplan[0].Crewdetailsprecheck}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {actionplan[0].CrewdetailsprecheckComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              CrewdetailsprecheckComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={actionplan[0].CrewdetailsprecheckComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {actionplan[0].RealtimecontactATCoffice ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              RealtimecontactATCoffice :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={actionplan[0].RealtimecontactATCoffice}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {actionplan[0].RealtimecontactATCofficeComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              RealtimecontactATCofficeComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                actionplan[0].RealtimecontactATCofficeComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {actionplan[0].Equipment_x2019_scheck_x002d_Too ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Equipment’scheck-ToolsPaperwork :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                actionplan[0].Equipment_x2019_scheck_x002d_Too
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {actionplan[0].Equipment_x2019_scheck_x002d_Too0 ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Equipment’scheck-ToolsPaperworkComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                actionplan[0].Equipment_x2019_scheck_x002d_Too0
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {actionplan[0].AdditionalJobs ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              AdditionalJobs :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={actionplan[0].AdditionalJobs}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {actionplan[0].AdditionalJobsComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              AdditionalJobsComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={actionplan[0].AdditionalJobsComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {effectivecom[0].InformTeamleadOfIssuesOnSite ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              InformTeamleadOfIssuesOnSite :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                effectivecom[0].InformTeamleadOfIssuesOnSite
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {effectivecom[0].InformTeamleadOfIssuesOnSiteComm ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              InformTeamleadOfIssuesOnSiteComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                effectivecom[0].InformTeamleadOfIssuesOnSiteComm
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {effectivecom[0].CommunicationIssuesTeamOrVendor ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              CommunicationIssuesTeamOrVendor :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                effectivecom[0].CommunicationIssuesTeamOrVendor
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {effectivecom[0].CommunicationIssuesTeamOrVendorC ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              CommunicationIssuesTeamOrVendorComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                effectivecom[0].CommunicationIssuesTeamOrVendorC
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {effectivecom[0].Driversrating_x0028_Vendorsonly_ ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Driversrating(Vendorsonly) :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                effectivecom[0].Driversrating_x0028_Vendorsonly_
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {effectivecom[0].NotesToReportOnDailyMeeting ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              NotesToReportOnDailyMeeting :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                effectivecom[0].NotesToReportOnDailyMeeting
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {effectivecom[0].NotesToReportOnDailyMeetingComme ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              NotesToReportOnDailyMeetingComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                effectivecom[0].NotesToReportOnDailyMeetingComme
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].ToolsOnChargeForNextDay ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              ToolsOnChargeForNextDay :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={wrappingup[0].ToolsOnChargeForNextDay}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].ToolsOnChargeForNextDayComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              ToolsOnChargeForNextDayComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                wrappingup[0].ToolsOnChargeForNextDayComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].VehicleIsCleanAndNotOnReserveFor ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              VehicleIsCleanAndNotOnReserveForNextDay :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                wrappingup[0].VehicleIsCleanAndNotOnReserveFor
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].VehicleIsCleanAndNotOnReserveFor0 ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              VehicleIsCleanAndNotOnReserveForNextDayComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                wrappingup[0].VehicleIsCleanAndNotOnReserveFor0
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].PaperWorkCompletePlanningTeamUpd ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              PaperWorkCompletePlanningTeamUpdated :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                wrappingup[0].PaperWorkCompletePlanningTeamUpd
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].PaperWorkCompletePlanningTeamUpd0 ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              PaperWorkCompletePlanningTeamUpdatedComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                wrappingup[0].PaperWorkCompletePlanningTeamUpd0
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingnext[0].AdditionalDeliveryComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              AdditionalDeliveryComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={wrappingnext[0].AdditionalDeliveryComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].Cablingspreadsheetupdate ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Cablingspreadsheetupdate :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={wrappingup[0].Cablingspreadsheetupdate}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].CablingspreadsheetupdateComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              CablingspreadsheetupdateComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                wrappingup[0].CablingspreadsheetupdateComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].AccidentInformation ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              AccidentInformation :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={wrappingup[0].AccidentInformation}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].AccidentInformationComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              AccidentInformationComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={wrappingup[0].AccidentInformationComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].GoodSave ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              GoodSave :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={wrappingup[0].GoodSave}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].GoodSaveComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              GoodSaveComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={wrappingup[0].GoodSaveComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].Safetyinitiative ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Safetyinitiative :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={wrappingup[0].Safetyinitiative}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].SafetyinitiativeComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SafetyinitiativeComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={wrappingup[0].SafetyinitiativeComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].Drivingforwsuggestion ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Drivingforwsuggestion :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={wrappingup[0].Drivingforwsuggestion}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingup[0].DrivingforwsuggestionComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              DrivingforwsuggestionComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                wrappingup[0].DrivingforwsuggestionComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingnext[0].CustomerFeedback ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              CustomerFeedback :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={wrappingnext[0].CustomerFeedback}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingnext[0].CustomerFeedbackComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              CustomerFeedbackComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={wrappingnext[0].CustomerFeedbackComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingnext[0].ATCSupervvisorFeedback ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              ATCSupervvisorFeedback :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={wrappingnext[0].ATCSupervvisorFeedback}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {wrappingnext[0].ATCSupervisorFeedbackComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              ATCSupervisorFeedbackComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                border: "1px solid",
-                                height: "110%",
-                              }}
-                              value={
-                                wrappingnext[0].ATCSupervisorFeedbackComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].TruckSealBreak ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              TruckSealBreak :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].TruckSealBreak}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].TruckSealBreakComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              TruckSealBreakComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={operationalres[0].TruckSealBreakComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].Truckdeparturedelays ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Truckdeparturedelays :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].Truckdeparturedelays}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].TruckdeparturedelaysTime ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              TruckdeparturedelaysTime :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].TruckdeparturedelaysTime}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].TruckdeparturedelaysComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              TruckdeparturedelaysComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0].TruckdeparturedelaysComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].DCATsDelays ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              DCATsDelays :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].DCATsDelays}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].DCATsDelaysTime ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              DCATsDelaysTime :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].DCATsDelaysTime}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].DCATsDelaysComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              DCATsDelaysComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={operationalres[0].DCATsDelaysComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].VendorWGCrewdelays ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              VendorWGCrewdelays :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].VendorWGCrewdelays}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].VendorWGCrewdelaysTime ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              VendorWGCrewdelaysTime :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].VendorWGCrewdelaysTime}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].VendorWGCrewdelaysComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              VendorWGCrewdelaysComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0].VendorWGCrewdelaysComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].BANKSMANPresent ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              BANKSMANPresent :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].BANKSMANPresent}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].BANKSMANPresentComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              BANKSMANPresentComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={operationalres[0].BANKSMANPresentComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].SecurityOrOtherDelays ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SecurityOrOtherDelays :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].SecurityOrOtherDelays}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].SecurityorotherdelaysTime ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SecurityorotherdelaysTime :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0].SecurityorotherdelaysTime
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].SecurityOrOtherDelaysComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SecurityOrOtherDelaysComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0].SecurityOrOtherDelaysComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].Full5PPE ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Full5PPE :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].Full5PPE}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].Full5PPEComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Full5PPEComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={operationalres[0].Full5PPEComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].PhoneMediaUsage ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              PhoneMediaUsage :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].PhoneMediaUsage}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].PhoneMediaUsageComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              PhoneMediaUsageComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={operationalres[0].PhoneMediaUsageComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].RestingOnFloor ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              RestingOnFloor :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].RestingOnFloor}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].RestingOnFloorComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              RestingOnFloorComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={operationalres[0].RestingOnFloorComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].TruckArrival ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              TruckArrival :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].TruckArrival}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].TruckArrivalLoadingbayComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              TruckArrivalLoadingbayComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0].TruckArrivalLoadingbayComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].TruckDeparture ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              TruckDeparture :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].TruckDeparture}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].TruckDepartureLoadingbayComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              TruckDepartureLoadingbayComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0]
-                                  .TruckDepartureLoadingbayComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].RealtimeETAs ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              RealtimeETAs :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].RealtimeETAs}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].RealtimeETAComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              RealtimeETAComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={operationalres[0].RealtimeETAComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].COLLOaccessissues ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              COLLOaccessissues :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].COLLOaccessissues}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].COLLOaccessissuesTime ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              COLLOaccessissuesTime :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].COLLOaccessissuesTime}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].COLLOaccessissuesComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              COLLOaccessissuesComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0].COLLOaccessissuesComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].Induction ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Induction :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].Induction}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].InductionComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              InductionComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={operationalres[0].InductionComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].HandSBriefingConductedby ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              HandSBriefingConductedby :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].HandSBriefingConductedby}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].STARTofoperationMSFTstaff ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              STARTofoperationMSFTstaff :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0].STARTofoperationMSFTstaff
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].STARTofoperationMSFTstaffComment ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              STARTofoperationMSFTstaffComment :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0]
-                                  .STARTofoperationMSFTstaffComment
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].SmartTeamdelegating ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SmartTeamdelegating :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].SmartTeamdelegating}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].SmartTeamdelegatingComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SmartTeamdelegatingComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0].SmartTeamdelegatingComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].Rampsetup ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Rampsetup :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].Rampsetup}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].RampsetupComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              RampsetupComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={operationalres[0].RampsetupComments}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].LoadingBayPreparationofworkareae0 ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              LoadingBayPreparationofworkareae0 :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0]
-                                  .LoadingBayPreparationofworkareae0
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].LoadingBayPreparationofworkareae ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              LoadingBayPreparationofworkareae :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0]
-                                  .LoadingBayPreparationofworkareae
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].FINALcheckasperSOP_x2013_WGorDep0 ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              FINALcheckasperSOP_x2013_WGorDep0 :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0]
-                                  .FINALcheckasperSOP_x2013_WGorDep0
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].FINALcheckasperSOP_x2013_WGorDep ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              FINALcheckasperSOP_x2013_WGorDep :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0]
-                                  .FINALcheckasperSOP_x2013_WGorDep
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].DebrisSeparationOfPlasticMetal ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              DebrisSeparationOfPlasticMetal :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0].DebrisSeparationOfPlasticMetal
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].DebrisSeparationOfPlasticMetalCo ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              DebrisSeparationOfPlasticMetalCo :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0]
-                                  .DebrisSeparationOfPlasticMetalCo
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].DebrisCleanUpLoadingbay ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              DebrisCleanUpLoadingbay :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].DebrisCleanUpLoadingbay}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].DebrisCleanUpLoadingbayComments ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              DebrisCleanUpLoadingbayComments :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0]
-                                  .DebrisCleanUpLoadingbayComments
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].JobCompletionConfirmation ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              JobCompletionConfirmation :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0].JobCompletionConfirmation
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].JobCompletionConfirmationComment ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              JobCompletionConfirmationComment :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0]
-                                  .JobCompletionConfirmationComment
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].SecondTruck ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SecondTruck :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].SecondTruck}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].SecondTruckArrivalDateTime ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SecondTruckArrivalDateTime :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0].SecondTruckArrivalDateTime
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].SecondTruckArrivalDateTimeCommen ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SecondTruckArrivalDateTimeComment :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0]
-                                  .SecondTruckArrivalDateTimeCommen
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].SecondTruckDepartureDateTime ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SecondTruckDepartureDateTime :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0].SecondTruckDepartureDateTime
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].SecondTruckDepartureDateTimeComm ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              SecondTruckDepartureDateTimeCommt :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0]
-                                  .SecondTruckDepartureDateTimeComm
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].Team1LoadingBay ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Team1LoadingBay :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].Team1LoadingBay}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].Team2Rackpushing0toCOLLO ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              Team2Rackpushing0toCOLLO :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].Team2Rackpushing0toCOLLO}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].ThirdTruck ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              ThirdTruck :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={operationalres[0].ThirdTruck}
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].ThirdTruckArrivalDateTime ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              ThirdTruckArrivalDateTime :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0].ThirdTruckArrivalDateTime
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].ThirdTruckArrivalDateTimeComment ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              ThirdTruckArrivalDateTimeComment :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0]
-                                  .ThirdTruckArrivalDateTimeComment
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].ThirdTruckDepartureDateTime ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              ThirdTruckDepartureDateTime :
-                            </label>
-                            <input
-                              style={{ width: "50%" }}
-                              type="text"
-                              value={
-                                operationalres[0].ThirdTruckDepartureDateTime
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-                        {operationalres[0].ThirdTruckDepartureDateTimeComme ? (
-                          <div className={approvePopupStyles.right}>
-                            <label style={{ width: "46%", fontWeight: "700" }}>
-                              ThirdTruckDepartureDateTimeCommet :
-                            </label>
-                            <textarea
-                              style={{
-                                width: "50%",
-                                height: "110%",
-                                border: "1px solid",
-                              }}
-                              value={
-                                operationalres[0]
-                                  .ThirdTruckDepartureDateTimeComme
-                              }
-                              disabled
-                            />
-                          </div>
-                        ) : (
-                          ""
-                        )}
-
+                          {actionplan[0].GeneralprecheckComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                GeneralprecheckComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={actionplan[0].GeneralprecheckComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {actionplan[0].Crewdetailsprecheck ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Crewdetailsprecheck :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={actionplan[0].Crewdetailsprecheck}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {actionplan[0].CrewdetailsprecheckComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                CrewdetailsprecheckComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  actionplan[0].CrewdetailsprecheckComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {actionplan[0].RealtimecontactATCoffice ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                RealtimecontactATCoffice :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={actionplan[0].RealtimecontactATCoffice}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {actionplan[0].RealtimecontactATCofficeComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                RealtimecontactATCofficeComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  actionplan[0].RealtimecontactATCofficeComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {actionplan[0].Equipment_x2019_scheck_x002d_Too ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Equipment’scheck-ToolsPaperwork :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  actionplan[0].Equipment_x2019_scheck_x002d_Too
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {actionplan[0].Equipment_x2019_scheck_x002d_Too0 ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Equipment’scheck-ToolsPaperworkComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  actionplan[0]
+                                    .Equipment_x2019_scheck_x002d_Too0
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {actionplan[0].AdditionalJobs ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                AdditionalJobs :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={actionplan[0].AdditionalJobs}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {actionplan[0].AdditionalJobsComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                AdditionalJobsComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={actionplan[0].AdditionalJobsComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {effectivecom[0].InformTeamleadOfIssuesOnSite ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                InformTeamleadOfIssuesOnSite :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  effectivecom[0].InformTeamleadOfIssuesOnSite
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {effectivecom[0].InformTeamleadOfIssuesOnSiteComm ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                InformTeamleadOfIssuesOnSiteComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  effectivecom[0]
+                                    .InformTeamleadOfIssuesOnSiteComm
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {effectivecom[0].CommunicationIssuesTeamOrVendor ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                CommunicationIssuesTeamOrVendor :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  effectivecom[0]
+                                    .CommunicationIssuesTeamOrVendor
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {effectivecom[0].CommunicationIssuesTeamOrVendorC ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                CommunicationIssuesTeamOrVendorComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  effectivecom[0]
+                                    .CommunicationIssuesTeamOrVendorC
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {effectivecom[0].Driversrating_x0028_Vendorsonly_ ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Driversrating(Vendorsonly) :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  effectivecom[0]
+                                    .Driversrating_x0028_Vendorsonly_
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {effectivecom[0].NotesToReportOnDailyMeeting ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                NotesToReportOnDailyMeeting :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  effectivecom[0].NotesToReportOnDailyMeeting
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {effectivecom[0].NotesToReportOnDailyMeetingComme ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                NotesToReportOnDailyMeetingComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  effectivecom[0]
+                                    .NotesToReportOnDailyMeetingComme
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].ToolsOnChargeForNextDay ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                ToolsOnChargeForNextDay :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={wrappingup[0].ToolsOnChargeForNextDay}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].ToolsOnChargeForNextDayComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                ToolsOnChargeForNextDayComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  wrappingup[0].ToolsOnChargeForNextDayComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].VehicleIsCleanAndNotOnReserveFor ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                VehicleIsCleanAndNotOnReserveForNextDay :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  wrappingup[0].VehicleIsCleanAndNotOnReserveFor
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].VehicleIsCleanAndNotOnReserveFor0 ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                VehicleIsCleanAndNotOnReserveForNextDayComments
+                                :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  wrappingup[0]
+                                    .VehicleIsCleanAndNotOnReserveFor0
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].PaperWorkCompletePlanningTeamUpd ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                PaperWorkCompletePlanningTeamUpdated :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  wrappingup[0].PaperWorkCompletePlanningTeamUpd
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].PaperWorkCompletePlanningTeamUpd0 ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                PaperWorkCompletePlanningTeamUpdatedComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  wrappingup[0]
+                                    .PaperWorkCompletePlanningTeamUpd0
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingnext[0].AdditionalDeliveryComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                AdditionalDeliveryComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  wrappingnext[0].AdditionalDeliveryComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].Cablingspreadsheetupdate ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Cablingspreadsheetupdate :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={wrappingup[0].Cablingspreadsheetupdate}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].CablingspreadsheetupdateComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                CablingspreadsheetupdateComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  wrappingup[0].CablingspreadsheetupdateComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].AccidentInformation ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                AccidentInformation :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={wrappingup[0].AccidentInformation}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].AccidentInformationComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                AccidentInformationComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  wrappingup[0].AccidentInformationComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].GoodSave ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                GoodSave :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={wrappingup[0].GoodSave}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].GoodSaveComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                GoodSaveComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={wrappingup[0].GoodSaveComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].Safetyinitiative ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Safetyinitiative :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={wrappingup[0].Safetyinitiative}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].SafetyinitiativeComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SafetyinitiativeComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={wrappingup[0].SafetyinitiativeComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].Drivingforwsuggestion ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Drivingforwsuggestion :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={wrappingup[0].Drivingforwsuggestion}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingup[0].DrivingforwsuggestionComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                DrivingforwsuggestionComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  wrappingup[0].DrivingforwsuggestionComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingnext[0].CustomerFeedback ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                CustomerFeedback :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={wrappingnext[0].CustomerFeedback}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingnext[0].CustomerFeedbackComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                CustomerFeedbackComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={wrappingnext[0].CustomerFeedbackComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingnext[0].ATCSupervvisorFeedback ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                ATCSupervvisorFeedback :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={wrappingnext[0].ATCSupervvisorFeedback}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {wrappingnext[0].ATCSupervisorFeedbackComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                ATCSupervisorFeedbackComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  border: "1px solid",
+                                  height: "110%",
+                                }}
+                                value={
+                                  wrappingnext[0].ATCSupervisorFeedbackComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].TruckSealBreak ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                TruckSealBreak :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].TruckSealBreak}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].TruckSealBreakComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                TruckSealBreakComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={operationalres[0].TruckSealBreakComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].Truckdeparturedelays ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Truckdeparturedelays :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].Truckdeparturedelays}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].TruckdeparturedelaysTime ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                TruckdeparturedelaysTime :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].TruckdeparturedelaysTime
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].TruckdeparturedelaysComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                TruckdeparturedelaysComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0].TruckdeparturedelaysComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].DCATsDelays ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                DCATsDelays :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].DCATsDelays}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].DCATsDelaysTime ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                DCATsDelaysTime :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].DCATsDelaysTime}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].DCATsDelaysComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                DCATsDelaysComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={operationalres[0].DCATsDelaysComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].VendorWGCrewdelays ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                VendorWGCrewdelays :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].VendorWGCrewdelays}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].VendorWGCrewdelaysTime ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                VendorWGCrewdelaysTime :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].VendorWGCrewdelaysTime}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].VendorWGCrewdelaysComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                VendorWGCrewdelaysComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0].VendorWGCrewdelaysComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].BANKSMANPresent ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                BANKSMANPresent :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].BANKSMANPresent}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].BANKSMANPresentComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                BANKSMANPresentComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0].BANKSMANPresentComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].SecurityOrOtherDelays ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SecurityOrOtherDelays :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].SecurityOrOtherDelays}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].SecurityorotherdelaysTime ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SecurityorotherdelaysTime :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].SecurityorotherdelaysTime
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].SecurityOrOtherDelaysComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SecurityOrOtherDelaysComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0]
+                                    .SecurityOrOtherDelaysComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].Full5PPE ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Full5PPE :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].Full5PPE}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].Full5PPEComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Full5PPEComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={operationalres[0].Full5PPEComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].PhoneMediaUsage ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                PhoneMediaUsage :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].PhoneMediaUsage}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].PhoneMediaUsageComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                PhoneMediaUsageComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0].PhoneMediaUsageComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].RestingOnFloor ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                RestingOnFloor :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].RestingOnFloor}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].RestingOnFloorComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                RestingOnFloorComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={operationalres[0].RestingOnFloorComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].TruckArrival ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                TruckArrival :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].TruckArrival}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].TruckArrivalLoadingbayComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                TruckArrivalLoadingbayComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0]
+                                    .TruckArrivalLoadingbayComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].TruckDeparture ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                TruckDeparture :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].TruckDeparture}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .TruckDepartureLoadingbayComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                TruckDepartureLoadingbayComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0]
+                                    .TruckDepartureLoadingbayComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].RealtimeETAs ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                RealtimeETAs :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].RealtimeETAs}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].RealtimeETAComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                RealtimeETAComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={operationalres[0].RealtimeETAComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].COLLOaccessissues ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                COLLOaccessissues :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].COLLOaccessissues}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].COLLOaccessissuesTime ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                COLLOaccessissuesTime :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].COLLOaccessissuesTime}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].COLLOaccessissuesComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                COLLOaccessissuesComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0].COLLOaccessissuesComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].Induction ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Induction :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].Induction}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].InductionComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                InductionComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={operationalres[0].InductionComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].HandSBriefingConductedby ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                HandSBriefingConductedby :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].HandSBriefingConductedby
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].STARTofoperationMSFTstaff ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                STARTofoperationMSFTstaff :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].STARTofoperationMSFTstaff
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .STARTofoperationMSFTstaffComment ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                STARTofoperationMSFTstaffComment :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0]
+                                    .STARTofoperationMSFTstaffComment
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].SmartTeamdelegating ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SmartTeamdelegating :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].SmartTeamdelegating}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].SmartTeamdelegatingComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SmartTeamdelegatingComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0].SmartTeamdelegatingComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].Rampsetup ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Rampsetup :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].Rampsetup}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].RampsetupComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                RampsetupComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={operationalres[0].RampsetupComments}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .LoadingBayPreparationofworkareae0 ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                LoadingBayPreparationofworkareae0 :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0]
+                                    .LoadingBayPreparationofworkareae0
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .LoadingBayPreparationofworkareae ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                LoadingBayPreparationofworkareae :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0]
+                                    .LoadingBayPreparationofworkareae
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .FINALcheckasperSOP_x2013_WGorDep0 ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                FINALcheckasperSOP_x2013_WGorDep0 :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0]
+                                    .FINALcheckasperSOP_x2013_WGorDep0
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .FINALcheckasperSOP_x2013_WGorDep ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                FINALcheckasperSOP_x2013_WGorDep :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0]
+                                    .FINALcheckasperSOP_x2013_WGorDep
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].DebrisSeparationOfPlasticMetal ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                DebrisSeparationOfPlasticMetal :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0]
+                                    .DebrisSeparationOfPlasticMetal
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .DebrisSeparationOfPlasticMetalCo ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                DebrisSeparationOfPlasticMetalCo :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0]
+                                    .DebrisSeparationOfPlasticMetalCo
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].DebrisCleanUpLoadingbay ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                DebrisCleanUpLoadingbay :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].DebrisCleanUpLoadingbay
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].DebrisCleanUpLoadingbayComments ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                DebrisCleanUpLoadingbayComments :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0]
+                                    .DebrisCleanUpLoadingbayComments
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].JobCompletionConfirmation ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                JobCompletionConfirmation :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].JobCompletionConfirmation
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .JobCompletionConfirmationComment ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                JobCompletionConfirmationComment :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0]
+                                    .JobCompletionConfirmationComment
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].SecondTruck ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SecondTruck :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].SecondTruck}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].SecondTruckArrivalDateTime ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SecondTruckArrivalDateTime :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].SecondTruckArrivalDateTime
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .SecondTruckArrivalDateTimeCommen ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SecondTruckArrivalDateTimeComment :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0]
+                                    .SecondTruckArrivalDateTimeCommen
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].SecondTruckDepartureDateTime ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SecondTruckDepartureDateTime :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].SecondTruckDepartureDateTime
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .SecondTruckDepartureDateTimeComm ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                SecondTruckDepartureDateTimeCommt :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0]
+                                    .SecondTruckDepartureDateTimeComm
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].Team1LoadingBay ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Team1LoadingBay :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].Team1LoadingBay}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].Team2Rackpushing0toCOLLO ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                Team2Rackpushing0toCOLLO :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].Team2Rackpushing0toCOLLO
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].ThirdTruck ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                ThirdTruck :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={operationalres[0].ThirdTruck}
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].ThirdTruckArrivalDateTime ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                ThirdTruckArrivalDateTime :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].ThirdTruckArrivalDateTime
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .ThirdTruckArrivalDateTimeComment ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                ThirdTruckArrivalDateTimeComment :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0]
+                                    .ThirdTruckArrivalDateTimeComment
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0].ThirdTruckDepartureDateTime ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                ThirdTruckDepartureDateTime :
+                              </label>
+                              <input
+                                style={{ width: "50%" }}
+                                type="text"
+                                value={
+                                  operationalres[0].ThirdTruckDepartureDateTime
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {operationalres[0]
+                            .ThirdTruckDepartureDateTimeComme ? (
+                            <div className={approvePopupStyles.right}>
+                              <label
+                                style={{ width: "46%", fontWeight: "700" }}
+                              >
+                                ThirdTruckDepartureDateTimeCommet :
+                              </label>
+                              <textarea
+                                style={{
+                                  width: "50%",
+                                  height: "110%",
+                                  border: "1px solid",
+                                }}
+                                value={
+                                  operationalres[0]
+                                    .ThirdTruckDepartureDateTimeComme
+                                }
+                                disabled
+                              />
+                            </div>
+                          ) : (
+                            ""
+                          )}
+                          {/* <div
+                          style={{
+                            width: "95%",
+                            display: "flex",
+                            justifyContent: "center",
+                            marginTop: "20px",
+                          }}
+                        >
+                          <DefaultButton
+                            primary
+                            text={"Reject"}
+                            style={{
+                              cursor: "pointer",
+                              backgroundColor: "#be3535ed",
+                              border: "1px solid #be3535ed",
+                              marginRight: "20px",
+                            }}
+                            onClick={() => {
+                              setIsRejectPopup(true);
+                            }}
+                          />
+                          <DefaultButton
+                            primary
+                            text={"Approve"}
+                            style={{
+                              cursor: "pointer",
+                              backgroundColor: "#67c25f",
+                              border: "1px solid #67c25f",
+                            }}
+                            onClick={(item) => approvelFunction()}
+                          />
+                        </div> */}
+                        </div>
                         <div
                           style={{
                             width: "95%",
@@ -7379,7 +7654,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                             onClick={(item) => approvelFunction()}
                           />
                         </div>
-                      </div>
+                      </>
                     ) : (
                       <>
                         <div className={approvePopupStyles.content}>
@@ -10042,8 +10317,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                           ) : (
                             ""
                           )}
-
-                          <div
+                          {/* <div
                             style={{
                               width: "95%",
                               display: "flex",
@@ -10074,7 +10348,39 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                               }}
                               onClick={(item) => approvelFunction()}
                             />
-                          </div>
+                          </div> */}
+                        </div>
+                        <div
+                          style={{
+                            width: "95%",
+                            display: "flex",
+                            justifyContent: "center",
+                            marginTop: "20px",
+                          }}
+                        >
+                          <DefaultButton
+                            primary
+                            text={"Reject"}
+                            style={{
+                              cursor: "pointer",
+                              backgroundColor: "#be3535ed",
+                              border: "1px solid #be3535ed",
+                              marginRight: "20px",
+                            }}
+                            onClick={() => {
+                              setIsRejectPopup(true);
+                            }}
+                          />
+                          <DefaultButton
+                            primary
+                            text={"Approve"}
+                            style={{
+                              cursor: "pointer",
+                              backgroundColor: "#67c25f",
+                              border: "1px solid #67c25f",
+                            }}
+                            onClick={(item) => approvelFunction()}
+                          />
                         </div>
                       </>
                     )}
