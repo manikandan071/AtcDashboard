@@ -1,13 +1,14 @@
 #workbenchPageContent {
-    max-width: 100%;
+  max-width: 100%;
 }
 
 .content_3f3fd3c2,
 .CanvasZone {
-    padding: 0 !important;
-    max-width: 100% !important;
+  padding: 0 !important;
+  max-width: 100% !important;
 }
 
-input[type="text" i]{
-    padding: 1px !important;
+input[type="text" i] {
+  padding: 1px !important;
+  border: 1px solid;
 }

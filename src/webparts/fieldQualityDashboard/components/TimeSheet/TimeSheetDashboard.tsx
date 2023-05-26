@@ -67,6 +67,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       { key: "Yes", text: "Yes" },
       { key: "No", text: "No" },
     ],
+    overTimeReason: [{ key: "All", text: "All" }],
   };
 
   let FilterItem = {
@@ -82,6 +83,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
     costCenter: "All",
     travel: "All",
     city: "All",
+    overTimeReason: "All",
     // mobilization:
     //   loggedinuser != "davor.salkanovic@atc-logistics.de" ? "All" : "Yes",
   };
@@ -119,6 +121,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
   const History: IIconProps = { iconName: "History" };
   const CloudUpload: IIconProps = { iconName: "SkypeCircleCheck" };
   const Close: IIconProps = { iconName: "ChromeClose" };
+  const Equalizer: IIconProps = { iconName: "Equalizer" };
   const gridStyles: Partial<IDetailsListStyles> = {
     root: {
       selectors: {
@@ -301,8 +304,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
       key: "columns1",
       name: "Week",
       fieldName: "week",
-      minWidth: 30,
-      maxWidth: 50,
+      minWidth: 20,
+      maxWidth: 30,
       onRender: (item) => (
         <>
           <div>{item.week}</div>
@@ -313,8 +316,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
       key: "columns2",
       name: "Date",
       fieldName: "date",
-      minWidth: 70,
-      maxWidth: 90,
+      minWidth: 40,
+      maxWidth: 50,
       onRender: (item) => (
         <>
           <div>{dateFormater(item.date)}</div>
@@ -326,7 +329,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       name: "Supervisor",
       fieldName: "name",
       minWidth: 90,
-      maxWidth: 120,
+      maxWidth: 110,
       onRender: (item) => (
         <>
           <div>{item.supervisor}</div>
@@ -338,7 +341,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       name: "Start Time",
       fieldName: "startTime",
       minWidth: 30,
-      maxWidth: 60,
+      maxWidth: 40,
       onRender: (item) => (
         <>
           <div>{item.startTime ? item.startTime : "-"}</div>
@@ -350,7 +353,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       name: "Finish Time",
       fieldName: "finishTime",
       minWidth: 30,
-      maxWidth: 60,
+      maxWidth: 40,
       onRender: (item) => (
         <>
           <div>{item.finishTime ? item.finishTime : "-"}</div>
@@ -362,7 +365,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       name: "Total hours",
       fieldName: "finishTime",
       minWidth: 40,
-      maxWidth: 80,
+      maxWidth: 70,
       onRender: (item) => (
         <>
           <div>{item.totalHours ? item.totalHours : "-"}</div>
@@ -406,6 +409,24 @@ export default function TimeSheetDashboard(props): JSX.Element {
     },
     {
       key: "columns9",
+      name: "Over time reason",
+      fieldName: "overtimecommentsDrp",
+      minWidth: 70,
+      maxWidth: 90,
+      onRender: (item) => (
+        <>
+          <div>
+            {item.overtimecommentsDrp
+              ? item.overtimecommentsDrp.map((data, index) => {
+                  return data + ",";
+                })
+              : "-"}
+          </div>
+        </>
+      ),
+    },
+    {
+      key: "columns10",
       name: "Status",
       fieldName: "status",
       minWidth: 90,
@@ -446,11 +467,11 @@ export default function TimeSheetDashboard(props): JSX.Element {
       ),
     },
     {
-      key: "columns10",
+      key: "columns11",
       name: "Cost Center",
       fieldName: "costCenter",
-      minWidth: 70,
-      maxWidth: 90,
+      minWidth: 40,
+      maxWidth: 60,
       onRender: (item) => (
         <>
           <div>{item.costCenter ? item.costCenter : "-"}</div>
@@ -458,7 +479,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       ),
     },
     {
-      key: "columns11",
+      key: "columns12",
       name: "Site Code",
       fieldName: "siteCode",
       minWidth: 100,
@@ -470,7 +491,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       ),
     },
     {
-      key: "columns12",
+      key: "columns13",
       name: "Mobilization",
       fieldName: "mobilization",
       minWidth: 70,
@@ -482,7 +503,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       ),
     },
     {
-      key: "columns13",
+      key: "columns14",
       name: "Travel",
       fieldName: "travel",
       minWidth: 50,
@@ -494,7 +515,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       ),
     },
     {
-      key: "columns14",
+      key: "columns15",
       name: "City",
       fieldName: "city",
       minWidth: 50,
@@ -506,7 +527,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       ),
     },
     {
-      key: "columns15",
+      key: "columns16",
       name: "Approve/Review",
       fieldName: "json",
       minWidth: 50,
@@ -554,8 +575,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
   const [isRejectPopup, setIsRejectPopup] = useState(false);
   const [approvelJson, setApprovelJson] = useState([...approvelJSON]);
   const [appprovelId, setApprovelID] = useState(null);
-
-  console.log(approvelJson);
+  const [otherOptions, setOtherOptions] = useState(false);
 
   const dateFormater = (date: Date): string => {
     return !date ? "" : moment(date).format("DD/MM/YYYY");
@@ -642,7 +662,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
                   json: data.Json,
                   isRefund: data.IsRefundApproved ? "Yes" : "No",
                   overtimecommentsDrp: data.OvertimecommentsDrp
-                    ? data.OvertimecommentsDrp.join()
+                    ? data.OvertimecommentsDrp
                     : "",
                 });
               });
@@ -910,6 +930,22 @@ export default function TimeSheetDashboard(props): JSX.Element {
           text: _data.costCenter,
         });
       }
+      if (_data.overtimecommentsDrp) {
+        console.log(_data.overtimecommentsDrp);
+        for (let i = 0; i < _data.overtimecommentsDrp.length; i++) {
+          if (
+            _data.overtimecommentsDrp[i] &&
+            drpDownForFilter.overTimeReason.findIndex((dd) => {
+              return dd.key == _data.overtimecommentsDrp[i];
+            }) == -1
+          ) {
+            drpDownForFilter.overTimeReason.push({
+              key: _data.overtimecommentsDrp[i],
+              text: _data.overtimecommentsDrp[i],
+            });
+          }
+        }
+      }
     });
   };
   const filterHandleFunction = (key, text): void => {
@@ -983,6 +1019,17 @@ export default function TimeSheetDashboard(props): JSX.Element {
         setDuplicateData(tempArr);
       }
     }
+    if (tempKey.overTimeReason != "All") {
+      tempArr = tempArr.filter((arr) => {
+        if (arr.overtimecommentsDrp) {
+          for (let i = 0; i < arr.overtimecommentsDrp.length; i++) {
+            return tempKey.overTimeReason == arr.overtimecommentsDrp[i];
+          }
+        }
+        // return arr.overTimeReason == tempKey.overTimeReason;
+      });
+      setDuplicateData(tempArr);
+    }
     setFilterKey({ ...tempKey });
     setDisplayData([...tempArr]);
     setExportExcel([...tempArr]);
@@ -1010,6 +1057,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       costCenter: "All",
       travel: "All",
       city: "All",
+      overTimeReason: "All",
     });
   };
 
@@ -1075,6 +1123,11 @@ export default function TimeSheetDashboard(props): JSX.Element {
           key: "overTimeComments",
           width: 25,
         },
+        {
+          header: "Over time reason",
+          key: "overtimecommentsDrp",
+          width: 25,
+        },
         { header: "Expense", key: "expense", width: 25 },
         { header: "ATCCreditCardAmount", key: "AtcCreditAmount", width: 25 },
         {
@@ -1132,6 +1185,9 @@ export default function TimeSheetDashboard(props): JSX.Element {
               ? item.personalCardAmount
               : "-",
             isRefund: item.isRefund,
+            overtimecommentsDrp: item.overtimecommentsDrp
+              ? item.overtimecommentsDrp.join(",")
+              : "-",
           });
           if (filterWeeklyData.length == index + 1) {
             worksheet.addRow({
@@ -1229,6 +1285,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         "W1",
         "X1",
         "Y1",
+        "Z1",
       ].map((key) => {
         worksheet.getCell(key).fill = {
           type: "pattern",
@@ -1262,6 +1319,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         "W1",
         "X1",
         "Y1",
+        "Z1",
       ].map((key) => {
         worksheet.getCell(key).color = {
           type: "pattern",
@@ -1312,8 +1370,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
   };
 
   const uploadApprove = (id, json) => {
-    console.log(json);
-
     if (json != "") {
       let splitJson = json.split("|");
       approvelJson[0].Week = splitJson[0];
@@ -2254,7 +2310,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
             options={dropDownOptions.ifOverTime}
             styles={dropdownStyles}
           />
-          <Dropdown
+          {/* <Dropdown
             label="Travel"
             selectedKey={FilterKey.travel}
             onChange={(e, option) => {
@@ -2263,16 +2319,73 @@ export default function TimeSheetDashboard(props): JSX.Element {
             placeholder="Select an option"
             options={dropDownOptions.travel}
             styles={dropdownStyles}
+          /> */}
+          <Dropdown
+            label="Over time reason"
+            selectedKey={FilterKey.overTimeReason}
+            onChange={(e, option) => {
+              filterHandleFunction("overTimeReason", option["text"]);
+            }}
+            placeholder="Select an option"
+            options={dropDownOptions.overTimeReason}
+            styles={dropdownStyles}
           />
           <IconButton
+            style={{ margin: "27px 10px 0px 0px" }}
+            iconProps={Equalizer}
+            title="More Options"
+            ariaLabel="More Options"
+            onClick={() => setOtherOptions(!otherOptions)}
+          />
+          {/* <IconButton
             className={styles.resetbtn}
             style={{ marginTop: "27px" }}
             iconProps={Refresh}
             title="Filter reset"
             ariaLabel="Filter reset"
             onClick={() => resetFilterOptions()}
-          />
+          /> */}
+          {!otherOptions ? (
+            <IconButton
+              className={styles.resetbtn}
+              style={{ marginTop: "27px" }}
+              iconProps={Refresh}
+              title="Filter reset"
+              ariaLabel="Filter reset"
+              onClick={() => resetFilterOptions()}
+            />
+          ) : (
+            ""
+          )}
         </div>
+        {otherOptions ? (
+          <div className={styles.filtersection}>
+            <Dropdown
+              label="Tracking"
+              selectedKey={FilterKey.overTimeReason}
+              onChange={(e, option) => {
+                filterHandleFunction("overTimeReason", option["text"]);
+              }}
+              placeholder="Select an option"
+              options={dropDownOptions.overTimeReason}
+              styles={dropdownStyles}
+            />
+            {otherOptions ? (
+              <IconButton
+                className={styles.resetbtn}
+                style={{ marginTop: "27px" }}
+                iconProps={Refresh}
+                title="Refresh"
+                ariaLabel="Refresh"
+                onClick={() => resetFilterOptions()}
+              />
+            ) : (
+              ""
+            )}
+          </div>
+        ) : (
+          ""
+        )}
       </div>
       <div>
         <DetailsList

@@ -53,8 +53,8 @@ export default function TimeSheetView(props: any): JSX.Element {
   };
   const generalDetailsTextbox2: Partial<ITextFieldStyles> = {
     root: {
-      width: "75%",
-      padding: "13px 30px 0px 0px",
+      width: "37%",
+      padding: "13px 19px 0px 0px",
       borderRadius: "4px",
       ".ms-Label": { color: "#a55860" },
     },
@@ -62,6 +62,7 @@ export default function TimeSheetView(props: any): JSX.Element {
   };
 
   const getTimeSheetlist = () => {
+    var OvertimecommentsDrpList = "";
     spweb.lists
       .getByTitle(`Timesheet`)
       .items.getById(props.Id)
@@ -70,7 +71,6 @@ export default function TimeSheetView(props: any): JSX.Element {
       .get()
       .then(async (Response) => {
         console.log(Response);
-
         let personalUrl =
           "/sites/PlanningOperations/Field%20Quality/Shared Documents/TimeSheet/" +
           moment(Response.Date).format("MMMM-YYYY") +
@@ -153,6 +153,9 @@ export default function TimeSheetView(props: any): JSX.Element {
             ? Response.OverTimeComments
             : "",
           expense: Response.Expense ? Response.Expense : "",
+          OvertimecommentsDrp: Response.OvertimecommentsDrp
+            ? Response.OvertimecommentsDrp.join()
+            : "",
         };
         setTimeSheetObj({ ...timeSheetObject });
       })
@@ -344,6 +347,19 @@ export default function TimeSheetView(props: any): JSX.Element {
                 : "-"
             }
             label="Over time comments"
+            styles={generalDetailsTextbox2}
+            multiline
+            rows={3}
+            resizable={false}
+          />
+          <TextField
+            disabled
+            value={
+              timeSheetObj.OvertimecommentsDrp
+                ? timeSheetObj.OvertimecommentsDrp
+                : "-"
+            }
+            label="Over time reason"
             styles={generalDetailsTextbox2}
             multiline
             rows={3}
