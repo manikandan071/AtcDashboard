@@ -932,6 +932,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                     );
                     awsATCplan(item.Id, item.OperationalRes, item.WrappingUp);
                   }
+                  setRejectId(item.Id);
                   setIsMSFT(item.client);
                   setTrackingNum(item.trackingNo);
                   setIsApprovePopup(true);
@@ -990,9 +991,14 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   const [awsOperationalres, setAWSoperationalRes] = useState([
     ...AWSOperationalres,
   ]);
+  const [rejectId, setRejectId] = useState(null);
   const [awsATCplanning, setawsATCplanning] = useState([...AWSatcplanning]);
   const [awsactionplan, setAWSactionplan] = useState([...AWSactionplan]);
-
+  const [awswrappingId, setAWSwrappingId] = useState(null);
+  const [awsEffectiveId, setAWSeffectiveId] = useState(null);
+  const [awsOperationalId, setAWSoperationalId] = useState(null);
+  const [awsATCplanId, setAWSatcPlanId] = useState(null);
+  const [awsactionplanId, setAWSactionplanId] = useState(null);
   // all Functions
 
   const dateFormater = (date: Date): string => {
@@ -1016,8 +1022,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   const rejectFunction = () => {
     if (actionplan[0].InReviewComments != "") {
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("ATC Field Quality Planning")
+        .items.getById(rejectId)
         .update({
           InReviewComments: actionplan[0].InReviewComments,
           Status: "InReview",
@@ -1945,6 +1951,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
+    setAWSeffectiveId(id);
     setAWSeffective(awsEffective);
   };
 
@@ -2077,6 +2084,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
+    setAWSwrappingId(id);
     setAWSwrapping(awsWrapping);
   };
 
@@ -2107,6 +2115,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
+    setAWSatcPlanId(id);
     setawsATCplanning(awsATCplanning);
   };
 
@@ -2769,6 +2778,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
+    setAWSoperationalId(id);
     setAWSoperationalRes(awsOperationalres);
   };
 
@@ -2958,6 +2968,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
+    setAWSactionplanId(id);
     setAWSactionplan(awsactionplan);
   };
 
@@ -2974,8 +2985,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       let updateactionjson = { ...actionplan[0] };
 
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("Action Plan")
+        .items.getById(actionappprovelId)
         .update(updateactionjson)
         .then((Response) => {
           allFilterOptions(duplicateData);
@@ -2998,8 +3009,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       let updateeffectivecomm = { ...effectivecom[0] };
 
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("Effective Communication")
+        .items.getById(effectiveapproveId)
         .update(updateeffectivecomm)
         .then((Response) => {
           allFilterOptions(duplicateData);
@@ -3019,8 +3030,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       }
       let updatewrappingup = { ...wrappingup[0] };
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("Wrapping Up")
+        .items.getById(wrappingupId)
         .update(updatewrappingup)
         .then((Response) => {
           allFilterOptions(duplicateData);
@@ -3040,8 +3051,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       }
       let updatewrappingnext = { ...wrappingnext[0] };
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("ATC Field Quality Planning")
+        .items.getById(wrappingnextId)
         .update(updatewrappingnext)
         .then((Response) => {
           allFilterOptions(duplicateData);
@@ -3064,8 +3075,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
 
       let updateOperationalRes = { ...operationalres[0] };
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("Operational Responsibilities")
+        .items.getById(operationRedId)
         .update(updateOperationalRes)
         .then((Response) => {
           allFilterOptions(duplicateData);
@@ -3084,8 +3095,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       }
       let updateAWSeffective = { ...awsEffective[0] };
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("Effective Communication")
+        .items.getById(awsEffectiveId)
         .update(updateAWSeffective)
         .then((Response) => {
           allFilterOptions(duplicateData);
@@ -3104,8 +3115,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       }
       let updateAWSwrapping = { ...awsWrapping[0] };
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("Wrapping Up")
+        .items.getById(awswrappingId)
         .update(updateAWSwrapping)
         .then((Response) => {
           allFilterOptions(duplicateData);
@@ -3127,8 +3138,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       }
       let updateAWSoperational = { ...awsOperationalres[0] };
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("Operational Responsibilities")
+        .items.getById(awsOperationalId)
         .update(updateAWSoperational)
         .then((Response) => {
           allFilterOptions(duplicateData);
@@ -3150,8 +3161,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       }
       let updateAWSatcplanning = { ...awsATCplanning[0] };
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("ATC Field Quality Planning")
+        .items.getById(awsATCplanId)
         .update(updateAWSatcplanning)
         .then((Response) => {
           allFilterOptions(duplicateData);
@@ -3170,8 +3181,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       }
       let updateAWSactionplan = { ...awsactionplan[0] };
       spweb.lists
-        .getByTitle("ATC Field Quality Planning-Dev")
-        .items.getById(2)
+        .getByTitle("Action Plan")
+        .items.getById(awsactionplanId)
         .update(updateAWSactionplan)
         .then((Response) => {
           allFilterOptions(duplicateData);
