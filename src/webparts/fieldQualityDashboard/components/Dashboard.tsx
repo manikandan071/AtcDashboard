@@ -24,7 +24,7 @@ export default function Dashboard(props: any): JSX.Element {
       .getByName("Timesheet_HR")
       .users.get()
       .then((Response) => {
-        console.log(Response);
+        // console.log(Response);
         let onlyTSPermission = Response.filter((user) => {
           return user.Email == loggedinuser;
         });
