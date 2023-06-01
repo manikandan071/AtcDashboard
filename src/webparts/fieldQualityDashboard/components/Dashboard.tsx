@@ -31,7 +31,7 @@ export default function Dashboard(props: any): JSX.Element {
         setOnlyTimeSheetPermission([...onlyTSPermission]);
       })
       .catch((err) => {
-        console.log(err);
+        console.log(err, "User don't have permission ");
       });
   };
   useEffect(() => {

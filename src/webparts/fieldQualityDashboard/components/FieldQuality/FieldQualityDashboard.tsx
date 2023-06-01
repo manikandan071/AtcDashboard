@@ -316,8 +316,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       SecondTruckArrivalDateTimeCommen: "",
       SecondTruckDepartureDateTime: "",
       SecondTruckDepartureDateTimeComm: "",
-      Team1LoadingBay: "",
-      Team2Rackpushing0toCOLLO: "",
+      Team1LoadingBay: null,
+      Team2Rackpushing0toCOLLO: null,
       ThirdTruck: "",
       ThirdTruckArrivalDateTime: "",
       ThirdTruckArrivalDateTimeComment: "",
@@ -914,23 +914,43 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                 onClick={(ev) => {
                   if (item.client == "MSFT") {
                     setIsClient(true);
-                    uploadActionplan(item.Id, item.ActionPlan);
-                    uploadEffective(item.Id, item.EffectiveCommunication);
-                    uploadwrappingup(item.Id, item.WrappingUp);
+
+                    // master Data
                     uploadwrappingnext(item.Id, item.WrappingUp);
+
+                    // action plan
+                    uploadActionplan(item.Id, item.ActionPlan);
+
+                    // effective
+                    uploadEffective(item.Id, item.EffectiveCommunication);
+
+                    // wrapping up
+                    uploadwrappingup(item.Id, item.WrappingUp);
+
+                    // operational
                     uploadoperationRes(item.Id, item.OperationalRes);
                   } else {
                     setIsClient(false);
-                    uploadAWSeffective(item.Id, item.EffectiveCommunication);
+
+                    // master Data
+                    awsATCplan(item.Id, item.OperationalRes, item.WrappingUp);
+
+                    // wrapping up
                     uploadAWSWrapping(item.Id, item.WrappingUp);
-                    uploadAWSoperationalres(item.Id, item.OperationalRes);
+
+                    // effective
+                    uploadAWSeffective(item.Id, item.EffectiveCommunication);
+
+                    // action plan
                     uploadAWSactionplan(
                       item.Id,
                       item.ActionPlan,
                       item.jobtype,
                       item.client
                     );
-                    awsATCplan(item.Id, item.OperationalRes, item.WrappingUp);
+
+                    // operational
+                    uploadAWSoperationalres(item.Id, item.OperationalRes);
                   }
                   setRejectId(item.Id);
                   setIsMSFT(item.client);
@@ -954,33 +974,36 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   const [dropDownOptions, setDropDownOptions] = useState(drpDownForFilter);
   const [FilterKey, setFilterKey] = useState(FilterItem);
   const [exportExcel, setExportExcel] = useState([]);
+
   const [usercoutrypermission, setUserCountryPermission] = useState([]);
   const [supervisor, setSupervisor] = useState<any>("All");
   const [wgcrew, setWgcrew] = useState<any>("All");
   const [handSBriefingConductby, setHandSBriefingConductedby] =
     useState<any>("All");
   const [siteCode, setSiteCode] = useState<any>("All");
+
   const [currentPage, setCurrentPage] = useState(currpage);
   const [deliveryStartDate, setDeliveryStartDate] = useState(null);
   const [deliveryEndDate, setDeliveryEndDate] = useState(null);
   const [deleteItemID, setDeleteItemID] = useState(null);
+
   const [otherOptions, setOtherOptions] = useState(false);
+
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [isDelPopupVisible, setIsDelPopupVisible] = useState(false);
-  const [loader, setLoader] = useState(true);
+
+  const [loader, setLoader] = useState(false);
   const [isApprovePopup, setIsApprovePopup] = useState(false);
+
   const [actionplan, setActionPlan] = useState([...actionjson]);
   const [effectivecom, setEffectiveCom] = useState([...effectivejson]);
   const [wrappingup, setWrappingup] = useState([...wrappingjson]);
   const [wrappingnext, setWrappingNext] = useState([..._wrappingnext]);
   const [operationalres, setOperationalRes] = useState([...operationalresJson]);
+
   // const [approvelJson, setApprovelJson] = useState([...approvelJSON]);
   const [isRejectPopup, setIsRejectPopup] = useState(false);
-  const [actionappprovelId, setactionApprovelID] = useState(null);
-  const [effectiveapproveId, setEffectiveapproveId] = useState(null);
-  const [wrappingupId, setWrappingupId] = useState(null);
-  const [wrappingnextId, setWrappingnextId] = useState(null);
-  const [operationRedId, setOperationalResId] = useState(null);
+
   const [isMSFT, setIsMSFT] = useState("");
   const [trackingNum, setTrackingNum] = useState("");
   const [effectivedata, setEffectivedata] = useState([]);
@@ -994,6 +1017,13 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   const [rejectId, setRejectId] = useState(null);
   const [awsATCplanning, setawsATCplanning] = useState([...AWSatcplanning]);
   const [awsactionplan, setAWSactionplan] = useState([...AWSactionplan]);
+
+  const [actionappprovelId, setactionApprovelID] = useState(null);
+  const [effectiveapproveId, setEffectiveapproveId] = useState(null);
+  const [wrappingupId, setWrappingupId] = useState(null);
+  const [wrappingnextId, setWrappingnextId] = useState(null);
+  const [operationRedId, setOperationalResId] = useState(null);
+
   const [awswrappingId, setAWSwrappingId] = useState(null);
   const [awsEffectiveId, setAWSeffectiveId] = useState(null);
   const [awsOperationalId, setAWSoperationalId] = useState(null);
@@ -1029,29 +1059,10 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           Status: "InReview",
         })
         .then((Response) => {
-          masterData.forEach((data) => {
-            if (data.Id == actionappprovelId) {
-              data.status = "InReview";
-              data.ReviewComments = actionplan[0].InReviewComments;
-            }
-          });
-          displayData.forEach((data) => {
-            if (data.Id == actionappprovelId) {
-              data.status = "InReview";
-              data.ReviewComments = actionplan[0].InReviewComments;
-            }
-          });
-          exportExcel.forEach((data) => {
-            if (data.Id == actionappprovelId) {
-              data.status = "InReview";
-              data.ReviewComments = actionplan[0].InReviewComments;
-            }
-          });
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
           setIsRejectPopup(false);
           setIsApprovePopup(false);
           setActionPlan([...actionjson]);
+          init();
         })
         .catch((err) => {
           console.log(err);
@@ -1065,6 +1076,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   //uploadActionplan
 
   const uploadActionplan = (id, actionjson) => {
+    let ActionID = null;
     if (actionjson != "") {
       let splitactionjson = actionjson.split("|");
       actionplan[0].Generalprecheck = splitactionjson[0];
@@ -1082,6 +1094,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     }
     actiondata.forEach((data) => {
       if (data.TrackingNumberReferenceId == id) {
+        ActionID = data.Id;
         for (let key in actionplan[0]) {
           if (
             key == "Generalprecheck" &&
@@ -1146,13 +1159,16 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
-    setactionApprovelID(id);
+
+    setactionApprovelID(ActionID);
     setActionPlan(actionplan);
   };
 
   //uploadEffective function
 
   const uploadEffective = (id, effectivejson) => {
+    let EffectiveID = null;
+
     if (effectivejson != "") {
       let spliteffectivecom = effectivejson.split("|");
       effectivecom[0].InformTeamleadOfIssuesOnSite = spliteffectivecom[0];
@@ -1167,6 +1183,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     }
     effectivedata.forEach((data) => {
       if (data.TrackingNumberReferenceId == id) {
+        EffectiveID = data.Id;
         for (let key in effectivecom[0]) {
           if (
             key == "InformTeamleadOfIssuesOnSite" &&
@@ -1213,13 +1230,14 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
-    setEffectiveapproveId(id);
+    setEffectiveapproveId(EffectiveID);
     setEffectiveCom(effectivecom);
   };
 
   //uploadwrappingup
 
   const uploadwrappingup = (id, wrappingjson) => {
+    let WrappingUpID = null;
     if (wrappingjson != "") {
       let splitwrappingup = wrappingjson.split("|");
       wrappingup[0].ToolsOnChargeForNextDay = splitwrappingup[0];
@@ -1244,6 +1262,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     }
     displayData.forEach((data) => {
       if (data.Id == id) {
+        WrappingUpID = data.WrappingUpID;
         for (let key in wrappingup[0]) {
           if (
             key == "ToolsOnChargeForNextDay" &&
@@ -1345,7 +1364,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
-    setWrappingupId(id);
+    setWrappingupId(WrappingUpID);
     setWrappingup(wrappingup);
   };
 
@@ -1402,6 +1421,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
 
   //operationalRes
   const uploadoperationRes = (id, operationalresJson) => {
+    let OperationResID = null;
     if (operationalresJson != "") {
       let splitoperationalRes = operationalresJson.split("|");
       operationalres[0].TruckSealBreak = splitoperationalRes[0];
@@ -1471,8 +1491,10 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       operationalres[0].SecondTruckDepartureDateTime = splitoperationalRes[53];
       operationalres[0].SecondTruckDepartureDateTimeComm =
         splitoperationalRes[54];
-      operationalres[0].Team1LoadingBay = splitoperationalRes[55];
-      operationalres[0].Team2Rackpushing0toCOLLO = splitoperationalRes[56];
+      operationalres[0].Team1LoadingBay =
+        splitoperationalRes[55] == "true" ? true : false;
+      operationalres[0].Team2Rackpushing0toCOLLO =
+        splitoperationalRes[56] == "true" ? true : false;
       operationalres[0].ThirdTruck = splitoperationalRes[57];
       operationalres[0].ThirdTruckArrivalDateTime = splitoperationalRes[58];
       operationalres[0].ThirdTruckArrivalDateTimeComment =
@@ -1485,6 +1507,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     }
     displayData.forEach((data) => {
       if (data.Id == id) {
+        OperationResID = data.OperationalResponsId;
         let string = [];
         if (
           data.handSBriefingConductedby != null &&
@@ -1864,13 +1887,16 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
-    setOperationalResId(id);
+
+    debugger;
+    setOperationalResId(OperationResID);
     setOperationalRes(operationalres);
   };
 
   //AWS
   //Effective
   const uploadAWSeffective = (id, AWSeffectivejson) => {
+    let EffectiveID = null;
     if (AWSeffectivejson != "") {
       let AWSspliteffectivecom = AWSeffectivejson.split("|");
       awsEffective[0].InformTeamleadOfIssuesOnSite = AWSspliteffectivecom[0];
@@ -1893,6 +1919,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     }
     effectivedata.forEach((data) => {
       if (data.TrackingNumberReferenceId == id) {
+        EffectiveID = data.Id;
         for (let key in awsEffective[0]) {
           if (
             key == "InformTeamleadOfIssuesOnSite" &&
@@ -1951,12 +1978,13 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
-    setAWSeffectiveId(id);
+    setAWSeffectiveId(EffectiveID);
     setAWSeffective(awsEffective);
   };
 
   //AWSwrapping
   const uploadAWSWrapping = (id, AWSwrappingjson) => {
+    let WrappingUpID = null;
     if (AWSwrappingjson != "") {
       let SplitAWSwrappingup = AWSwrappingjson.split("|");
       awsWrapping[0].ToolsOnChargeForNextDay = SplitAWSwrappingup[0];
@@ -1983,6 +2011,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     }
     displayData.forEach((data) => {
       if (data.Id == id) {
+        WrappingUpID = data.WrappingUpID;
         for (let key in awsWrapping[0]) {
           if (
             key == "ToolsOnChargeForNextDay" &&
@@ -2084,7 +2113,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
-    setAWSwrappingId(id);
+    setAWSwrappingId(WrappingUpID);
     setAWSwrapping(awsWrapping);
   };
 
@@ -2121,6 +2150,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
 
   //AWSOperationalres
   const uploadAWSoperationalres = (id, AWSoperationalResjson) => {
+    let OperationResID = null;
     if (AWSoperationalResjson != "") {
       let splitAWSOperationalres = AWSoperationalResjson.split("|");
       awsOperationalres[0].SiteAccessDelays = splitAWSOperationalres[0];
@@ -2253,6 +2283,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     }
     displayData.forEach((data) => {
       if (data.Id == id) {
+        OperationResID = data.OperationalResponsId;
         let finalArr = [];
         if (
           data.Finalrackpositioncheckedby != null &&
@@ -2778,11 +2809,12 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
-    setAWSoperationalId(id);
+    setAWSoperationalId(OperationResID);
     setAWSoperationalRes(awsOperationalres);
   };
 
   const uploadAWSactionplan = (id, AWSaction, jobType, client) => {
+    let ActionID = null;
     if (AWSaction != "") {
       let splitAWSactionplan = AWSaction.split("|");
       awsactionplan[0].ConfirmETA = splitAWSactionplan[0];
@@ -2832,6 +2864,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     }
     actiondata.forEach((data) => {
       if (data.TrackingNumberReferenceId == id) {
+        ActionID = data.Id;
         for (let key in awsactionplan[0]) {
           if (key == "ConfirmETA" && data.ConfirmETA == awsactionplan[0][key]) {
             delete awsactionplan[0][key];
@@ -2968,12 +3001,12 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
     });
-    setAWSactionplanId(id);
+    setAWSactionplanId(ActionID);
     setAWSactionplan(awsactionplan);
   };
 
   //ApprovelFunction
-  const approvelFunction = () => {
+  const approvelFunction = async () => {
     if (isMSFT == "MSFT") {
       //For action plan
       for (let key in actionplan[0]) {
@@ -2984,105 +3017,104 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
 
       let updateactionjson = { ...actionplan[0] };
 
-      spweb.lists
+      await spweb.lists
         .getByTitle("Action Plan")
         .items.getById(actionappprovelId)
         .update(updateactionjson)
-        .then((Response) => {
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
-          setIsApprovePopup(false);
+        .then(async (Response) => {
           setActionPlan([...actionjson]);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
 
-      //For Effective
+          //For Effective
 
-      for (let key in effectivecom[0]) {
-        if (effectivecom[0][key] == "" || effectivecom[0][key] == undefined) {
-          delete effectivecom[0][key];
-        }
-      }
+          for (let key in effectivecom[0]) {
+            if (
+              effectivecom[0][key] == "" ||
+              effectivecom[0][key] == undefined
+            ) {
+              delete effectivecom[0][key];
+            }
+          }
 
-      let updateeffectivecomm = { ...effectivecom[0] };
+          let updateeffectivecomm = { ...effectivecom[0] };
 
-      spweb.lists
-        .getByTitle("Effective Communication")
-        .items.getById(effectiveapproveId)
-        .update(updateeffectivecomm)
-        .then((Response) => {
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
-          setIsApprovePopup(false);
-          setEffectiveCom([...effectivejson]);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+          await spweb.lists
+            .getByTitle("Effective Communication")
+            .items.getById(effectiveapproveId)
+            .update(updateeffectivecomm)
+            .then(async (Response) => {
+              setEffectiveCom([...effectivejson]);
 
-      //wrappingUp
-      for (let key in wrappingup[0]) {
-        if (wrappingup[0][key] == "" || wrappingup[0][key] == undefined) {
-          delete wrappingup[0][key];
-        }
-      }
-      let updatewrappingup = { ...wrappingup[0] };
-      spweb.lists
-        .getByTitle("Wrapping Up")
-        .items.getById(wrappingupId)
-        .update(updatewrappingup)
-        .then((Response) => {
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
-          setIsApprovePopup(false);
-          setWrappingup([...wrappingjson]);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+              //wrappingUp
+              for (let key in wrappingup[0]) {
+                if (
+                  wrappingup[0][key] == "" ||
+                  wrappingup[0][key] == undefined
+                ) {
+                  delete wrappingup[0][key];
+                }
+              }
+              let updatewrappingup = { ...wrappingup[0] };
+              await spweb.lists
+                .getByTitle("Wrapping Up")
+                .items.getById(wrappingupId)
+                .update(updatewrappingup)
+                .then(async (Response) => {
+                  setWrappingup([...wrappingjson]);
 
-      //wrappingnext fieldquality
-      for (let key in wrappingnext[0]) {
-        if (wrappingnext[0][key] == "" || wrappingnext[0][key] == undefined) {
-          delete wrappingnext[0][key];
-        }
-      }
-      let updatewrappingnext = { ...wrappingnext[0] };
-      spweb.lists
-        .getByTitle("ATC Field Quality Planning")
-        .items.getById(wrappingnextId)
-        .update(updatewrappingnext)
-        .then((Response) => {
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
-          setIsApprovePopup(false);
-          setWrappingNext([..._wrappingnext]);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+                  //wrappingnext fieldquality
+                  for (let key in wrappingnext[0]) {
+                    if (
+                      wrappingnext[0][key] == "" ||
+                      wrappingnext[0][key] == undefined
+                    ) {
+                      delete wrappingnext[0][key];
+                    }
+                  }
+                  let updatewrappingnext = {
+                    ...wrappingnext[0],
+                    Status: "Completed",
+                  };
+                  await spweb.lists
+                    .getByTitle("ATC Field Quality Planning")
+                    .items.getById(wrappingnextId)
+                    .update(updatewrappingnext)
+                    .then(async (Response) => {
+                      setWrappingNext([..._wrappingnext]);
 
-      for (let key in operationalres[0]) {
-        if (
-          operationalres[0][key] == "" ||
-          operationalres[0][key] == undefined
-        ) {
-          delete operationalres[0][key];
-        }
-      }
+                      for (let key in operationalres[0]) {
+                        if (
+                          operationalres[0][key] == "" ||
+                          operationalres[0][key] == undefined
+                        ) {
+                          delete operationalres[0][key];
+                        }
+                      }
 
-      let updateOperationalRes = { ...operationalres[0] };
-      spweb.lists
-        .getByTitle("Operational Responsibilities")
-        .items.getById(operationRedId)
-        .update(updateOperationalRes)
-        .then((Response) => {
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
-          setIsApprovePopup(false);
-          setOperationalRes([...operationalresJson]);
+                      let updateOperationalRes = { ...operationalres[0] };
+                      await spweb.lists
+                        .getByTitle("Operational Responsibilities")
+                        .items.getById(operationRedId)
+                        .update(updateOperationalRes)
+                        .then(async (Response) => {
+                          setOperationalRes([...operationalresJson]);
+                          setIsApprovePopup(false);
+                          await init();
+                        })
+                        .catch((err) => {
+                          console.log(err);
+                        });
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                    });
+                })
+                .catch((err) => {
+                  console.log(err);
+                });
+            })
+            .catch((err) => {
+              console.log(err);
+            });
         })
         .catch((err) => {
           console.log(err);
@@ -3094,101 +3126,90 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         }
       }
       let updateAWSeffective = { ...awsEffective[0] };
-      spweb.lists
+      await spweb.lists
         .getByTitle("Effective Communication")
         .items.getById(awsEffectiveId)
         .update(updateAWSeffective)
-        .then((Response) => {
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
-          setIsApprovePopup(false);
+        .then(async (Response) => {
           setAWSeffective([...AWSeffectivejson]);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
-      for (let key in awsWrapping[0]) {
-        if (awsWrapping[0][key] == "" || awsWrapping[0][key] == undefined) {
-          delete awsWrapping[0][key];
-        }
-      }
-      let updateAWSwrapping = { ...awsWrapping[0] };
-      spweb.lists
-        .getByTitle("Wrapping Up")
-        .items.getById(awswrappingId)
-        .update(updateAWSwrapping)
-        .then((Response) => {
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
-          setIsApprovePopup(false);
-          setAWSwrapping([...AWSwrappingjson]);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
-      for (let key in awsOperationalres[0]) {
-        if (
-          awsOperationalres[0][key] == "" ||
-          awsOperationalres[0][key] == undefined
-        ) {
-          delete awsOperationalres[0][key];
-        }
-      }
-      let updateAWSoperational = { ...awsOperationalres[0] };
-      spweb.lists
-        .getByTitle("Operational Responsibilities")
-        .items.getById(awsOperationalId)
-        .update(updateAWSoperational)
-        .then((Response) => {
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
-          setIsApprovePopup(false);
-          setAWSwrapping([...AWSwrappingjson]);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
-      for (let key in awsATCplanning[0]) {
-        if (
-          awsATCplanning[0][key] == "" ||
-          awsATCplanning[0][key] == undefined
-        ) {
-          delete awsATCplanning[0][key];
-        }
-      }
-      let updateAWSatcplanning = { ...awsATCplanning[0] };
-      spweb.lists
-        .getByTitle("ATC Field Quality Planning")
-        .items.getById(awsATCplanId)
-        .update(updateAWSatcplanning)
-        .then((Response) => {
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
-          setIsApprovePopup(false);
-          setawsATCplanning([...AWSatcplanning]);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-
-      for (let key in awsactionplan[0]) {
-        if (awsactionplan[0][key] == "" || awsactionplan[0][key] == undefined) {
-          delete awsactionplan[0][key];
-        }
-      }
-      let updateAWSactionplan = { ...awsactionplan[0] };
-      spweb.lists
-        .getByTitle("Action Plan")
-        .items.getById(awsactionplanId)
-        .update(updateAWSactionplan)
-        .then((Response) => {
-          allFilterOptions(duplicateData);
-          filterHandleFunction("status", FilterKey.status);
-          setIsApprovePopup(false);
-          setAWSwrapping([...AWSwrappingjson]);
+          for (let key in awsWrapping[0]) {
+            if (awsWrapping[0][key] == "" || awsWrapping[0][key] == undefined) {
+              delete awsWrapping[0][key];
+            }
+          }
+          let updateAWSwrapping = { ...awsWrapping[0] };
+          await spweb.lists
+            .getByTitle("Wrapping Up")
+            .items.getById(awswrappingId)
+            .update(updateAWSwrapping)
+            .then(async (Response) => {
+              setAWSwrapping([...AWSwrappingjson]);
+              for (let key in awsOperationalres[0]) {
+                if (
+                  awsOperationalres[0][key] == "" ||
+                  awsOperationalres[0][key] == undefined
+                ) {
+                  delete awsOperationalres[0][key];
+                }
+              }
+              let updateAWSoperational = { ...awsOperationalres[0] };
+              await spweb.lists
+                .getByTitle("Operational Responsibilities")
+                .items.getById(awsOperationalId)
+                .update(updateAWSoperational)
+                .then(async (Response) => {
+                  setAWSwrapping([...AWSwrappingjson]);
+                  for (let key in awsATCplanning[0]) {
+                    if (
+                      awsATCplanning[0][key] == "" ||
+                      awsATCplanning[0][key] == undefined
+                    ) {
+                      delete awsATCplanning[0][key];
+                    }
+                  }
+                  let updateAWSatcplanning = {
+                    ...awsATCplanning[0],
+                    Status: "Completed",
+                  };
+                  await spweb.lists
+                    .getByTitle("ATC Field Quality Planning")
+                    .items.getById(awsATCplanId)
+                    .update(updateAWSatcplanning)
+                    .then(async (Response) => {
+                      setawsATCplanning([...AWSatcplanning]);
+                      for (let key in awsactionplan[0]) {
+                        if (
+                          awsactionplan[0][key] == "" ||
+                          awsactionplan[0][key] == undefined
+                        ) {
+                          delete awsactionplan[0][key];
+                        }
+                      }
+                      let updateAWSactionplan = { ...awsactionplan[0] };
+                      await spweb.lists
+                        .getByTitle("Action Plan")
+                        .items.getById(awsactionplanId)
+                        .update(updateAWSactionplan)
+                        .then(async (Response) => {
+                          setAWSwrapping([...AWSwrappingjson]);
+                          setIsApprovePopup(false);
+                          await init();
+                        })
+                        .catch((err) => {
+                          console.log(err);
+                        });
+                    })
+                    .catch((err) => {
+                      console.log(err);
+                    });
+                })
+                .catch((err) => {
+                  console.log(err);
+                });
+            })
+            .catch((err) => {
+              console.log(err);
+            });
         })
         .catch((err) => {
           console.log(err);
@@ -3288,6 +3309,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
             if (plan.trackingNumber) {
               responsibilityData.push({
                 Id: plan.Id,
+                OperationalResponsId: operationalListObject.ID,
                 trackingNo: plan.trackingNumber,
                 rackQuantity: plan.racks,
                 siteCode: plan.siteCode,
@@ -3562,11 +3584,11 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                     : "",
                 Team1LoadingBay: operationalListObject.Team1LoadingBay
                   ? operationalListObject.Team1LoadingBay
-                  : "",
+                  : false,
                 Team2Rackpushing0toCOLLO:
                   operationalListObject.Team2Rackpushing0toCOLLO
                     ? operationalListObject.Team2Rackpushing0toCOLLO
-                    : "",
+                    : false,
                 ThirdTruck: operationalListObject.ThirdTruck
                   ? operationalListObject.ThirdTruck
                   : "",
@@ -3804,6 +3826,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                 ActionPlan: plan.ActionPlan,
                 EffectiveCommunication: plan.EffectiveCommunication,
                 WrappingUp: plan.WrappingUp,
+                WrappingUpID: plan.WrappingUpID,
               });
             }
           });
@@ -3839,16 +3862,22 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           allFilterOptions(onlyMobilizationYes);
           setMasterData([...onlyMobilizationYes]);
           setDuplicateData([...onlyMobilizationYes]);
-          setDisplayData([...onlyMobilizationYes]);
-          setExportExcel([...onlyMobilizationYes]);
-          paginateFunction(1, [...onlyMobilizationYes]);
+          filterFunction(FilterKey, onlyMobilizationYes);
+
+          // setDisplayData([...onlyMobilizationYes]);
+          // setExportExcel([...onlyMobilizationYes]);
+          // paginateFunction(1, [...onlyMobilizationYes]);
+
           setLoader(false);
         } else {
           setMasterData([...responsibilityData]);
           setDuplicateData([...responsibilityData]);
-          setDisplayData([...responsibilityData]);
-          setExportExcel([...responsibilityData]);
-          paginateFunction(1, [...responsibilityData]);
+          filterFunction(FilterKey, responsibilityData);
+
+          // setDisplayData([...responsibilityData]);
+          // setExportExcel([...responsibilityData]);
+          // paginateFunction(1, [...responsibilityData]);
+
           allFilterOptions(responsibilityData);
           setLoader(false);
         }
@@ -3999,6 +4028,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                 ActionPlan: data.ActionPlan,
                 EffectiveCommunication: data.EffectiveCommunication,
                 WrappingUp: data.WrappingUp,
+                WrappingUpID: refWrappingDataObject.WrappingUpID,
               });
             });
           }
@@ -4023,6 +4053,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         if (Response.length > 0) {
           Response.forEach((data) => {
             wrappingData.push({
+              WrappingUpID: data.ID,
               Id: data.TrackingNumberReferenceId,
               accidentInformation: data.AccidentInformation
                 ? data.AccidentInformation
@@ -4107,7 +4138,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         if (Response.length > 0) {
           Response.forEach((data) => {
             effectiveData.push({
-              Id: data.Id,
+              Id: data.ID,
               TrackingNumberReferenceId: data.TrackingNumberReferenceId,
               InformTeamleadOfIssuesOnSite: data.InformTeamleadOfIssuesOnSite
                 ? data.InformTeamleadOfIssuesOnSite
@@ -4164,6 +4195,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         if (Response.length > 0) {
           Response.forEach((data) => {
             actionplandata.push({
+              Id: data.ID,
               TrackingNumberReferenceId: data.TrackingNumberReferenceId,
               Generalprecheck: data.Generalprecheck ? data.Generalprecheck : "",
               GeneralprecheckComments: data.GeneralprecheckComments
@@ -4314,8 +4346,13 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       });
   };
 
-  useEffect(() => {
+  const init = () => {
+    setLoader(true);
     getAdmins();
+  };
+
+  useEffect(() => {
+    init();
   }, []);
 
   const allFilterOptions = (data) => {
@@ -4441,45 +4478,50 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   };
 
   const filterHandleFunction = (key, text): void => {
-    let tempArr = [...duplicateData];
     let tempKey = FilterKey;
     tempKey[key] = text;
 
+    setFilterKey({ ...tempKey });
+
+    filterFunction(tempKey, duplicateData);
+  };
+  const filterFunction = (tempKey, tempArr) => {
+    // let tempArr = [...duplicateData];
     if (tempKey.country != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.country == tempKey.country;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.status != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.status == tempKey.status;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.supervisor.key != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.supervisor == tempKey.supervisor.key;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.siteCode.key != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.siteCode == tempKey.siteCode.key;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.client != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.client == tempKey.client;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.joptype != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.joptype == tempKey.joptype;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.week != "All") {
       if (tempKey.week == "Last Week") {
@@ -4487,56 +4529,56 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         tempArr = tempArr.filter((arr) => {
           return moment(arr.deleteDate).isoWeek() == lastweek;
         });
-        setDuplicateData(tempArr);
+        // setDuplicateData(tempArr);
       } else if (tempKey.week == "This Week") {
         let thisweek = moment().isoWeek();
         tempArr = tempArr.filter((arr) => {
           return moment(arr.deleteDate).isoWeek() == thisweek;
         });
-        setDuplicateData(tempArr);
+        // setDuplicateData(tempArr);
       } else if (tempKey.week == "Last Month") {
         let lastMonth = moment().subtract(1, "month").month();
         tempArr = tempArr.filter((arr) => {
           return moment(arr.deleteDate).month() == lastMonth;
         });
-        setDuplicateData(tempArr);
+        // setDuplicateData(tempArr);
       }
     }
     if (tempKey.mobilization != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.mobilization == tempKey.mobilization;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.siteAccessdelay != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.siteAccessdelay == tempKey.siteAccessdelay;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.securityOrOtherdelays != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.securityOrOtherdelays == tempKey.securityOrOtherdelays;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.accidentInformation != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.accidentInformation == tempKey.accidentInformation;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.full5PPE != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.full5PPE == tempKey.full5PPE;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.escalated != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.escalated == tempKey.escalated;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.wgcrew.key != "All") {
       tempArr = tempArr.filter((arr) => {
@@ -4545,7 +4587,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         );
         return filterCrew ? arr : "";
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.filterStartDate != "All") {
       setDeliveryStartDate(tempKey.filterStartDate);
@@ -4553,7 +4595,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         tempArr = tempArr.filter((arr) => {
           return moment(tempKey.filterStartDate) <= moment(arr.deleteDate);
         });
-        setDuplicateData(tempArr);
+        // setDuplicateData(tempArr);
       }
     }
     if (tempKey.filterEndDate != "All") {
@@ -4564,26 +4606,26 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
             moment(tempKey.filterEndDate).add("d", 1) >= moment(arr.deleteDate)
           );
         });
-        setDuplicateData(tempArr);
+        // setDuplicateData(tempArr);
       }
     }
     if (tempKey.goodSave != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.goodSave == tempKey.goodSave;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.safetyInitiative != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.safetyInitiative == tempKey.safetyInitiative;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.DrivingforwSuggestion != "All") {
       tempArr = tempArr.filter((arr) => {
         return arr.DrivingforwSuggestion == tempKey.DrivingforwSuggestion;
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
     if (tempKey.handSBriefingConductedby.key != "All") {
       tempArr = tempArr.filter((arr) => {
@@ -4592,7 +4634,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         );
         return filterHandS ? arr : "";
       });
-      setDuplicateData(tempArr);
+      // setDuplicateData(tempArr);
     }
 
     if (tempKey.search) {
@@ -4611,10 +4653,10 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           item.client.toLowerCase().match(tempKey.search.toLowerCase())
       );
     }
-    setFilterKey({ ...tempKey });
+
     setDisplayData([...tempArr]);
     setExportExcel([...tempArr]);
-    setDuplicateData([...masterData]);
+    // setDuplicateData([...masterData]);
     paginateFunction(currpage, tempArr);
   };
 
