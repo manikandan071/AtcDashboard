@@ -3240,7 +3240,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
             );
             let operationalListObject =
               operationalData.length > 0 ? operationalData[0] : {};
-
             let handSBriefingConductedbyList = [];
 
             try {
@@ -3902,7 +3901,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           let filterCountrys = Response.filter(
             (item) => item.Country == con.country && item.isDelete != true
           );
-
           if (filterCountrys.length) {
             filterCountrys.forEach((data) => {
               let curTracRef = wrappingData.filter((arr) => {
@@ -4281,7 +4279,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   };
 
   //Get Siteusers
-
   const getAdmins = () => {
     spweb.siteGroups
       .getByName("ATC FQT Owners")
