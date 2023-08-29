@@ -169,7 +169,14 @@ export default function FieldQualityView(props): JSX.Element {
       .expand("TrackingNumberReference")
       .get()
       .then((Response) => {
+        debugger;
         var wGCrewMemberDataList = [];
+        // Response.filter((data)=>{
+        //   if(planningData.Id == data.TrackingNumberReferenceId){
+        //     console.log(data);
+
+        //   }
+        // })
         if (planningData.WGCrewMemberData) {
           var splitBy = planningData.WGCrewMemberData;
           var splitByArr = splitBy.split("~");
@@ -177,7 +184,7 @@ export default function FieldQualityView(props): JSX.Element {
             ? splitByArr.forEach((data) => {
                 let splitObj = data != "" ? data.split("|") : "";
                 splitObj != ""
-                  ? splitObj[0] != "" && splitObj[1] != "" && splitObj[2] != ""
+                  ? splitObj[0] != "" || splitObj[1] != "" || splitObj[2] != ""
                     ? wGCrewMemberDataList.push({
                         first: splitObj[0],
                         name: splitObj[1],

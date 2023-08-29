@@ -28,14 +28,37 @@ import Pagination from "@material-ui/lab/Pagination";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { TextField } from "@material-ui/core";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
+import { log } from "sp-pnp-js";
+
+interface IEmployee {
+  Email: string;
+  Name: string;
+  Mobilization: string;
+}
+interface ICRM {
+  PersonName: string;
+  Email: string;
+  TelNumber: string;
+  Comments: string;
+  Name: string;
+  Date: string;
+  Client: string;
+  MeetingCon: string;
+  ConversationType: string;
+}
+let localArr = [];
+let tempCount: number = 0;
 let spweb = Web(
   "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 
 let tsWeb = Web(
   "https://atclogisticsie.sharepoint.com/sites/FieldQualityDashboard"
 );
 let currentUrl = window.location.href;
+let EmployeeConfig: IEmployee[] = [];
+let CRMArr: ICRM[] = [];
 
 export default function TimeSheetDashboard(props): JSX.Element {
   let loggedinuser = props.spcontext.pageContext.user.email;
@@ -585,29 +608,51 @@ export default function TimeSheetDashboard(props): JSX.Element {
     window.open(currentUrl + "?TsID=" + item);
   }, []);
 
-  const onRenderRow = useCallback(
+  const onRenderRow =
+    // useCallback(
+    //   (row, defaultRender) => {
+    //     return cloneElement(defaultRender(row), {
+    //       onClick: () => onItemInvoked(row.item.Id),
+    //     });
+    //   },
+    //   [onItemInvoked]
+    // );
     (row, defaultRender) => {
-      return cloneElement(defaultRender(row), {
-        onClick: () => onItemInvoked(row.item.Id),
-      });
-    },
-    [onItemInvoked]
-  );
+      let props = row.item;
+      let classNameColor: string = "";
+      // EmployeeConfig.forEach((col) => {
+      //   if (col.Name == props.supervisor && col.Mobilization) {
+      //     classNameColor = "colorRow";
+      //   }
+      // });
+      return (
+        <a
+          // className={classNameColor}
+          href={currentUrl + "?TsID=" + row.Id}
+          target="blank"
+        >
+          {defaultRender(row)}
+        </a>
+      );
+    };
 
   const getEmployeeList = (allCitys) => {
     spweb.lists
       .getByTitle(`Timesheet`)
       .items.top(5000)
       .select("*,Name/Title,OvertimecommentsDrp")
+      .orderBy("ID", false)
       .expand("Name")
       .get()
       .then((Response) => {
-        console.log(Response[0].Id);
-
+        // console.log(Response[0].Id);
         let timeSheetData = [];
+        tempCount = 0;
+        localArr = [];
+        let timeFilterData = [];
         allCitys.forEach((city) => {
           let filterCitys = Response.filter((res) => {
-            return res.City == city.City;
+            return res.City == city.City || res.OrginCity == city.City;
           });
           if (filterCitys.length > 0) {
             filterCitys.forEach((citys) => {
@@ -621,96 +666,124 @@ export default function TimeSheetDashboard(props): JSX.Element {
                 });
               }
             });
+
             if (filterCitys.length > 0) {
               filterCitys.forEach((data) => {
-                let compareTime = totalHoursFunction(
-                  data.StartTime,
-                  data.FinishTime
-                );
-                timeSheetData.push({
-                  Id: data.Id,
-                  week: data.Week ? data.Week : "",
-                  date: data.Date ? data.Date : "",
-                  supervisor: data.Name ? data.Name.Title : "",
-                  startTime: data.StartTime ? data.StartTime : "",
-                  finishTime: data.FinishTime ? data.FinishTime : "",
-                  overTime: data.OverTime ? data.OverTime : "",
-                  ifOverTime: data.OverTime ? "Yes" : "No",
-                  status: data.Status ? data.Status : "",
-                  siteCode: data.SiteCode ? data.SiteCode : "",
-                  mobilization: data.Mobilization ? data.Mobilization : "",
-                  travel: data.Travel ? data.Travel : "",
-                  city: data.City ? data.City : "",
-                  costCenter: data.CostCenter ? data.CostCenter : "",
-                  otherSiteCode: data.OtherSiteCode ? data.OtherSiteCode : "",
-                  comments: data.Comments ? data.Comments : "",
-                  reviewComments: data.ReviewComments
-                    ? data.ReviewComments
-                    : "",
-                  kmWithPrivateCar: data.KmWithPrivateCar
-                    ? data.KmWithPrivateCar
-                    : "",
-                  cityOverNight: data.CityOverNight ? data.CityOverNight : "",
-                  travelWithCar: data.TravelWithCar ? data.TravelWithCar : "",
-                  overTimeComments: data.OverTimeComments
-                    ? data.OverTimeComments
-                    : "",
-                  expense: data.Expense ? data.Expense : "",
-                  totalHours: compareTime ? compareTime : "",
-                  AtcCreditAmount: data.TotalAtcCredit,
-                  personalCardAmount: data.TotalPersonalCard,
-                  json: data.Json,
-                  isRefund: data.IsRefundApproved ? "Yes" : "No",
-                  overtimecommentsDrp: data.OvertimecommentsDrp
-                    ? data.OvertimecommentsDrp
-                    : "",
-                });
+                timeFilterData.push(data);
+                // let compareTime = totalHoursFunction(
+                //   data.StartTime,
+                //   data.FinishTime
+                // );
+                // timeSheetData.push({
+                //   Id: data.Id,
+                //   week: data.Week ? data.Week : "",
+                //   date: data.Date ? data.Date : "",
+                //   supervisor: data.Name ? data.Name.Title : "",
+                //   startTime: data.StartTime ? data.StartTime : "",
+                //   finishTime: data.FinishTime ? data.FinishTime : "",
+                //   overTime: data.OverTime ? data.OverTime : "",
+                //   ifOverTime: data.OverTime ? "Yes" : "No",
+                //   status: data.Status ? data.Status : "",
+                //   siteCode: data.SiteCode ? data.SiteCode : "",
+                //   mobilization: data.Mobilization ? data.Mobilization : "",
+                //   travel: data.Travel ? data.Travel : "",
+                //   city: data.City ? data.City : "",
+                //   costCenter: data.CostCenter ? data.CostCenter : "",
+                //   otherSiteCode: data.OtherSiteCode ? data.OtherSiteCode : "",
+                //   comments: data.Comments ? data.Comments : "",
+                //   reviewComments: data.ReviewComments
+                //     ? data.ReviewComments
+                //     : "",
+                //   kmWithPrivateCar: data.KmWithPrivateCar
+                //     ? data.KmWithPrivateCar
+                //     : "",
+                //   cityOverNight: data.CityOverNight ? data.CityOverNight : "",
+                //   travelWithCar: data.TravelWithCar ? data.TravelWithCar : "",
+                //   overTimeComments: data.OverTimeComments
+                //     ? data.OverTimeComments
+                //     : "",
+                //   expense: data.Expense ? data.Expense : "",
+                //   totalHours: compareTime ? compareTime : "",
+                //   AtcCreditAmount: data.TotalAtcCredit,
+                //   personalCardAmount: data.TotalPersonalCard,
+                //   json: data.Json,
+                //   isRefund: data.IsRefundApproved ? "Yes" : "No",
+                //   overtimecommentsDrp: data.OvertimecommentsDrp
+                //     ? data.OvertimecommentsDrp
+                //     : "",
+                //   Country: data.Country ? data.Country : "",
+                //   originCity: data.OrginCity ? data.OrginCity : "",
+                //   originCountry: data.OrginCountry ? data.OrginCountry : "",
+                //   CRMActivity: data.CRM_Activity ? data.CRM_Activity : "",
+                //   ProjectType:
+                //     data.ProjectType && data.ProjectType.length > 0
+                //       ? data.ProjectType[0]
+                //       : "",
+                //   ProjectType_2:
+                //     data.ProjectType && data.ProjectType.length >= 1
+                //       ? data.ProjectType[1]
+                //       : "",
+                //   ProjectType_3:
+                //     data.ProjectType && data.ProjectType.length >= 2
+                //       ? data.ProjectType[2]
+                //       : "",
+                //   ProjectTypeOthers: data.ProjectTypeOthers
+                //     ? data.ProjectTypeOthers
+                //     : "",
+                // });
               });
-              timeSheetData = timeSheetData.sort(function (a, b) {
-                return moment(a.date) > moment(b.date)
-                  ? -1
-                  : moment(a.date) < moment(b.date)
-                  ? 1
-                  : 0;
-              });
+              getEmployeeConfig(timeFilterData);
+              // timeSheetData = timeSheetData.sort(function (a, b) {
+              //   return moment(a.date) > moment(b.date)
+              //     ? -1
+              //     : moment(a.date) < moment(b.date)
+              //     ? 1
+              //     : 0;
+              // });
             }
-            if (loggedinuser == "davor.salkanovic@atc-logistics.de") {
-              // let onlyMobilizationYes = timeSheetData.filter(
-              //   (yes) => yes.mobilization == "Yes"
-              // );
-              let onlyMobilizationYes = [];
-              timeSheetData.forEach((data) => {
-                if (
-                  data.city == "Paris" ||
-                  data.city == "Gavle" ||
-                  data.city == "Warsaw" ||
-                  data.city == "Milan"
-                ) {
-                  onlyMobilizationYes.push(data);
-                } else {
-                  if (data.mobilization == "Yes") {
-                    onlyMobilizationYes.push(data);
-                  }
-                }
-              });
-              allFilterOptions([...onlyMobilizationYes]);
-              setMasterData([...onlyMobilizationYes]);
-              setDuplicateData([...onlyMobilizationYes]);
-              setDisplayData([...onlyMobilizationYes]);
-              setExportExcel([...onlyMobilizationYes]);
-              timeSheetPaginateFunction(1, [...onlyMobilizationYes]);
-              setLoader(false);
-            } else {
-              allFilterOptions([...timeSheetData]);
-              setMasterData([...timeSheetData]);
-              setDuplicateData([...timeSheetData]);
-              setDisplayData([...timeSheetData]);
-              setExportExcel([...timeSheetData]);
-              timeSheetPaginateFunction(1, [...timeSheetData]);
-              setLoader(false);
-            }
+            // if (loggedinuser == "davor.salkanovic@atc-logistics.de") {
+            //   // let onlyMobilizationYes = timeSheetData.filter(
+            //   //   (yes) => yes.mobilization == "Yes"
+            //   // );
+            //   let onlyMobilizationYes = [];
+            //   timeSheetData.forEach((data) => {
+            //     if (
+            //       data.city == "Paris" ||
+            //       data.city == "Gavle" ||
+            //       data.city == "Warsaw" ||
+            //       data.city == "Milan"
+            //     ) {
+            //       onlyMobilizationYes.push(data);
+            //     } else {
+            //       if (data.mobilization == "Yes") {
+            //         onlyMobilizationYes.push(data);
+            //       }
+            //     }
+            //   });
+            //   getEmployeeConfig(timeFilterData);
+            //   // getEmployeeConfig(onlyMobilizationYes);
+            //   // allFilterOptions([...onlyMobilizationYes]);
+            //   // setMasterData([...onlyMobilizationYes]);
+            //   // setDuplicateData([...onlyMobilizationYes]);
+            //   // setDisplayData([...onlyMobilizationYes]);
+            //   // setExportExcel([...onlyMobilizationYes]);
+            //   // timeSheetPaginateFunction(1, [...onlyMobilizationYes]);
+            //   // setLoader(false);
+            // } else {
+            //   getEmployeeConfig(timeFilterData);
+            //   // allFilterOptions([...timeSheetData]);
+            //   // setMasterData([...timeSheetData]);
+            //   // setDuplicateData([...timeSheetData]);
+            //   // setDisplayData([...timeSheetData]);
+            //   // setExportExcel([...timeSheetData]);
+            //   // timeSheetPaginateFunction(1, [...timeSheetData]);
+            //   // setLoader(false);
+            // }
+          } else {
+            setLoader(false);
           }
         });
+
         // console.log(Response);
       })
       .catch((err) => {
@@ -785,7 +858,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
       .getByName("Timesheet_HR")
       .users.get()
       .then((Response) => {
-        console.log(Response);
         let onlyTSPermission = Response.filter((user) => {
           return user.Email == loggedinuser;
         });
@@ -797,6 +869,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
   };
   useEffect(() => {
     getAdmin();
+    // getCRMActivityData();
     getOnlyTimeSheetPermissions();
   }, []);
 
@@ -931,7 +1004,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
         });
       }
       if (_data.overtimecommentsDrp) {
-        console.log(_data.overtimecommentsDrp);
         for (let i = 0; i < _data.overtimecommentsDrp.length; i++) {
           if (
             _data.overtimecommentsDrp[i] &&
@@ -1083,12 +1155,22 @@ export default function TimeSheetDashboard(props): JSX.Element {
       let getUniqeWeek = getAllWeeks.filter(
         (item, index) => getAllWeeks.indexOf(item) === index
       );
+      let crmFlag: boolean = false;
+      list.forEach((value) => {
+        if (value.CRMId != "-") {
+          crmFlag = true;
+        }
+      });
       const workbook = new Excel.Workbook();
       const worksheet = workbook.addWorksheet("My Sheet");
+      let CRMworksheet: any;
+      if (crmFlag) {
+        CRMworksheet = workbook.addWorksheet("CRM_Activity");
+      }
       worksheet.columns = [
         { header: "Week", key: "week", width: 25 },
         { header: "Date", key: "date", width: 25 },
-        { header: "Sipervisor", key: "supervisor", width: 25 },
+        { header: "Supervisor", key: "supervisor", width: 25 },
         { header: "Start time", key: "startTime", width: 25 },
         { header: "Finish time", key: "finishTime", width: 25 },
         { header: "Total hours", key: "totalHours", width: 25 },
@@ -1136,12 +1218,57 @@ export default function TimeSheetDashboard(props): JSX.Element {
           width: 25,
         },
         { header: "ReFundApproved", key: "isRefund", width: 25 },
+        { header: "Country", key: "country", width: 25 },
+        { header: "OrginCity", key: "orgCity", width: 25 },
+        { header: "OrginCountry", key: "orgCountry", width: 25 },
+        { header: "CRM Activity", key: "CRMActivity", width: 25 },
+        { header: "Project Type", key: "ProjType", width: 25 },
+        { header: "Project Type2", key: "ProjType2", width: 25 },
+        { header: "Project Type3", key: "ProjType3", width: 25 },
+        // { header: "Project Type4", key: "ProjTyp4", width: 25 },
+        { header: "Project Type Others", key: "ProjeTypeOthers", width: 25 },
       ];
+      if (crmFlag) {
+        CRMworksheet.columns = [
+          { header: "Person Name", key: "perName", width: 25 },
+          { header: "Email Address", key: "email", width: 50 },
+          { header: "Tel Number", key: "telNo", width: 25 },
+          { header: "Comments", key: "cmts", width: 25 },
+          { header: "Name", key: "name", width: 25 },
+          { header: "Date", key: "date", width: 25 },
+          { header: "Client", key: "client", width: 25 },
+          { header: "Meeting Conducted", key: "meetingConducted", width: 25 },
+          { header: "Conversation Type", key: "conversationType", width: 25 },
+        ];
+      }
+      // CRMworksheet.addRow({
+      //   perName: "Test",
+      //   email: "test@gmail.com",
+      //   telNo: "98989882",
+      //   cmts: "Comments",
+      //   name: "Test2",
+      //   date: "24/08/2023",
+      //   client: "Client",
+      //   meetingConducted: "Inperson",
+      //   conversationType: "Type",
+      // });
 
       await getUniqeWeek.forEach(async (week) => {
         var TotalHour = 0;
         var TotalMin = 0;
         var filterWeeklyData = arrExport.filter((item) => item.week == week);
+        // const sortFunction = (a, b) => {
+        //   let firstvalue = a.supervisor.toLowerCase(),
+        //     lastValue = b.supervisor.toLowerCase();
+        //   if (firstvalue < lastValue) {
+        //     return -1;
+        //   }
+        //   if (firstvalue > lastValue) {
+        //     return 1;
+        //   }
+        //   return 0;
+        // };
+        // filterWeeklyData = filterWeeklyData.sort(sortFunction);
         await filterWeeklyData.forEach((item, index) => {
           if (item.totalHours != "") {
             let timeSplit = item.totalHours.split(":");
@@ -1153,7 +1280,20 @@ export default function TimeSheetDashboard(props): JSX.Element {
               TotalMin = 0;
             }
           }
-          worksheet.addRow({
+          if (crmFlag && item.CRMActivity == "Yes") {
+            CRMworksheet.addRow({
+              perName: item.PersonName,
+              email: item.Email,
+              telNo: item.TelNumber,
+              cmts: item.Comments,
+              name: item.Name,
+              date: item.Date,
+              client: item.Client,
+              meetingConducted: item.MeetingCon,
+              conversationType: item.ConversationType,
+            });
+          }
+          var row = worksheet.addRow({
             week: item.week ? item.week : "-",
             date: item.date ? dateFormater(item.date) : "-",
             city: item.city ? item.city : "-",
@@ -1188,7 +1328,37 @@ export default function TimeSheetDashboard(props): JSX.Element {
             overtimecommentsDrp: item.overtimecommentsDrp
               ? item.overtimecommentsDrp.join(",")
               : "-",
+            country: item.Country ? item.Country : "-",
+            orgCity: item.originCity ? item.originCity : "-",
+            orgCountry: item.originCountry ? item.originCountry : "-",
+            CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
+            ProjType: item.ProjectType ? item.ProjectType : "-",
+            ProjType2: item.ProjectType_2 ? item.ProjectType_2 : "-",
+            ProjType3: item.ProjectType_3 ? item.ProjectType_3 : "-",
+            ProjeTypeOthers: item.ProjectTypeOthers
+              ? item.ProjectTypeOthers
+              : "-",
           });
+          EmployeeConfig.forEach((col) => {
+            if (col.Name == item.supervisor && col.Mobilization) {
+              row._cells[2].fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: {
+                  argb: "f8696b",
+                },
+              };
+
+              // row.fill = {
+              //   type: "pattern",
+              //   pattern: "solid",
+              //   fgColor: {
+              //     argb: "f8696b",
+              //   },
+              // };
+            }
+          });
+
           if (filterWeeklyData.length == index + 1) {
             worksheet.addRow({
               totalHours: `Total = ${TotalHour}:${TotalMin}`,
@@ -1198,7 +1368,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         for (let i = 0; i < filterWeeklyData.length; i++) {
           let date = new Date(filterWeeklyData[i].date);
           let day = date.toLocaleString("en-us", { weekday: "long" });
-          console.log(day);
+          // console.log(day);
           if (day == "Saturday" || day == "Sunday") {
             worksheet.getCell("B" + (i + excelCount)).fill = {
               type: "pattern",
@@ -1286,6 +1456,14 @@ export default function TimeSheetDashboard(props): JSX.Element {
         "X1",
         "Y1",
         "Z1",
+        "AA1",
+        "AB1",
+        "AC1",
+        "AD1",
+        "AE1",
+        "AF1",
+        "AG1",
+        "AH1",
       ].map((key) => {
         worksheet.getCell(key).fill = {
           type: "pattern",
@@ -1320,6 +1498,14 @@ export default function TimeSheetDashboard(props): JSX.Element {
         "X1",
         "Y1",
         "Z1",
+        "AA1",
+        "AB1",
+        "AC1",
+        "AD1",
+        "AE1",
+        "AF1",
+        "AG1",
+        "AH1",
       ].map((key) => {
         worksheet.getCell(key).color = {
           type: "pattern",
@@ -1327,6 +1513,23 @@ export default function TimeSheetDashboard(props): JSX.Element {
           fgColor: { argb: "FFFFFF" },
         };
       });
+
+      // new changes
+      if (crmFlag) {
+        ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", "I1"].map((key) => {
+          CRMworksheet.getCell(key).fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "C5D9F1" },
+          };
+          CRMworksheet.getCell(key).color = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFFF" },
+          };
+        });
+      }
+
       await workbook.xlsx
         .writeBuffer()
         .then((buffer) => {
@@ -1659,6 +1862,277 @@ export default function TimeSheetDashboard(props): JSX.Element {
       let approvelComment = document.getElementById("approvelComment");
       approvelComment.style.color = "red";
     }
+  };
+  const getEmployeeConfig = (TimesheetData) => {
+    spweb.lists
+      .getByTitle("EmployeeConfig")
+      .items.select("*,Employee/Title,Employee/EMail")
+      .expand("Employee")
+      // .filter(`EmployeeId eq 457`)
+      .top(5000)
+      .get()
+      .then((res) => {
+        res.forEach((users) => {
+          EmployeeConfig.push({
+            Email: users.Employee.EMail ? users.Employee.EMail : "",
+            Name: users.Employee.Title ? users.Employee.Title : null,
+            Mobilization: users.IsMobilization,
+          });
+        });
+        getCRMActivityData(TimesheetData);
+      })
+      .catch((err) => {
+        console.log(err, "getEmployeeConfig");
+      });
+  };
+  const getCRMActivityData = (TimesheetData) => {
+    spweb.lists
+      .getByTitle("TMST_CRM_ActivityDetails")
+      .items.top(5000)
+      .select("*,Name/Title")
+      .expand("Name")
+      .get()
+      .then((res: any) => {
+        let tempLocalArr = TimesheetData;
+        for (let i = 0; i < tempLocalArr.length; i++) {
+          let _isValueId: boolean = false;
+          for (let j = 0; j < res.length; j++) {
+            if (
+              tempLocalArr[i].CRM_Activity == "Yes" &&
+              res[j].TMST_CRM_IDId != 0 &&
+              res[j].TMST_CRM_IDId == tempLocalArr[i].Id
+            ) {
+              _isValueId = true;
+              arrCreator(tempLocalArr[i], res[j], tempLocalArr);
+            }
+          }
+          if (!_isValueId) {
+            arrCreator(tempLocalArr[i], "", tempLocalArr);
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err, "getCRMActivityData");
+      });
+  };
+  const arrCreator = (timesheetData, CRMData, nasterData) => {
+    let compareTime = totalHoursFunction(
+      timesheetData.StartTime,
+      timesheetData.FinishTime
+    );
+    if (CRMData) {
+      tempCount++;
+      localArr.push({
+        Id: timesheetData.Id,
+        week: timesheetData.Week ? timesheetData.Week : "",
+        date: timesheetData.Date ? timesheetData.Date : "",
+        supervisor: timesheetData.Name ? timesheetData.Name.Title : "",
+        startTime: timesheetData.StartTime ? timesheetData.StartTime : "",
+        finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
+        overTime: timesheetData.OverTime ? timesheetData.OverTime : "",
+        ifOverTime: timesheetData.OverTime ? "Yes" : "No",
+        status: timesheetData.Status ? timesheetData.Status : "",
+        siteCode: timesheetData.SiteCode ? timesheetData.SiteCode : "",
+        mobilization: timesheetData.Mobilization
+          ? timesheetData.Mobilization
+          : "",
+        travel: timesheetData.Travel ? timesheetData.Travel : "",
+        city: timesheetData.City ? timesheetData.City : "",
+        costCenter: timesheetData.CostCenter ? timesheetData.CostCenter : "",
+        otherSiteCode: timesheetData.OtherSiteCode
+          ? timesheetData.OtherSiteCode
+          : "",
+        comments: timesheetData.Comments ? timesheetData.Comments : "",
+        reviewComments: timesheetData.ReviewComments
+          ? timesheetData.ReviewComments
+          : "",
+        kmWithPrivateCar: timesheetData.KmWithPrivateCar
+          ? timesheetData.KmWithPrivateCar
+          : "",
+        cityOverNight: timesheetData.CityOverNight
+          ? timesheetData.CityOverNight
+          : "",
+        travelWithCar: timesheetData.TravelWithCar
+          ? timesheetData.TravelWithCar
+          : "",
+        overTimeComments: timesheetData.OverTimeComments
+          ? timesheetData.OverTimeComments
+          : "",
+        expense: timesheetData.Expense ? timesheetData.Expense : "",
+        totalHours: compareTime ? compareTime : "",
+        AtcCreditAmount: timesheetData.TotalAtcCredit,
+        personalCardAmount: timesheetData.TotalPersonalCard,
+        ison: timesheetData.ison,
+        isRefund: timesheetData.IsRefundApproved ? "Yes" : "No",
+        overtimecommentsDrp: timesheetData.OvertimecommentsDrp
+          ? timesheetData.OvertimecommentsDrp
+          : "",
+        Country: timesheetData.Country ? timesheetData.Country : "",
+        originCity: timesheetData.originCity ? timesheetData.originCity : "",
+        originCountry: timesheetData.OrginCountry
+          ? timesheetData.OrginCountry
+          : "",
+        CRMActivity: timesheetData.CRM_Activity
+          ? timesheetData.CRM_Activity
+          : "",
+        ProjectType:
+          timesheetData.ProjectType && timesheetData.ProjectType.length > 0
+            ? timesheetData.ProjectType[0]
+            : "",
+        ProjectType_2:
+          timesheetData.ProjectType && timesheetData.ProjectType.length >= 1
+            ? timesheetData.ProjectType[1]
+            : "",
+        ProjectType_3:
+          timesheetData.ProjectType && timesheetData.ProjectType.length >= 2
+            ? timesheetData.ProjectType[2]
+            : "",
+        ProjectTypeOthers: timesheetData.ProjectTypeOthers
+          ? timesheetData.ProjectTypeOthers
+          : "",
+        PersonName: CRMData.PersonName ? CRMData.PersonName : "-",
+        Email: CRMData.EmailAddress ? CRMData.EmailAddress : "-",
+        TelNumber: CRMData.TelNumber ? CRMData.TelNumber : "-",
+        Comments: CRMData.Comments ? CRMData.Comments : "-",
+        Name: CRMData.Name ? CRMData.Name.Title : "-",
+        Date: CRMData.Date ? moment(CRMData.Date).format("DD/MM/YYYY") : "-",
+        Client: CRMData.Client ? CRMData.Client : "-",
+        MeetingCon: CRMData.MeetingConducted ? CRMData.MeetingConducted : "-",
+        ConversationType: CRMData.ConversationType
+          ? CRMData.ConversationType
+          : "-",
+        CRMId: CRMData.TMST_CRM_IDId ? CRMData.TMST_CRM_IDId : "-",
+      });
+    } else {
+      tempCount++;
+      localArr.push({
+        Id: timesheetData.Id,
+        week: timesheetData.Week ? timesheetData.Week : "",
+        date: timesheetData.Date ? timesheetData.Date : "",
+        supervisor: timesheetData.Name ? timesheetData.Name.Title : "",
+        startTime: timesheetData.StartTime ? timesheetData.StartTime : "",
+        finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
+        overTime: timesheetData.OverTime ? timesheetData.OverTime : "",
+        ifOverTime: timesheetData.OverTime ? "Yes" : "No",
+        status: timesheetData.Status ? timesheetData.Status : "",
+        siteCode: timesheetData.SiteCode ? timesheetData.SiteCode : "",
+        mobilization: timesheetData.Mobilization
+          ? timesheetData.Mobilization
+          : "",
+        travel: timesheetData.Travel ? timesheetData.Travel : "",
+        city: timesheetData.City ? timesheetData.City : "",
+        costCenter: timesheetData.CostCenter ? timesheetData.CostCenter : "",
+        otherSiteCode: timesheetData.OtherSiteCode
+          ? timesheetData.OtherSiteCode
+          : "",
+        comments: timesheetData.Comments ? timesheetData.Comments : "",
+        reviewComments: timesheetData.ReviewComments
+          ? timesheetData.ReviewComments
+          : "",
+        kmWithPrivateCar: timesheetData.KmWithPrivateCar
+          ? timesheetData.KmWithPrivateCar
+          : "",
+        cityOverNight: timesheetData.CityOverNight
+          ? timesheetData.CityOverNight
+          : "",
+        travelWithCar: timesheetData.TravelWithCar
+          ? timesheetData.TravelWithCar
+          : "",
+        overTimeComments: timesheetData.OverTimeComments
+          ? timesheetData.OverTimeComments
+          : "",
+        expense: timesheetData.Expense ? timesheetData.Expense : "",
+        totalHours: compareTime ? compareTime : "",
+        AtcCreditAmount: timesheetData.TotalAtcCredit,
+        personalCardAmount: timesheetData.TotalPersonalCard,
+        ison: timesheetData.ison,
+        isRefund: timesheetData.IsRefundApproved ? "Yes" : "No",
+        overtimecommentsDrp: timesheetData.OvertimecommentsDrp
+          ? timesheetData.OvertimecommentsDrp
+          : "",
+        Country: timesheetData.Country ? timesheetData.Country : "",
+        originCity: timesheetData.OriginCity ? timesheetData.OriginCity : "",
+        originCountry: timesheetData.OrginCountry
+          ? timesheetData.OrginCountry
+          : "",
+        CRMActivity: timesheetData.CRM_Activity
+          ? timesheetData.CRM_Activity
+          : "",
+        ProjectType:
+          timesheetData.ProjectType && timesheetData.ProjectType.length > 0
+            ? timesheetData.ProjectType[0]
+            : "",
+        ProjectType_2:
+          timesheetData.ProjectType && timesheetData.ProjectType.length >= 1
+            ? timesheetData.ProjectType[1]
+            : "",
+        ProjectType_3:
+          timesheetData.ProjectType && timesheetData.ProjectType.length >= 2
+            ? timesheetData.ProjectType[2]
+            : "",
+        ProjectTypeOthers: timesheetData.ProjectTypeOthers
+          ? timesheetData.ProjectTypeOthers
+          : "",
+        PersonName: "-",
+        Email: "-",
+        TelNumber: "-",
+        Comments: "-",
+        Name: "-",
+        Date: "-",
+        Client: "-",
+        MeetingCon: "-",
+        ConversationType: "-",
+        CRMId: "-",
+      });
+    }
+
+    if (tempCount == nasterData.length) {
+      localArr = localArr.sort(function (a, b) {
+        return moment(a.date) > moment(b.date)
+          ? -1
+          : moment(a.date) < moment(b.date)
+          ? 1
+          : 0;
+      });
+
+      if (loggedinuser == "davor.salkanovic@atc-logistics.de") {
+        // let onlyMobilizationYes = timeSheetData.filter(
+        //   (yes) => yes.mobilization == "Yes"
+        // );
+        let onlyMobilizationYes = [];
+        localArr.forEach((data) => {
+          if (
+            data.city == "Paris" ||
+            data.city == "Gavle" ||
+            data.city == "Warsaw" ||
+            data.city == "Milan"
+          ) {
+            onlyMobilizationYes.push(data);
+          } else {
+            if (data.mobilization == "Yes") {
+              onlyMobilizationYes.push(data);
+            }
+          }
+        });
+        // getEmployeeConfig(onlyMobilizationYes);
+        allFilterOptions([...onlyMobilizationYes]);
+        setMasterData([...onlyMobilizationYes]);
+        setDuplicateData([...onlyMobilizationYes]);
+        setDisplayData([...onlyMobilizationYes]);
+        setExportExcel([...onlyMobilizationYes]);
+        timeSheetPaginateFunction(1, [...onlyMobilizationYes]);
+        setLoader(false);
+      } else {
+        allFilterOptions([...localArr]);
+        setMasterData([...localArr]);
+        setDuplicateData([...localArr]);
+        setDisplayData([...localArr]);
+        setExportExcel([...localArr]);
+        timeSheetPaginateFunction(1, [...localArr]);
+        setLoader(false);
+      }
+    }
+    // console.log(localArr);
   };
 
   return loader ? (
