@@ -12,3 +12,21 @@ input[type="text" i] {
   padding: 1px !important;
   border: 1px solid;
 }
+
+.colorRow > :first-child {
+  /* animation: rowColorChange 2s linear infinite; */
+  background-color: rgba(204, 87, 87, 0.658);
+}
+@keyframes rowColorChange {
+  0% {
+    background-color: rgba(204, 87, 87, 0.658);
+  }
+
+  50% {
+    background-color: rgb(255, 255, 255);
+  }
+
+  100% {
+    background-color: rgba(204, 87, 87, 0.658);
+  }
+}
