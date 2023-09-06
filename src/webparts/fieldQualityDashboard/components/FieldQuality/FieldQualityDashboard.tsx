@@ -36,6 +36,10 @@ let spweb = Web(
   "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
 );
 let currentUrl = window.location.href;
+let globalPlanArr: any[] = [];
+let responsibilityData: any[] = [];
+let onlyMobilizationYes = [];
+let count: number = 0;
 
 const theme = createTheme({
   overrides: {
@@ -162,6 +166,11 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       { key: "Italy", text: "Italy" },
       { key: "Italy", text: "Italy" },
     ],
+    isCabled: [
+      { key: "All", text: "All" },
+      { key: "Yes", text: "Yes" },
+      { key: "No", text: "No" },
+    ],
   };
   let FilterItem = {
     country: "All",
@@ -188,10 +197,10 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     handSBriefingConductedby: { text: "All", key: "All" },
     edgeregion: "All",
     siteCode: { text: "All", key: "All" },
+    isCabled: "All",
   };
 
   //Action plan json
-
   let actionjson = [
     {
       Generalprecheck: "",
@@ -3218,7 +3227,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   };
 
   const getResponsibitydata = (planningData) => {
-    let onlyMobilizationYes = [];
+    // let onlyMobilizationYes = [];
     spweb.lists
       .getByTitle(`Operational Responsibilities`)
       .items.top(5000)
@@ -3231,655 +3240,653 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       .get()
       .then((Response) => {
         // console.log(Response, "Response");
-
-        let responsibilityData: any[] = [];
+        // let responsibilityData: any[] = [];
+        let totalPlanningItem: any[] = [];
         if (Response.length > 0) {
           planningData.forEach((plan) => {
-            let operationalData = Response.filter(
-              (data) => plan.Id == data.TrackingNumberReferenceId
-            );
-            let operationalListObject =
-              operationalData.length > 0 ? operationalData[0] : {};
-            let handSBriefingConductedbyList = [];
+            // let operationalData = Response.filter(
+            //   (data) => plan.Id == data.TrackingNumberReferenceId
+            // );
 
-            try {
-              handSBriefingConductedbyList = operationalListObject
-                ? operationalListObject.HandSBriefingConductedby?.map((e) => {
-                    return {
-                      Title: e.Title ? e.Title : "",
-                      EMail: e.EMail ? e.EMail : "",
-                      Id: e.Id,
-                    };
-                  })
-                : [];
-            } catch (e) {
-              handSBriefingConductedbyList = [];
-            }
+            // let operationalListObject =
+            //   operationalData.length > 0 ? operationalData[0] : {};
+            // let handSBriefingConductedbyList = [];
 
-            let Finalrackpositioncheckedby = [];
+            // try {
+            //   handSBriefingConductedbyList = operationalListObject
+            //     ? operationalListObject.HandSBriefingConductedby?.map((e) => {
+            //         return {
+            //           Title: e.Title ? e.Title : "",
+            //           EMail: e.EMail ? e.EMail : "",
+            //           Id: e.Id,
+            //         };
+            //       })
+            //     : [];
+            // } catch (e) {
+            //   handSBriefingConductedbyList = [];
+            // }
 
-            try {
-              Finalrackpositioncheckedby = operationalListObject
-                ? operationalListObject.Finalrackpositioncheckedby?.map((e) => {
-                    return { EMail: e.EMail ? e.EMail : "", Id: e.Id };
-                  })
-                : [];
-            } catch (e) {
-              Finalrackpositioncheckedby = [];
-            }
-
-            let CrewNameAuditCheckConductedBy = [];
-
-            try {
-              CrewNameAuditCheckConductedBy = operationalListObject
-                ? operationalListObject.CrewNameAuditCheckConductedBy?.map(
-                    (e) => {
-                      return { EMail: e.EMail ? e.EMail : "", Id: e.Id };
-                    }
-                  )
-                : [];
-            } catch (e) {
-              CrewNameAuditCheckConductedBy = [];
-            }
-
-            let TruckLoadAuditconductedby = [];
-
-            try {
-              TruckLoadAuditconductedby = operationalListObject
-                ? operationalListObject.TruckLoadAuditconductedby?.map((e) => {
-                    return { EMail: e.Email ? e.Email : "", Id: e.Id };
-                  })
-                : [];
-            } catch (e) {
-              TruckLoadAuditconductedby = [];
-            }
-
-            let Briefingconductedby = [];
-            try {
-              Briefingconductedby = operationalListObject
-                ? operationalListObject.Briefingconductedby?.map((e) => {
-                    return { EMail: e.EMail ? e.EMail : "", Id: e.Id };
-                  })
-                : [];
-            } catch (e) {
-              Briefingconductedby = [];
-            }
+            // let Finalrackpositioncheckedby = [];
+            // try {
+            //   Finalrackpositioncheckedby = operationalListObject
+            //     ? operationalListObject.Finalrackpositioncheckedby?.map((e) => {
+            //         return { EMail: e.EMail ? e.EMail : "", Id: e.Id };
+            //       })
+            //     : [];
+            // } catch (e) {
+            //   Finalrackpositioncheckedby = [];
+            // }
+            // let CrewNameAuditCheckConductedBy = [];
+            // try {
+            //   CrewNameAuditCheckConductedBy = operationalListObject
+            //     ? operationalListObject.CrewNameAuditCheckConductedBy?.map(
+            //         (e) => {
+            //           return { EMail: e.EMail ? e.EMail : "", Id: e.Id };
+            //         }
+            //       )
+            //     : [];
+            // } catch (e) {
+            //   CrewNameAuditCheckConductedBy = [];
+            // }
+            // let TruckLoadAuditconductedby = [];
+            // try {
+            //   TruckLoadAuditconductedby = operationalListObject
+            //     ? operationalListObject.TruckLoadAuditconductedby?.map((e) => {
+            //         return { EMail: e.Email ? e.Email : "", Id: e.Id };
+            //       })
+            //     : [];
+            // } catch (e) {
+            //   TruckLoadAuditconductedby = [];
+            // }
+            // let Briefingconductedby = [];
+            // try {
+            //   Briefingconductedby = operationalListObject
+            //     ? operationalListObject.Briefingconductedby?.map((e) => {
+            //         return { EMail: e.EMail ? e.EMail : "", Id: e.Id };
+            //       })
+            //     : [];
+            // } catch (e) {
+            //   Briefingconductedby = [];
+            // }
 
             if (plan.trackingNumber) {
-              responsibilityData.push({
-                Id: plan.Id,
-                OperationalResponsId: operationalListObject.ID,
-                trackingNo: plan.trackingNumber,
-                rackQuantity: plan.racks,
-                siteCode: plan.siteCode,
-                country: plan.country,
-                client: plan.client,
-                supervisor: plan.supervisor,
-                deleteDate: plan.deleteDate ? plan.deleteDate : null,
-                deployementSupervisor: plan.deployementSupervisor,
-                mobilization: plan.mobilization,
-                driverName: plan.driverName,
-                isDriver: plan.isDriver,
-                status: plan.status,
-                healthSafetyPerformance: plan.healthSafetyPerformance,
-                driverNameYes: plan.driverNameYes,
-                siteAddress: plan.siteAddress,
-                additionalDeliveryComments: plan.additionalDeliveryComments,
-                wgcrew: plan.wgcrew ? plan.wgcrew : [],
-                notes: plan.notes,
-                isActionPlanCompleted: plan.isActionPlanCompleted,
-                escalated: plan.escalated,
-                city: plan.city,
-                joptype: plan.joptype,
-                accidentInformation: plan.accidentInformation,
-                accidentInformationComments: plan.accidentInformationComments,
-                goodSave: plan.goodSave,
-                safetyInitiative: plan.safetyInitiative,
-                DrivingforwSuggestion: plan.DrivingforwSuggestion,
-                goodSaveComments: plan.goodSaveComments,
-                safetyInitiativeComments: plan.safetyInitiativeComments,
-                drivingforwSuggestionComments:
-                  plan.drivingforwSuggestionComments,
-                goodSaveName: plan.goodSaveName,
-                safetyInitiativeName: plan.safetyInitiativeName,
-                drivingforwSuggestionName: plan.drivingforwSuggestionName,
-                wGCrewMemberData: plan.wGCrewMemberData,
-                isDelete: plan.isDelete,
-                CustomerFeedback: plan.CustomerFeedback,
-                CustomerFeedbackComments: plan.CustomerFeedbackComments,
-                ATCSupervvisorFeedback: plan.ATCSupervvisorFeedback,
-                ATCSupervisorFeedbackComments:
-                  plan.ATCSupervisorFeedbackComments,
-                ToolsOnChargeForNextDay: plan.ToolsOnChargeForNextDay,
-                ToolsOnChargeForNextDayComments:
-                  plan.ToolsOnChargeForNextDayComments,
-                VehicleIsCleanAndNotOnReserveFor:
-                  plan.VehicleIsCleanAndNotOnReserveFor,
-                VehicleIsCleanAndNotOnReserveFor0:
-                  plan.VehicleIsCleanAndNotOnReserveFor0,
-                PaperWorkCompletePlanningTeamUpd:
-                  plan.PaperWorkCompletePlanningTeamUpd,
-                PaperWorkCompletePlanningTeamUpd0:
-                  plan.PaperWorkCompletePlanningTeamUpd0,
-                Cablingspreadsheetupdate: plan.Cablingspreadsheetupdate,
-                CablingspreadsheetupdateComments:
-                  plan.CablingspreadsheetupdateComments,
-                AccidentInformation: plan.AccidentInformation,
-                AccidentInformationComments: plan.AccidentInformationComments,
-                Drivingforwsuggestion: plan.Drivingforwsuggestion,
-                siteAccessdelay: operationalListObject.SiteAccessDelays
-                  ? operationalListObject.SiteAccessDelays
-                  : "",
-                CrewNameAuditCheckConductedBy: CrewNameAuditCheckConductedBy
-                  ? CrewNameAuditCheckConductedBy
-                  : [],
-                Finalrackpositioncheckedby: Finalrackpositioncheckedby
-                  ? Finalrackpositioncheckedby
-                  : [],
-                siteAccessDelaysTime: operationalListObject.SiteAccessDelaysTime
-                  ? operationalListObject.SiteAccessDelaysTime
-                  : "",
-                securityOrOtherdelays:
-                  operationalListObject.SecurityOrOtherDelays
-                    ? operationalListObject.SecurityOrOtherDelays
-                    : "",
-                securityorotherdelaysTime:
-                  operationalListObject.SecurityorotherdelaysTime
-                    ? operationalListObject.SecurityorotherdelaysTime
-                    : "",
-                full5PPE: operationalListObject.Full5PPE
-                  ? operationalListObject.Full5PPE
-                  : "",
-                siteAccessDelaysComments:
-                  operationalListObject.SiteAccessDelaysComments
-                    ? operationalListObject.SiteAccessDelaysComments
-                    : "",
-                securityOrOtherDelaysComments:
-                  operationalListObject.SecurityOrOtherDelaysComments
-                    ? operationalListObject.SecurityOrOtherDelaysComments
-                    : "",
-                full5PPEComments: operationalListObject.Full5PPEComments
-                  ? operationalListObject.Full5PPEComments
-                  : "",
-                crewNameAuditCheckConductedByCom:
-                  operationalListObject.CrewNameAuditCheckConductedByCom
-                    ? operationalListObject.CrewNameAuditCheckConductedByCom
-                    : "",
-                TruckSealBreak: operationalListObject.TruckSealBreak
-                  ? operationalListObject.TruckSealBreak
-                  : "",
-                TruckSealBreakComments:
-                  operationalListObject.TruckSealBreakComments
-                    ? operationalListObject.TruckSealBreakComments
-                    : "",
-                Truckdeparturedelays: operationalListObject.Truckdeparturedelays
-                  ? operationalListObject.Truckdeparturedelays
-                  : "",
-                TruckdeparturedelaysTime:
-                  operationalListObject.TruckdeparturedelaysTime
-                    ? operationalListObject.TruckdeparturedelaysTime
-                    : "",
-                TruckdeparturedelaysComments:
-                  operationalListObject.TruckdeparturedelaysComments
-                    ? operationalListObject.TruckdeparturedelaysComments
-                    : "",
-                DCATsDelays: operationalListObject.DCATsDelays
-                  ? operationalListObject.DCATsDelays
-                  : "",
-                DCATsDelaysTime: operationalListObject.DCATsDelaysTime
-                  ? operationalListObject.DCATsDelaysTime
-                  : "",
-                DCATsDelaysComments: operationalListObject.DCATsDelaysComments
-                  ? operationalListObject.DCATsDelaysComments
-                  : "",
-                VendorWGCrewdelays: operationalListObject.VendorWGCrewdelays
-                  ? operationalListObject.VendorWGCrewdelays
-                  : "",
-                VendorWGCrewdelaysTime:
-                  operationalListObject.VendorWGCrewdelaysTime
-                    ? operationalListObject.VendorWGCrewdelaysTime
-                    : "",
-                VendorWGCrewdelaysComments:
-                  operationalListObject.VendorWGCrewdelaysComments
-                    ? operationalListObject.VendorWGCrewdelaysComments
-                    : "",
-                BANKSMANPresent: operationalListObject.BANKSMANPresent
-                  ? operationalListObject.BANKSMANPresent
-                  : "",
-                BANKSMANPresentComments:
-                  operationalListObject.BANKSMANPresentComments
-                    ? operationalListObject.BANKSMANPresentComments
-                    : "",
-                PhoneMediaUsage: operationalListObject.PhoneMediaUsage
-                  ? operationalListObject.PhoneMediaUsage
-                  : "",
-                PhoneMediaUsageComments:
-                  operationalListObject.PhoneMediaUsageComments
-                    ? operationalListObject.PhoneMediaUsageComments
-                    : "",
-                RestingOnFloor: operationalListObject.RestingOnFloor
-                  ? operationalListObject.RestingOnFloor
-                  : "",
-                RestingOnFloorComments:
-                  operationalListObject.RestingOnFloorComments
-                    ? operationalListObject.RestingOnFloorComments
-                    : "",
-                TruckArrival: operationalListObject.TruckArrival
-                  ? operationalListObject.TruckArrival
-                  : "",
-                TruckArrivalLoadingbayComments:
-                  operationalListObject.TruckArrivalLoadingbayComments
-                    ? operationalListObject.TruckArrivalLoadingbayComments
-                    : "",
-                TruckDeparture: operationalListObject.TruckDeparture
-                  ? operationalListObject.TruckDeparture
-                  : "",
-                TruckdepartureLoadingbayComments:
-                  operationalListObject.TruckdepartureLoadingbayComments
-                    ? operationalListObject.TruckdepartureLoadingbayComments
-                    : "",
-                RealtimeETAs: operationalListObject.RealtimeETAs
-                  ? operationalListObject.RealtimeETAs
-                  : "",
-                RealtimeETAComments: operationalListObject.RealtimeETAComments
-                  ? operationalListObject.RealtimeETAComments
-                  : "",
-                COLLOaccessissues: operationalListObject.COLLOaccessissues
-                  ? operationalListObject.COLLOaccessissues
-                  : "",
-                COLLOaccessissuesTime:
-                  operationalListObject.COLLOaccessissuesTime
-                    ? operationalListObject.COLLOaccessissuesTime
-                    : "",
-                COLLOaccessissuesComments:
-                  operationalListObject.COLLOaccessissuesComments
-                    ? operationalListObject.COLLOaccessissuesComments
-                    : "",
-                Induction: operationalListObject.Induction
-                  ? operationalListObject.Induction
-                  : "",
-                InductionComments: operationalListObject.InductionComments
-                  ? operationalListObject.InductionComments
-                  : "",
-                STARTofoperationMSFTstaff:
-                  operationalListObject.STARTofoperationMSFTstaff
-                    ? operationalListObject.STARTofoperationMSFTstaff
-                    : "",
-                STARTofoperationMSFTstaffComment:
-                  operationalListObject.STARTofoperationMSFTstaffComment
-                    ? operationalListObject.STARTofoperationMSFTstaffComment
-                    : "",
-                SmartTeamdelegating: operationalListObject.SmartTeamdelegating
-                  ? operationalListObject.SmartTeamdelegating
-                  : "",
-                SmartTeamdelegatingComments:
-                  operationalListObject.SmartTeamdelegatingComments
-                    ? operationalListObject.SmartTeamdelegatingComments
-                    : "",
-                Rampsetup: operationalListObject.Rampsetup
-                  ? operationalListObject.Rampsetup
-                  : "",
-                RampsetupComments: operationalListObject.RampsetupComments
-                  ? operationalListObject.RampsetupComments
-                  : "",
-                LoadingBayPreparationofworkareae0:
-                  operationalListObject.LoadingBayPreparationofworkareae0
-                    ? operationalListObject.LoadingBayPreparationofworkareae0
-                    : "",
-                LoadingBayPreparationofworkareae:
-                  operationalListObject.LoadingBayPreparationofworkareae
-                    ? operationalListObject.LoadingBayPreparationofworkareae
-                    : "",
-                FINALcheckasperSOP_x2013_WGorDep0:
-                  operationalListObject.FINALcheckasperSOP_x2013_WGorDep0
-                    ? operationalListObject.FINALcheckasperSOP_x2013_WGorDep0
-                    : "",
-                FINALcheckasperSOP_x2013_WGorDep:
-                  operationalListObject.FINALcheckasperSOP_x2013_WGorDep
-                    ? operationalListObject.FINALcheckasperSOP_x2013_WGorDep
-                    : "",
-                DebrisSeparationOfPlasticMetal:
-                  operationalListObject.DebrisSeparationOfPlasticMetal
-                    ? operationalListObject.DebrisSeparationOfPlasticMetal
-                    : "",
-                DebrisSeparationOfPlasticMetalCo:
-                  operationalListObject.DebrisSeparationOfPlasticMetalCo
-                    ? operationalListObject.DebrisSeparationOfPlasticMetalCo
-                    : "",
-                DebrisCleanUpLoadingbay:
-                  operationalListObject.DebrisCleanUpLoadingbay
-                    ? operationalListObject.DebrisCleanUpLoadingbay
-                    : "",
-                DebrisCleanUpLoadingbayComments:
-                  operationalListObject.DebrisCleanUpLoadingbayComments
-                    ? operationalListObject.DebrisCleanUpLoadingbayComments
-                    : "",
-                JobCompletionConfirmation:
-                  operationalListObject.JobCompletionConfirmation
-                    ? operationalListObject.JobCompletionConfirmation
-                    : "",
-                JobCompletionConfirmationComment:
-                  operationalListObject.JobCompletionConfirmationComment
-                    ? operationalListObject.JobCompletionConfirmationComment
-                    : "",
-                SecondTruck: operationalListObject.SecondTruck
-                  ? operationalListObject.SecondTruck
-                  : "",
-                SecondTruckArrivalDateTime:
-                  operationalListObject.SecondTruckArrivalDateTime
-                    ? operationalListObject.SecondTruckArrivalDateTime
-                    : "",
-                SecondTruckArrivalDateTimeCommen:
-                  operationalListObject.SecondTruckArrivalDateTimeCommen
-                    ? operationalListObject.SecondTruckArrivalDateTimeCommen
-                    : "",
-                SecondTruckDepartureDateTime:
-                  operationalListObject.SecondTruckDepartureDateTime
-                    ? operationalListObject.SecondTruckDepartureDateTime
-                    : "",
-                SecondTruckDepartureDateTimeComm:
-                  operationalListObject.SecondTruckDepartureDateTimeComm
-                    ? operationalListObject.SecondTruckDepartureDateTimeComm
-                    : "",
-                Team1LoadingBay: operationalListObject.Team1LoadingBay
-                  ? operationalListObject.Team1LoadingBay
-                  : false,
-                Team2Rackpushing0toCOLLO:
-                  operationalListObject.Team2Rackpushing0toCOLLO
-                    ? operationalListObject.Team2Rackpushing0toCOLLO
-                    : false,
-                ThirdTruck: operationalListObject.ThirdTruck
-                  ? operationalListObject.ThirdTruck
-                  : "",
-                ThirdTruckArrivalDateTime:
-                  operationalListObject.ThirdTruckArrivalDateTime
-                    ? operationalListObject.ThirdTruckArrivalDateTime
-                    : "",
-                ThirdTruckArrivalDateTimeComment:
-                  operationalListObject.ThirdTruckArrivalDateTimeComment
-                    ? operationalListObject.ThirdTruckArrivalDateTimeComment
-                    : "",
-                ThirdTruckDepartureDateTime:
-                  operationalListObject.ThirdTruckDepartureDateTime
-                    ? operationalListObject.ThirdTruckDepartureDateTime
-                    : "",
-                ThirdTruckDepartureDateTimeComme:
-                  operationalListObject.ThirdTruckDepartureDateTimeComme
-                    ? operationalListObject.ThirdTruckDepartureDateTimeComme
-                    : "",
-                SiteAccessDelays: operationalListObject.SiteAccessDelays
-                  ? operationalListObject.SiteAccessDelays
-                  : "",
-                SiteAccessDelaysTime: operationalListObject.SiteAccessDelaysTime
-                  ? operationalListObject.SiteAccessDelaysTime
-                  : "",
-                SiteAccessDelaysComments:
-                  operationalListObject.SiteAccessDelaysComments
-                    ? operationalListObject.SiteAccessDelaysComments
-                    : "",
-                SecurityOrOtherDelays:
-                  operationalListObject.SecurityOrOtherDelays
-                    ? operationalListObject.SecurityOrOtherDelays
-                    : "",
-                SecurityorotherdelaysTime:
-                  operationalListObject.SecurityorotherdelaysTime
-                    ? operationalListObject.SecurityorotherdelaysTime
-                    : "",
-                SecurityOrOtherDelaysComments:
-                  operationalListObject.SecurityOrOtherDelaysComments
-                    ? operationalListObject.SecurityOrOtherDelaysComments
-                    : "",
-                FinalPositionCheckRacksFibres:
-                  operationalListObject.FinalPositionCheckRacksFibres
-                    ? operationalListObject.FinalPositionCheckRacksFibres
-                    : "",
-                FinalPositionCheckRacksFibresCom:
-                  operationalListObject.FinalPositionCheckRacksFibresCom
-                    ? operationalListObject.FinalPositionCheckRacksFibresCom
-                    : "",
-                // Finalrackpositioncheckedby:
-                //   operationalListObject.Finalrackpositioncheckedby
-                //     ? operationalListObject.Finalrackpositioncheckedby
-                //     : "",
-                FinalrackpositioncheckedbyCommen:
-                  operationalListObject.FinalrackpositioncheckedbyCommen
-                    ? operationalListObject.FinalrackpositioncheckedbyCommen
-                    : "",
-                RackScanningbyAWSBBonSite:
-                  operationalListObject.RackScanningbyAWSBBonSite
-                    ? operationalListObject.RackScanningbyAWSBBonSite
-                    : "",
-                RackScanningbyAWSBBonSiteComment:
-                  operationalListObject.RackScanningbyAWSBBonSiteComment
-                    ? operationalListObject.RackScanningbyAWSBBonSiteComment
-                    : "",
-                AssetMismatch: operationalListObject.AssetMismatch
-                  ? operationalListObject.AssetMismatch
-                  : "",
-                AssetMismatchComments:
-                  operationalListObject.AssetMismatchComments
-                    ? operationalListObject.AssetMismatchComments
-                    : "",
-                RackInspectionwgteamleadOnly:
-                  operationalListObject.RackInspectionwgteamleadOnly
-                    ? operationalListObject.RackInspectionwgteamleadOnly
-                    : "",
-                RackInspectionwgteamleadOnlyComm:
-                  operationalListObject.RackInspectionwgteamleadOnlyComm
-                    ? operationalListObject.RackInspectionwgteamleadOnlyComm
-                    : "",
-                ConfirmIRISHCheckWithSiteReprese:
-                  operationalListObject.ConfirmIRISHCheckWithSiteReprese
-                    ? operationalListObject.ConfirmIRISHCheckWithSiteReprese
-                    : "",
-                ConfirmIRISHCheckWithSiteReprese0:
-                  operationalListObject.ConfirmIRISHCheckWithSiteReprese0
-                    ? operationalListObject.ConfirmIRISHCheckWithSiteReprese0
-                    : "",
-                MatchRackStickerPosition:
-                  operationalListObject.MatchRackStickerPosition
-                    ? operationalListObject.MatchRackStickerPosition
-                    : "",
-                MatchRackStickerPositionComments:
-                  operationalListObject.MatchRackStickerPositionComments
-                    ? operationalListObject.MatchRackStickerPositionComments
-                    : "",
-                CompleteStriderPosition:
-                  operationalListObject.CompleteStriderPosition
-                    ? operationalListObject.CompleteStriderPosition
-                    : "",
-                CompleteStriderPositionComments:
-                  operationalListObject.CompleteStriderPositionComments
-                    ? operationalListObject.CompleteStriderPositionComments
-                    : "",
-                FinishCabling: operationalListObject.FinishCabling
-                  ? operationalListObject.FinishCabling
-                  : "",
-                FinishCablingComments:
-                  operationalListObject.FinishCablingComments
-                    ? operationalListObject.FinishCablingComments
-                    : "",
-                FinalAuditCheckAsPerSOP:
-                  operationalListObject.FinalAuditCheckAsPerSOP
-                    ? operationalListObject.FinalAuditCheckAsPerSOP
-                    : "",
-                FinalAuditCheckAsPerSOPComments:
-                  operationalListObject.FinalAuditCheckAsPerSOPComments
-                    ? operationalListObject.FinalAuditCheckAsPerSOPComments
-                    : "",
-                CrewNameAuditCheckConductedByCom:
-                  operationalListObject.CrewNameAuditCheckConductedByCom
-                    ? operationalListObject.CrewNameAuditCheckConductedByCom
-                    : "",
-                WalkthroughSUPERVISOROnly:
-                  operationalListObject.WalkthroughSUPERVISOROnly
-                    ? operationalListObject.WalkthroughSUPERVISOROnly
-                    : "",
-                WalkthroughSUPERVISOROnlyComment:
-                  operationalListObject.WalkthroughSUPERVISOROnlyComment
-                    ? operationalListObject.WalkthroughSUPERVISOROnlyComment
-                    : "",
-                Briefingconductedby: Briefingconductedby,
-                STARTofoperationoperationToCheck:
-                  operationalListObject.STARTofoperationoperationToCheck
-                    ? operationalListObject.STARTofoperationoperationToCheck
-                    : "",
-                STARTofoperationoperationToCheck0:
-                  operationalListObject.STARTofoperationoperationToCheck0
-                    ? operationalListObject.STARTofoperationoperationToCheck0
-                    : "",
-                Preparationofequipment:
-                  operationalListObject.Preparationofequipment
-                    ? operationalListObject.Preparationofequipment
-                    : "",
-                Preparationofequipmentomments:
-                  operationalListObject.Preparationofequipmentomments
-                    ? operationalListObject.Preparationofequipmentomments
-                    : "",
-                EnsureSafeEnvironment:
-                  operationalListObject.EnsureSafeEnvironment
-                    ? operationalListObject.EnsureSafeEnvironment
-                    : "",
-                EnsureSafeEnvironmentComments:
-                  operationalListObject.EnsureSafeEnvironmentComments
-                    ? operationalListObject.EnsureSafeEnvironmentComments
-                    : "",
-                RemovingRacksfromDH: operationalListObject.RemovingRacksfromDH
-                  ? operationalListObject.RemovingRacksfromDH
-                  : "",
-                RemovingRacksfromDHComments:
-                  operationalListObject.RemovingRacksfromDHComments
-                    ? operationalListObject.RemovingRacksfromDHComments
-                    : "",
-                ContactwithAWSDecomTeam:
-                  operationalListObject.ContactwithAWSDecomTeam
-                    ? operationalListObject.ContactwithAWSDecomTeam
-                    : "",
-                AssetandsealNocheck: operationalListObject.AssetandsealNocheck
-                  ? operationalListObject.AssetandsealNocheck
-                  : "",
-                DCSMConfirmBFRackMovement:
-                  operationalListObject.DCSMConfirmBFRackMovement
-                    ? operationalListObject.DCSMConfirmBFRackMovement
-                    : "",
-                Teamsplitting: operationalListObject.Teamsplitting
-                  ? operationalListObject.Teamsplitting
-                  : "",
-                TeamsplittingComments:
-                  operationalListObject.TeamsplittingComments
-                    ? operationalListObject.TeamsplittingComments
-                    : "",
-                TeamTask: operationalListObject.TeamTask
-                  ? operationalListObject.TeamTask
-                  : "",
-                TeamTaskComments: operationalListObject.TeamTaskComments
-                  ? operationalListObject.TeamTaskComments
-                  : "",
-                TruckSealingAndLocking:
-                  operationalListObject.TruckSealingAndLocking
-                    ? operationalListObject.TruckSealingAndLocking
-                    : "",
-                TruckSealingAndLockingComments:
-                  operationalListObject.TruckSealingAndLockingComments
-                    ? operationalListObject.TruckSealingAndLockingComments
-                    : "",
-                RealtimepostingonJob: operationalListObject.RealtimepostingonJob
-                  ? operationalListObject.RealtimepostingonJob
-                  : "",
-                RealtimepostingonJobComments:
-                  operationalListObject.RealtimepostingonJobComments
-                    ? operationalListObject.RealtimepostingonJobComments
-                    : "",
-                TruckparkingonLoadingbay:
-                  operationalListObject.TruckparkingonLoadingbay
-                    ? operationalListObject.TruckparkingonLoadingbay
-                    : "",
-                TruckparkingonLoadingbayComments:
-                  operationalListObject.TruckparkingonLoadingbayComments
-                    ? operationalListObject.TruckparkingonLoadingbayComments
-                    : "",
-                BriefingAndTaskbifurcation:
-                  operationalListObject.BriefingAndTaskbifurcation
-                    ? operationalListObject.BriefingAndTaskbifurcation
-                    : "",
-                BriefingAndTaskbifurcationCommen:
-                  operationalListObject.BriefingAndTaskbifurcationCommen
-                    ? operationalListObject.BriefingAndTaskbifurcationCommen
-                    : "",
-                Team1: operationalListObject.Team1
-                  ? operationalListObject.Team1
-                  : "",
-                Team2: operationalListObject.Team2
-                  ? operationalListObject.Team2
-                  : "",
-                Team3: operationalListObject.Team3
-                  ? operationalListObject.Team3
-                  : "",
-                TruckLoadAuditconductedby: TruckLoadAuditconductedby,
+              totalPlanningItem.push(plan);
+              // responsibilityData.push({
+              //   Id: plan.Id,
+              //   OperationalResponsId: operationalListObject.ID,
+              //   trackingNo: plan.trackingNumber,
+              //   rackQuantity: plan.racks,
+              //   siteCode: plan.siteCode,
+              //   country: plan.country,
+              //   client: plan.client,
+              //   supervisor: plan.supervisor,
+              //   deleteDate: plan.deleteDate ? plan.deleteDate : null,
+              //   deployementSupervisor: plan.deployementSupervisor,
+              //   mobilization: plan.mobilization,
+              //   driverName: plan.driverName,
+              //   isDriver: plan.isDriver,
+              //   status: plan.status,
+              //   healthSafetyPerformance: plan.healthSafetyPerformance,
+              //   driverNameYes: plan.driverNameYes,
+              //   siteAddress: plan.siteAddress,
+              //   additionalDeliveryComments: plan.additionalDeliveryComments,
+              //   wgcrew: plan.wgcrew ? plan.wgcrew : [],
+              //   notes: plan.notes,
+              //   isActionPlanCompleted: plan.isActionPlanCompleted,
+              //   escalated: plan.escalated,
+              //   city: plan.city,
+              //   joptype: plan.joptype,
+              //   accidentInformation: plan.accidentInformation,
+              //   accidentInformationComments: plan.accidentInformationComments,
+              //   goodSave: plan.goodSave,
+              //   safetyInitiative: plan.safetyInitiative,
+              //   DrivingforwSuggestion: plan.DrivingforwSuggestion,
+              //   goodSaveComments: plan.goodSaveComments,
+              //   safetyInitiativeComments: plan.safetyInitiativeComments,
+              //   drivingforwSuggestionComments:
+              //     plan.drivingforwSuggestionComments,
+              //   goodSaveName: plan.goodSaveName,
+              //   safetyInitiativeName: plan.safetyInitiativeName,
+              //   drivingforwSuggestionName: plan.drivingforwSuggestionName,
+              //   wGCrewMemberData: plan.wGCrewMemberData,
+              //   isDelete: plan.isDelete,
+              //   CustomerFeedback: plan.CustomerFeedback,
+              //   CustomerFeedbackComments: plan.CustomerFeedbackComments,
+              //   ATCSupervvisorFeedback: plan.ATCSupervvisorFeedback,
+              //   ATCSupervisorFeedbackComments:
+              //     plan.ATCSupervisorFeedbackComments,
+              //   ToolsOnChargeForNextDay: plan.ToolsOnChargeForNextDay,
+              //   ToolsOnChargeForNextDayComments:
+              //     plan.ToolsOnChargeForNextDayComments,
+              //   VehicleIsCleanAndNotOnReserveFor:
+              //     plan.VehicleIsCleanAndNotOnReserveFor,
+              //   VehicleIsCleanAndNotOnReserveFor0:
+              //     plan.VehicleIsCleanAndNotOnReserveFor0,
+              //   PaperWorkCompletePlanningTeamUpd:
+              //     plan.PaperWorkCompletePlanningTeamUpd,
+              //   PaperWorkCompletePlanningTeamUpd0:
+              //     plan.PaperWorkCompletePlanningTeamUpd0,
+              //   Cablingspreadsheetupdate: plan.Cablingspreadsheetupdate,
+              //   CablingspreadsheetupdateComments:
+              //     plan.CablingspreadsheetupdateComments,
+              //   AccidentInformation: plan.AccidentInformation,
+              //   AccidentInformationComments: plan.AccidentInformationComments,
+              //   Drivingforwsuggestion: plan.Drivingforwsuggestion,
+              //   siteAccessdelay: operationalListObject.SiteAccessDelays
+              //     ? operationalListObject.SiteAccessDelays
+              //     : "",
+              //   CrewNameAuditCheckConductedBy: CrewNameAuditCheckConductedBy
+              //     ? CrewNameAuditCheckConductedBy
+              //     : [],
+              //   Finalrackpositioncheckedby: Finalrackpositioncheckedby
+              //     ? Finalrackpositioncheckedby
+              //     : [],
+              //   siteAccessDelaysTime: operationalListObject.SiteAccessDelaysTime
+              //     ? operationalListObject.SiteAccessDelaysTime
+              //     : "",
+              //   securityOrOtherdelays:
+              //     operationalListObject.SecurityOrOtherDelays
+              //       ? operationalListObject.SecurityOrOtherDelays
+              //       : "",
+              //   securityorotherdelaysTime:
+              //     operationalListObject.SecurityorotherdelaysTime
+              //       ? operationalListObject.SecurityorotherdelaysTime
+              //       : "",
+              //   full5PPE: operationalListObject.Full5PPE
+              //     ? operationalListObject.Full5PPE
+              //     : "",
+              //   siteAccessDelaysComments:
+              //     operationalListObject.SiteAccessDelaysComments
+              //       ? operationalListObject.SiteAccessDelaysComments
+              //       : "",
+              //   securityOrOtherDelaysComments:
+              //     operationalListObject.SecurityOrOtherDelaysComments
+              //       ? operationalListObject.SecurityOrOtherDelaysComments
+              //       : "",
+              //   full5PPEComments: operationalListObject.Full5PPEComments
+              //     ? operationalListObject.Full5PPEComments
+              //     : "",
+              //   crewNameAuditCheckConductedByCom:
+              //     operationalListObject.CrewNameAuditCheckConductedByCom
+              //       ? operationalListObject.CrewNameAuditCheckConductedByCom
+              //       : "",
+              //   TruckSealBreak: operationalListObject.TruckSealBreak
+              //     ? operationalListObject.TruckSealBreak
+              //     : "",
+              //   TruckSealBreakComments:
+              //     operationalListObject.TruckSealBreakComments
+              //       ? operationalListObject.TruckSealBreakComments
+              //       : "",
+              //   Truckdeparturedelays: operationalListObject.Truckdeparturedelays
+              //     ? operationalListObject.Truckdeparturedelays
+              //     : "",
+              //   TruckdeparturedelaysTime:
+              //     operationalListObject.TruckdeparturedelaysTime
+              //       ? operationalListObject.TruckdeparturedelaysTime
+              //       : "",
+              //   TruckdeparturedelaysComments:
+              //     operationalListObject.TruckdeparturedelaysComments
+              //       ? operationalListObject.TruckdeparturedelaysComments
+              //       : "",
+              //   DCATsDelays: operationalListObject.DCATsDelays
+              //     ? operationalListObject.DCATsDelays
+              //     : "",
+              //   DCATsDelaysTime: operationalListObject.DCATsDelaysTime
+              //     ? operationalListObject.DCATsDelaysTime
+              //     : "",
+              //   DCATsDelaysComments: operationalListObject.DCATsDelaysComments
+              //     ? operationalListObject.DCATsDelaysComments
+              //     : "",
+              //   VendorWGCrewdelays: operationalListObject.VendorWGCrewdelays
+              //     ? operationalListObject.VendorWGCrewdelays
+              //     : "",
+              //   VendorWGCrewdelaysTime:
+              //     operationalListObject.VendorWGCrewdelaysTime
+              //       ? operationalListObject.VendorWGCrewdelaysTime
+              //       : "",
+              //   VendorWGCrewdelaysComments:
+              //     operationalListObject.VendorWGCrewdelaysComments
+              //       ? operationalListObject.VendorWGCrewdelaysComments
+              //       : "",
+              //   BANKSMANPresent: operationalListObject.BANKSMANPresent
+              //     ? operationalListObject.BANKSMANPresent
+              //     : "",
+              //   BANKSMANPresentComments:
+              //     operationalListObject.BANKSMANPresentComments
+              //       ? operationalListObject.BANKSMANPresentComments
+              //       : "",
+              //   PhoneMediaUsage: operationalListObject.PhoneMediaUsage
+              //     ? operationalListObject.PhoneMediaUsage
+              //     : "",
+              //   PhoneMediaUsageComments:
+              //     operationalListObject.PhoneMediaUsageComments
+              //       ? operationalListObject.PhoneMediaUsageComments
+              //       : "",
+              //   RestingOnFloor: operationalListObject.RestingOnFloor
+              //     ? operationalListObject.RestingOnFloor
+              //     : "",
+              //   RestingOnFloorComments:
+              //     operationalListObject.RestingOnFloorComments
+              //       ? operationalListObject.RestingOnFloorComments
+              //       : "",
+              //   TruckArrival: operationalListObject.TruckArrival
+              //     ? operationalListObject.TruckArrival
+              //     : "",
+              //   TruckArrivalLoadingbayComments:
+              //     operationalListObject.TruckArrivalLoadingbayComments
+              //       ? operationalListObject.TruckArrivalLoadingbayComments
+              //       : "",
+              //   TruckDeparture: operationalListObject.TruckDeparture
+              //     ? operationalListObject.TruckDeparture
+              //     : "",
+              //   TruckdepartureLoadingbayComments:
+              //     operationalListObject.TruckdepartureLoadingbayComments
+              //       ? operationalListObject.TruckdepartureLoadingbayComments
+              //       : "",
+              //   RealtimeETAs: operationalListObject.RealtimeETAs
+              //     ? operationalListObject.RealtimeETAs
+              //     : "",
+              //   RealtimeETAComments: operationalListObject.RealtimeETAComments
+              //     ? operationalListObject.RealtimeETAComments
+              //     : "",
+              //   COLLOaccessissues: operationalListObject.COLLOaccessissues
+              //     ? operationalListObject.COLLOaccessissues
+              //     : "",
+              //   COLLOaccessissuesTime:
+              //     operationalListObject.COLLOaccessissuesTime
+              //       ? operationalListObject.COLLOaccessissuesTime
+              //       : "",
+              //   COLLOaccessissuesComments:
+              //     operationalListObject.COLLOaccessissuesComments
+              //       ? operationalListObject.COLLOaccessissuesComments
+              //       : "",
+              //   Induction: operationalListObject.Induction
+              //     ? operationalListObject.Induction
+              //     : "",
+              //   InductionComments: operationalListObject.InductionComments
+              //     ? operationalListObject.InductionComments
+              //     : "",
+              //   STARTofoperationMSFTstaff:
+              //     operationalListObject.STARTofoperationMSFTstaff
+              //       ? operationalListObject.STARTofoperationMSFTstaff
+              //       : "",
+              //   STARTofoperationMSFTstaffComment:
+              //     operationalListObject.STARTofoperationMSFTstaffComment
+              //       ? operationalListObject.STARTofoperationMSFTstaffComment
+              //       : "",
+              //   SmartTeamdelegating: operationalListObject.SmartTeamdelegating
+              //     ? operationalListObject.SmartTeamdelegating
+              //     : "",
+              //   SmartTeamdelegatingComments:
+              //     operationalListObject.SmartTeamdelegatingComments
+              //       ? operationalListObject.SmartTeamdelegatingComments
+              //       : "",
+              //   Rampsetup: operationalListObject.Rampsetup
+              //     ? operationalListObject.Rampsetup
+              //     : "",
+              //   RampsetupComments: operationalListObject.RampsetupComments
+              //     ? operationalListObject.RampsetupComments
+              //     : "",
+              //   LoadingBayPreparationofworkareae0:
+              //     operationalListObject.LoadingBayPreparationofworkareae0
+              //       ? operationalListObject.LoadingBayPreparationofworkareae0
+              //       : "",
+              //   LoadingBayPreparationofworkareae:
+              //     operationalListObject.LoadingBayPreparationofworkareae
+              //       ? operationalListObject.LoadingBayPreparationofworkareae
+              //       : "",
+              //   FINALcheckasperSOP_x2013_WGorDep0:
+              //     operationalListObject.FINALcheckasperSOP_x2013_WGorDep0
+              //       ? operationalListObject.FINALcheckasperSOP_x2013_WGorDep0
+              //       : "",
+              //   FINALcheckasperSOP_x2013_WGorDep:
+              //     operationalListObject.FINALcheckasperSOP_x2013_WGorDep
+              //       ? operationalListObject.FINALcheckasperSOP_x2013_WGorDep
+              //       : "",
+              //   DebrisSeparationOfPlasticMetal:
+              //     operationalListObject.DebrisSeparationOfPlasticMetal
+              //       ? operationalListObject.DebrisSeparationOfPlasticMetal
+              //       : "",
+              //   DebrisSeparationOfPlasticMetalCo:
+              //     operationalListObject.DebrisSeparationOfPlasticMetalCo
+              //       ? operationalListObject.DebrisSeparationOfPlasticMetalCo
+              //       : "",
+              //   DebrisCleanUpLoadingbay:
+              //     operationalListObject.DebrisCleanUpLoadingbay
+              //       ? operationalListObject.DebrisCleanUpLoadingbay
+              //       : "",
+              //   DebrisCleanUpLoadingbayComments:
+              //     operationalListObject.DebrisCleanUpLoadingbayComments
+              //       ? operationalListObject.DebrisCleanUpLoadingbayComments
+              //       : "",
+              //   JobCompletionConfirmation:
+              //     operationalListObject.JobCompletionConfirmation
+              //       ? operationalListObject.JobCompletionConfirmation
+              //       : "",
+              //   JobCompletionConfirmationComment:
+              //     operationalListObject.JobCompletionConfirmationComment
+              //       ? operationalListObject.JobCompletionConfirmationComment
+              //       : "",
+              //   SecondTruck: operationalListObject.SecondTruck
+              //     ? operationalListObject.SecondTruck
+              //     : "",
+              //   SecondTruckArrivalDateTime:
+              //     operationalListObject.SecondTruckArrivalDateTime
+              //       ? operationalListObject.SecondTruckArrivalDateTime
+              //       : "",
+              //   SecondTruckArrivalDateTimeCommen:
+              //     operationalListObject.SecondTruckArrivalDateTimeCommen
+              //       ? operationalListObject.SecondTruckArrivalDateTimeCommen
+              //       : "",
+              //   SecondTruckDepartureDateTime:
+              //     operationalListObject.SecondTruckDepartureDateTime
+              //       ? operationalListObject.SecondTruckDepartureDateTime
+              //       : "",
+              //   SecondTruckDepartureDateTimeComm:
+              //     operationalListObject.SecondTruckDepartureDateTimeComm
+              //       ? operationalListObject.SecondTruckDepartureDateTimeComm
+              //       : "",
+              //   Team1LoadingBay: operationalListObject.Team1LoadingBay
+              //     ? operationalListObject.Team1LoadingBay
+              //     : false,
+              //   Team2Rackpushing0toCOLLO:
+              //     operationalListObject.Team2Rackpushing0toCOLLO
+              //       ? operationalListObject.Team2Rackpushing0toCOLLO
+              //       : false,
+              //   ThirdTruck: operationalListObject.ThirdTruck
+              //     ? operationalListObject.ThirdTruck
+              //     : "",
+              //   ThirdTruckArrivalDateTime:
+              //     operationalListObject.ThirdTruckArrivalDateTime
+              //       ? operationalListObject.ThirdTruckArrivalDateTime
+              //       : "",
+              //   ThirdTruckArrivalDateTimeComment:
+              //     operationalListObject.ThirdTruckArrivalDateTimeComment
+              //       ? operationalListObject.ThirdTruckArrivalDateTimeComment
+              //       : "",
+              //   ThirdTruckDepartureDateTime:
+              //     operationalListObject.ThirdTruckDepartureDateTime
+              //       ? operationalListObject.ThirdTruckDepartureDateTime
+              //       : "",
+              //   ThirdTruckDepartureDateTimeComme:
+              //     operationalListObject.ThirdTruckDepartureDateTimeComme
+              //       ? operationalListObject.ThirdTruckDepartureDateTimeComme
+              //       : "",
+              //   SiteAccessDelays: operationalListObject.SiteAccessDelays
+              //     ? operationalListObject.SiteAccessDelays
+              //     : "",
+              //   SiteAccessDelaysTime: operationalListObject.SiteAccessDelaysTime
+              //     ? operationalListObject.SiteAccessDelaysTime
+              //     : "",
+              //   SiteAccessDelaysComments:
+              //     operationalListObject.SiteAccessDelaysComments
+              //       ? operationalListObject.SiteAccessDelaysComments
+              //       : "",
+              //   SecurityOrOtherDelays:
+              //     operationalListObject.SecurityOrOtherDelays
+              //       ? operationalListObject.SecurityOrOtherDelays
+              //       : "",
+              //   SecurityorotherdelaysTime:
+              //     operationalListObject.SecurityorotherdelaysTime
+              //       ? operationalListObject.SecurityorotherdelaysTime
+              //       : "",
+              //   SecurityOrOtherDelaysComments:
+              //     operationalListObject.SecurityOrOtherDelaysComments
+              //       ? operationalListObject.SecurityOrOtherDelaysComments
+              //       : "",
+              //   FinalPositionCheckRacksFibres:
+              //     operationalListObject.FinalPositionCheckRacksFibres
+              //       ? operationalListObject.FinalPositionCheckRacksFibres
+              //       : "",
+              //   FinalPositionCheckRacksFibresCom:
+              //     operationalListObject.FinalPositionCheckRacksFibresCom
+              //       ? operationalListObject.FinalPositionCheckRacksFibresCom
+              //       : "",
+              //   // Finalrackpositioncheckedby:
+              //   //   operationalListObject.Finalrackpositioncheckedby
+              //   //     ? operationalListObject.Finalrackpositioncheckedby
+              //   //     : "",
+              //   FinalrackpositioncheckedbyCommen:
+              //     operationalListObject.FinalrackpositioncheckedbyCommen
+              //       ? operationalListObject.FinalrackpositioncheckedbyCommen
+              //       : "",
+              //   RackScanningbyAWSBBonSite:
+              //     operationalListObject.RackScanningbyAWSBBonSite
+              //       ? operationalListObject.RackScanningbyAWSBBonSite
+              //       : "",
+              //   RackScanningbyAWSBBonSiteComment:
+              //     operationalListObject.RackScanningbyAWSBBonSiteComment
+              //       ? operationalListObject.RackScanningbyAWSBBonSiteComment
+              //       : "",
+              //   AssetMismatch: operationalListObject.AssetMismatch
+              //     ? operationalListObject.AssetMismatch
+              //     : "",
+              //   AssetMismatchComments:
+              //     operationalListObject.AssetMismatchComments
+              //       ? operationalListObject.AssetMismatchComments
+              //       : "",
+              //   RackInspectionwgteamleadOnly:
+              //     operationalListObject.RackInspectionwgteamleadOnly
+              //       ? operationalListObject.RackInspectionwgteamleadOnly
+              //       : "",
+              //   RackInspectionwgteamleadOnlyComm:
+              //     operationalListObject.RackInspectionwgteamleadOnlyComm
+              //       ? operationalListObject.RackInspectionwgteamleadOnlyComm
+              //       : "",
+              //   ConfirmIRISHCheckWithSiteReprese:
+              //     operationalListObject.ConfirmIRISHCheckWithSiteReprese
+              //       ? operationalListObject.ConfirmIRISHCheckWithSiteReprese
+              //       : "",
+              //   ConfirmIRISHCheckWithSiteReprese0:
+              //     operationalListObject.ConfirmIRISHCheckWithSiteReprese0
+              //       ? operationalListObject.ConfirmIRISHCheckWithSiteReprese0
+              //       : "",
+              //   MatchRackStickerPosition:
+              //     operationalListObject.MatchRackStickerPosition
+              //       ? operationalListObject.MatchRackStickerPosition
+              //       : "",
+              //   MatchRackStickerPositionComments:
+              //     operationalListObject.MatchRackStickerPositionComments
+              //       ? operationalListObject.MatchRackStickerPositionComments
+              //       : "",
+              //   CompleteStriderPosition:
+              //     operationalListObject.CompleteStriderPosition
+              //       ? operationalListObject.CompleteStriderPosition
+              //       : "",
+              //   CompleteStriderPositionComments:
+              //     operationalListObject.CompleteStriderPositionComments
+              //       ? operationalListObject.CompleteStriderPositionComments
+              //       : "",
+              //   FinishCabling: operationalListObject.FinishCabling
+              //     ? operationalListObject.FinishCabling
+              //     : "",
+              //   FinishCablingComments:
+              //     operationalListObject.FinishCablingComments
+              //       ? operationalListObject.FinishCablingComments
+              //       : "",
+              //   FinalAuditCheckAsPerSOP:
+              //     operationalListObject.FinalAuditCheckAsPerSOP
+              //       ? operationalListObject.FinalAuditCheckAsPerSOP
+              //       : "",
+              //   FinalAuditCheckAsPerSOPComments:
+              //     operationalListObject.FinalAuditCheckAsPerSOPComments
+              //       ? operationalListObject.FinalAuditCheckAsPerSOPComments
+              //       : "",
+              //   CrewNameAuditCheckConductedByCom:
+              //     operationalListObject.CrewNameAuditCheckConductedByCom
+              //       ? operationalListObject.CrewNameAuditCheckConductedByCom
+              //       : "",
+              //   WalkthroughSUPERVISOROnly:
+              //     operationalListObject.WalkthroughSUPERVISOROnly
+              //       ? operationalListObject.WalkthroughSUPERVISOROnly
+              //       : "",
+              //   WalkthroughSUPERVISOROnlyComment:
+              //     operationalListObject.WalkthroughSUPERVISOROnlyComment
+              //       ? operationalListObject.WalkthroughSUPERVISOROnlyComment
+              //       : "",
+              //   Briefingconductedby: Briefingconductedby,
+              //   STARTofoperationoperationToCheck:
+              //     operationalListObject.STARTofoperationoperationToCheck
+              //       ? operationalListObject.STARTofoperationoperationToCheck
+              //       : "",
+              //   STARTofoperationoperationToCheck0:
+              //     operationalListObject.STARTofoperationoperationToCheck0
+              //       ? operationalListObject.STARTofoperationoperationToCheck0
+              //       : "",
+              //   Preparationofequipment:
+              //     operationalListObject.Preparationofequipment
+              //       ? operationalListObject.Preparationofequipment
+              //       : "",
+              //   Preparationofequipmentomments:
+              //     operationalListObject.Preparationofequipmentomments
+              //       ? operationalListObject.Preparationofequipmentomments
+              //       : "",
+              //   EnsureSafeEnvironment:
+              //     operationalListObject.EnsureSafeEnvironment
+              //       ? operationalListObject.EnsureSafeEnvironment
+              //       : "",
+              //   EnsureSafeEnvironmentComments:
+              //     operationalListObject.EnsureSafeEnvironmentComments
+              //       ? operationalListObject.EnsureSafeEnvironmentComments
+              //       : "",
+              //   RemovingRacksfromDH: operationalListObject.RemovingRacksfromDH
+              //     ? operationalListObject.RemovingRacksfromDH
+              //     : "",
+              //   RemovingRacksfromDHComments:
+              //     operationalListObject.RemovingRacksfromDHComments
+              //       ? operationalListObject.RemovingRacksfromDHComments
+              //       : "",
+              //   ContactwithAWSDecomTeam:
+              //     operationalListObject.ContactwithAWSDecomTeam
+              //       ? operationalListObject.ContactwithAWSDecomTeam
+              //       : "",
+              //   AssetandsealNocheck: operationalListObject.AssetandsealNocheck
+              //     ? operationalListObject.AssetandsealNocheck
+              //     : "",
+              //   DCSMConfirmBFRackMovement:
+              //     operationalListObject.DCSMConfirmBFRackMovement
+              //       ? operationalListObject.DCSMConfirmBFRackMovement
+              //       : "",
+              //   Teamsplitting: operationalListObject.Teamsplitting
+              //     ? operationalListObject.Teamsplitting
+              //     : "",
+              //   TeamsplittingComments:
+              //     operationalListObject.TeamsplittingComments
+              //       ? operationalListObject.TeamsplittingComments
+              //       : "",
+              //   TeamTask: operationalListObject.TeamTask
+              //     ? operationalListObject.TeamTask
+              //     : "",
+              //   TeamTaskComments: operationalListObject.TeamTaskComments
+              //     ? operationalListObject.TeamTaskComments
+              //     : "",
+              //   TruckSealingAndLocking:
+              //     operationalListObject.TruckSealingAndLocking
+              //       ? operationalListObject.TruckSealingAndLocking
+              //       : "",
+              //   TruckSealingAndLockingComments:
+              //     operationalListObject.TruckSealingAndLockingComments
+              //       ? operationalListObject.TruckSealingAndLockingComments
+              //       : "",
+              //   RealtimepostingonJob: operationalListObject.RealtimepostingonJob
+              //     ? operationalListObject.RealtimepostingonJob
+              //     : "",
+              //   RealtimepostingonJobComments:
+              //     operationalListObject.RealtimepostingonJobComments
+              //       ? operationalListObject.RealtimepostingonJobComments
+              //       : "",
+              //   TruckparkingonLoadingbay:
+              //     operationalListObject.TruckparkingonLoadingbay
+              //       ? operationalListObject.TruckparkingonLoadingbay
+              //       : "",
+              //   TruckparkingonLoadingbayComments:
+              //     operationalListObject.TruckparkingonLoadingbayComments
+              //       ? operationalListObject.TruckparkingonLoadingbayComments
+              //       : "",
+              //   BriefingAndTaskbifurcation:
+              //     operationalListObject.BriefingAndTaskbifurcation
+              //       ? operationalListObject.BriefingAndTaskbifurcation
+              //       : "",
+              //   BriefingAndTaskbifurcationCommen:
+              //     operationalListObject.BriefingAndTaskbifurcationCommen
+              //       ? operationalListObject.BriefingAndTaskbifurcationCommen
+              //       : "",
+              //   Team1: operationalListObject.Team1
+              //     ? operationalListObject.Team1
+              //     : "",
+              //   Team2: operationalListObject.Team2
+              //     ? operationalListObject.Team2
+              //     : "",
+              //   Team3: operationalListObject.Team3
+              //     ? operationalListObject.Team3
+              //     : "",
+              //   TruckLoadAuditconductedby: TruckLoadAuditconductedby,
 
-                handSBriefingConductedby: handSBriefingConductedbyList
-                  ? handSBriefingConductedbyList
-                  : [],
-                OperationalRes: plan.OperationalRes,
-                ReviewComments: plan.InReviewComments,
-                ActionPlan: plan.ActionPlan,
-                EffectiveCommunication: plan.EffectiveCommunication,
-                WrappingUp: plan.WrappingUp,
-                WrappingUpID: plan.WrappingUpID,
-              });
+              //   handSBriefingConductedby: handSBriefingConductedbyList
+              //     ? handSBriefingConductedbyList
+              //     : [],
+              //   OperationalRes: plan.OperationalRes,
+              //   ReviewComments: plan.InReviewComments,
+              //   ActionPlan: plan.ActionPlan,
+              //   EffectiveCommunication: plan.EffectiveCommunication,
+              //   WrappingUp: plan.WrappingUp,
+              //   WrappingUpID: plan.WrappingUpID,
+              // });
             }
           });
-          getEffectivedata();
-          getactionplan();
-          responsibilityData = responsibilityData.sort(function (a, b) {
-            return moment(a.deleteDate) > moment(b.deleteDate)
-              ? -1
-              : moment(a.deleteDate) < moment(b.deleteDate)
-              ? 1
-              : 0;
-          });
+          // getEffectivedata();
+          // getactionplan();
+          // responsibilityData = responsibilityData.sort(function (a, b) {
+          //   return moment(a.deleteDate) > moment(b.deleteDate)
+          //     ? -1
+          //     : moment(a.deleteDate) < moment(b.deleteDate)
+          //     ? 1
+          //     : 0;
+          // });
         }
-        if (loggedinuser == "davor.salkanovic@atc-logistics.de") {
-          // let onlyMobilizationYes = responsibilityData.filter(
-          //   (yes) => yes.mobilization == "Yes"
-          // );
+        // if (loggedinuser == "davor.salkanovic@atc-logistics.de") {
+        //   // let onlyMobilizationYes = responsibilityData.filter(
+        //   //   (yes) => yes.mobilization == "Yes"
+        //   // );
 
-          responsibilityData.forEach(async (data) => {
-            if (
-              data.country == "France" ||
-              data.country == "Poland" ||
-              data.country == "Sweden" ||
-              data.country == "Italy"
-            ) {
-              onlyMobilizationYes.push(data);
-            } else {
-              if (data.mobilization == "Yes") {
-                onlyMobilizationYes.push(data);
-              }
-            }
-          });
-          allFilterOptions(onlyMobilizationYes);
-          setMasterData([...onlyMobilizationYes]);
-          setDuplicateData([...onlyMobilizationYes]);
-          filterFunction(FilterKey, onlyMobilizationYes);
+        //   responsibilityData.forEach(async (data) => {
+        //     if (
+        //       data.country == "France" ||
+        //       data.country == "Poland" ||
+        //       data.country == "Sweden" ||
+        //       data.country == "Italy"
+        //     ) {
+        //       onlyMobilizationYes.push(data);
+        //     } else {
+        //       if (data.mobilization == "Yes") {
+        //         onlyMobilizationYes.push(data);
+        //       }
+        //     }
+        //   });
+        //   allFilterOptions(onlyMobilizationYes);
+        //   setMasterData([...onlyMobilizationYes]);
+        //   setDuplicateData([...onlyMobilizationYes]);
+        //   filterFunction(FilterKey, onlyMobilizationYes);
 
-          // setDisplayData([...onlyMobilizationYes]);
-          // setExportExcel([...onlyMobilizationYes]);
-          // paginateFunction(1, [...onlyMobilizationYes]);
+        //   // setDisplayData([...onlyMobilizationYes]);
+        //   // setExportExcel([...onlyMobilizationYes]);
+        //   // paginateFunction(1, [...onlyMobilizationYes]);
 
-          setLoader(false);
-        } else {
-          setMasterData([...responsibilityData]);
-          setDuplicateData([...responsibilityData]);
-          filterFunction(FilterKey, responsibilityData);
+        //   setLoader(false);
+        // }
+        // else {
+        //   setMasterData([...responsibilityData]);
+        //   setDuplicateData([...responsibilityData]);
+        //   filterFunction(FilterKey, responsibilityData);
 
-          // setDisplayData([...responsibilityData]);
-          // setExportExcel([...responsibilityData]);
-          // paginateFunction(1, [...responsibilityData]);
+        //   // setDisplayData([...responsibilityData]);
+        //   // setExportExcel([...responsibilityData]);
+        //   // paginateFunction(1, [...responsibilityData]);
 
-          allFilterOptions(responsibilityData);
-          setLoader(false);
-        }
+        //   allFilterOptions(responsibilityData);
+        //   setLoader(false);
+        // }
+        getMileStoneData(totalPlanningItem, Response);
       })
       .catch((err) => {
         console.log(err);
@@ -3897,6 +3904,9 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       .get()
       .then((Response) => {
         let planningData: any[] = [];
+        globalPlanArr = [];
+        count = 0;
+        // let totalPlanningItem: any[] = [];
         country.forEach((con) => {
           let filterCountrys = Response.filter(
             (item) => item.Country == con.country && item.isDelete != true
@@ -3914,7 +3924,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                     return { Title: e.Title ? e.Title : "" };
                   })
                 : [];
-
               if (
                 usercoutrypermission.findIndex((dd) => {
                   return dd.country == data.Country;
@@ -3924,7 +3933,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                   country: data.Country,
                 });
               }
-
               planningData.push({
                 Id: data.ID,
                 trackingNumber: data.trackingNumber ? data.trackingNumber : "",
@@ -4037,6 +4045,1209 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         console.log(err);
       });
   };
+
+  // get Milestone item function
+  const getMileStoneData = (responsibilityItem, responsibilityResponse) => {
+    spweb.lists
+      .getByTitle(`FQT_MileStone`)
+      .items.top(5000)
+      // .select("*","Title")
+      // .expand("Title")
+      .get()
+      .then((Response: any[]) => {
+        for (let i = 0; i < responsibilityItem.length; i++) {
+          let tempArr = [];
+          for (let j = 0; j < Response.length; j++) {
+            if (responsibilityItem[i].Id == parseInt(Response[j].Title)) {
+              tempArr.push(Response[j]);
+            }
+          }
+          arrGenrator(
+            responsibilityItem[i],
+            tempArr,
+            responsibilityResponse,
+            i,
+            responsibilityItem
+          );
+          // if (planningDataOnly) {
+          //   arrGenrator(responsibilityItem[i], tempArr, responsibilityResponse);
+          // } else {
+          //   arrGenrator(responsibilityItem[i], [], responsibilityResponse);
+          // }
+          // console.log(tempArr);
+        }
+      })
+      .catch((err) => {
+        console.log(err, "getMileStoneData");
+      });
+  };
+  // arrgenrator function
+  const arrGenrator = (
+    plan,
+    MilestoneItem,
+    Response,
+    index,
+    responsibilityItem
+  ) => {
+    // console.log(plan);
+    count++;
+    let operationalData = Response.filter(
+      (data) => plan.Id == data.TrackingNumberReferenceId
+    );
+    let operationalListObject =
+      operationalData.length > 0 ? operationalData[0] : {};
+    let handSBriefingConductedbyList = [];
+    try {
+      handSBriefingConductedbyList = operationalListObject
+        ? operationalListObject.HandSBriefingConductedby?.map((e) => {
+            return {
+              Title: e.Title ? e.Title : "",
+              EMail: e.EMail ? e.EMail : "",
+              Id: e.Id,
+            };
+          })
+        : [];
+    } catch (e) {
+      handSBriefingConductedbyList = [];
+    }
+    let Finalrackpositioncheckedby = [];
+    try {
+      Finalrackpositioncheckedby = operationalListObject
+        ? operationalListObject.Finalrackpositioncheckedby?.map((e) => {
+            return { EMail: e.EMail ? e.EMail : "", Id: e.Id };
+          })
+        : [];
+    } catch (e) {
+      Finalrackpositioncheckedby = [];
+    }
+    let CrewNameAuditCheckConductedBy = [];
+    try {
+      CrewNameAuditCheckConductedBy = operationalListObject
+        ? operationalListObject.CrewNameAuditCheckConductedBy?.map((e) => {
+            return { EMail: e.EMail ? e.EMail : "", Id: e.Id };
+          })
+        : [];
+    } catch (e) {
+      CrewNameAuditCheckConductedBy = [];
+    }
+    let TruckLoadAuditconductedby = [];
+    try {
+      TruckLoadAuditconductedby = operationalListObject
+        ? operationalListObject.TruckLoadAuditconductedby?.map((e) => {
+            return { EMail: e.Email ? e.Email : "", Id: e.Id };
+          })
+        : [];
+    } catch (e) {
+      TruckLoadAuditconductedby = [];
+    }
+    let Briefingconductedby = [];
+    try {
+      Briefingconductedby = operationalListObject
+        ? operationalListObject.Briefingconductedby?.map((e) => {
+            return { EMail: e.EMail ? e.EMail : "", Id: e.Id };
+          })
+        : [];
+    } catch (e) {
+      Briefingconductedby = [];
+    }
+
+    if (MilestoneItem.length > 0) {
+      // console.log(MilestoneItem);
+      MilestoneItem.forEach((item) => {
+        globalPlanArr.push({
+          Id: plan.Id,
+          OperationalResponsId: operationalListObject.ID,
+          trackingNo: plan.trackingNumber,
+          rackQuantity: plan.racks,
+          siteCode: plan.siteCode,
+          country: plan.country,
+          client: plan.client,
+          supervisor: plan.supervisor,
+          deleteDate: plan.deleteDate ? plan.deleteDate : null,
+          deployementSupervisor: plan.deployementSupervisor,
+          mobilization: plan.mobilization,
+          driverName: plan.driverName,
+          isDriver: plan.isDriver,
+          status: plan.status,
+          healthSafetyPerformance: plan.healthSafetyPerformance,
+          driverNameYes: plan.driverNameYes,
+          siteAddress: plan.siteAddress,
+          additionalDeliveryComments: plan.additionalDeliveryComments,
+          wgcrew: plan.wgcrew ? plan.wgcrew : [],
+          notes: plan.notes,
+          isActionPlanCompleted: plan.isActionPlanCompleted,
+          escalated: plan.escalated,
+          city: plan.city,
+          joptype: plan.joptype,
+          accidentInformation: plan.accidentInformation,
+          accidentInformationComments: plan.accidentInformationComments,
+          goodSave: plan.goodSave,
+          safetyInitiative: plan.safetyInitiative,
+          DrivingforwSuggestion: plan.DrivingforwSuggestion,
+          goodSaveComments: plan.goodSaveComments,
+          safetyInitiativeComments: plan.safetyInitiativeComments,
+          drivingforwSuggestionComments: plan.drivingforwSuggestionComments,
+          goodSaveName: plan.goodSaveName,
+          safetyInitiativeName: plan.safetyInitiativeName,
+          drivingforwSuggestionName: plan.drivingforwSuggestionName,
+          wGCrewMemberData: plan.wGCrewMemberData,
+          isDelete: plan.isDelete,
+          CustomerFeedback: plan.CustomerFeedback,
+          CustomerFeedbackComments: plan.CustomerFeedbackComments,
+          ATCSupervvisorFeedback: plan.ATCSupervvisorFeedback,
+          ATCSupervisorFeedbackComments: plan.ATCSupervisorFeedbackComments,
+          ToolsOnChargeForNextDay: plan.ToolsOnChargeForNextDay,
+          ToolsOnChargeForNextDayComments: plan.ToolsOnChargeForNextDayComments,
+          VehicleIsCleanAndNotOnReserveFor:
+            plan.VehicleIsCleanAndNotOnReserveFor,
+          VehicleIsCleanAndNotOnReserveFor0:
+            plan.VehicleIsCleanAndNotOnReserveFor0,
+          PaperWorkCompletePlanningTeamUpd:
+            plan.PaperWorkCompletePlanningTeamUpd,
+          PaperWorkCompletePlanningTeamUpd0:
+            plan.PaperWorkCompletePlanningTeamUpd0,
+          Cablingspreadsheetupdate: plan.Cablingspreadsheetupdate,
+          CablingspreadsheetupdateComments:
+            plan.CablingspreadsheetupdateComments,
+          AccidentInformation: plan.AccidentInformation,
+          AccidentInformationComments: plan.AccidentInformationComments,
+          Drivingforwsuggestion: plan.Drivingforwsuggestion,
+          siteAccessdelay: operationalListObject.SiteAccessDelays
+            ? operationalListObject.SiteAccessDelays
+            : "",
+          CrewNameAuditCheckConductedBy: CrewNameAuditCheckConductedBy
+            ? CrewNameAuditCheckConductedBy
+            : [],
+          Finalrackpositioncheckedby: Finalrackpositioncheckedby
+            ? Finalrackpositioncheckedby
+            : [],
+          siteAccessDelaysTime: operationalListObject.SiteAccessDelaysTime
+            ? operationalListObject.SiteAccessDelaysTime
+            : "",
+          securityOrOtherdelays: operationalListObject.SecurityOrOtherDelays
+            ? operationalListObject.SecurityOrOtherDelays
+            : "",
+          securityorotherdelaysTime:
+            operationalListObject.SecurityorotherdelaysTime
+              ? operationalListObject.SecurityorotherdelaysTime
+              : "",
+          full5PPE: operationalListObject.Full5PPE
+            ? operationalListObject.Full5PPE
+            : "",
+          siteAccessDelaysComments:
+            operationalListObject.SiteAccessDelaysComments
+              ? operationalListObject.SiteAccessDelaysComments
+              : "",
+          securityOrOtherDelaysComments:
+            operationalListObject.SecurityOrOtherDelaysComments
+              ? operationalListObject.SecurityOrOtherDelaysComments
+              : "",
+          full5PPEComments: operationalListObject.Full5PPEComments
+            ? operationalListObject.Full5PPEComments
+            : "",
+          crewNameAuditCheckConductedByCom:
+            operationalListObject.CrewNameAuditCheckConductedByCom
+              ? operationalListObject.CrewNameAuditCheckConductedByCom
+              : "",
+          TruckSealBreak: operationalListObject.TruckSealBreak
+            ? operationalListObject.TruckSealBreak
+            : "",
+          TruckSealBreakComments: operationalListObject.TruckSealBreakComments
+            ? operationalListObject.TruckSealBreakComments
+            : "",
+          Truckdeparturedelays: operationalListObject.Truckdeparturedelays
+            ? operationalListObject.Truckdeparturedelays
+            : "",
+          TruckdeparturedelaysTime:
+            operationalListObject.TruckdeparturedelaysTime
+              ? operationalListObject.TruckdeparturedelaysTime
+              : "",
+          TruckdeparturedelaysComments:
+            operationalListObject.TruckdeparturedelaysComments
+              ? operationalListObject.TruckdeparturedelaysComments
+              : "",
+          DCATsDelays: operationalListObject.DCATsDelays
+            ? operationalListObject.DCATsDelays
+            : "",
+          DCATsDelaysTime: operationalListObject.DCATsDelaysTime
+            ? operationalListObject.DCATsDelaysTime
+            : "",
+          DCATsDelaysComments: operationalListObject.DCATsDelaysComments
+            ? operationalListObject.DCATsDelaysComments
+            : "",
+          VendorWGCrewdelays: operationalListObject.VendorWGCrewdelays
+            ? operationalListObject.VendorWGCrewdelays
+            : "",
+          VendorWGCrewdelaysTime: operationalListObject.VendorWGCrewdelaysTime
+            ? operationalListObject.VendorWGCrewdelaysTime
+            : "",
+          VendorWGCrewdelaysComments:
+            operationalListObject.VendorWGCrewdelaysComments
+              ? operationalListObject.VendorWGCrewdelaysComments
+              : "",
+          BANKSMANPresent: operationalListObject.BANKSMANPresent
+            ? operationalListObject.BANKSMANPresent
+            : "",
+          BANKSMANPresentComments: operationalListObject.BANKSMANPresentComments
+            ? operationalListObject.BANKSMANPresentComments
+            : "",
+          PhoneMediaUsage: operationalListObject.PhoneMediaUsage
+            ? operationalListObject.PhoneMediaUsage
+            : "",
+          PhoneMediaUsageComments: operationalListObject.PhoneMediaUsageComments
+            ? operationalListObject.PhoneMediaUsageComments
+            : "",
+          RestingOnFloor: operationalListObject.RestingOnFloor
+            ? operationalListObject.RestingOnFloor
+            : "",
+          RestingOnFloorComments: operationalListObject.RestingOnFloorComments
+            ? operationalListObject.RestingOnFloorComments
+            : "",
+          TruckArrival: operationalListObject.TruckArrival
+            ? operationalListObject.TruckArrival
+            : "",
+          TruckArrivalLoadingbayComments:
+            operationalListObject.TruckArrivalLoadingbayComments
+              ? operationalListObject.TruckArrivalLoadingbayComments
+              : "",
+          TruckDeparture: operationalListObject.TruckDeparture
+            ? operationalListObject.TruckDeparture
+            : "",
+          TruckdepartureLoadingbayComments:
+            operationalListObject.TruckdepartureLoadingbayComments
+              ? operationalListObject.TruckdepartureLoadingbayComments
+              : "",
+          RealtimeETAs: operationalListObject.RealtimeETAs
+            ? operationalListObject.RealtimeETAs
+            : "",
+          RealtimeETAComments: operationalListObject.RealtimeETAComments
+            ? operationalListObject.RealtimeETAComments
+            : "",
+          COLLOaccessissues: operationalListObject.COLLOaccessissues
+            ? operationalListObject.COLLOaccessissues
+            : "",
+          COLLOaccessissuesTime: operationalListObject.COLLOaccessissuesTime
+            ? operationalListObject.COLLOaccessissuesTime
+            : "",
+          COLLOaccessissuesComments:
+            operationalListObject.COLLOaccessissuesComments
+              ? operationalListObject.COLLOaccessissuesComments
+              : "",
+          Induction: operationalListObject.Induction
+            ? operationalListObject.Induction
+            : "",
+          InductionComments: operationalListObject.InductionComments
+            ? operationalListObject.InductionComments
+            : "",
+          STARTofoperationMSFTstaff:
+            operationalListObject.STARTofoperationMSFTstaff
+              ? operationalListObject.STARTofoperationMSFTstaff
+              : "",
+          STARTofoperationMSFTstaffComment:
+            operationalListObject.STARTofoperationMSFTstaffComment
+              ? operationalListObject.STARTofoperationMSFTstaffComment
+              : "",
+          SmartTeamdelegating: operationalListObject.SmartTeamdelegating
+            ? operationalListObject.SmartTeamdelegating
+            : "",
+          SmartTeamdelegatingComments:
+            operationalListObject.SmartTeamdelegatingComments
+              ? operationalListObject.SmartTeamdelegatingComments
+              : "",
+          Rampsetup: operationalListObject.Rampsetup
+            ? operationalListObject.Rampsetup
+            : "",
+          RampsetupComments: operationalListObject.RampsetupComments
+            ? operationalListObject.RampsetupComments
+            : "",
+          LoadingBayPreparationofworkareae0:
+            operationalListObject.LoadingBayPreparationofworkareae0
+              ? operationalListObject.LoadingBayPreparationofworkareae0
+              : "",
+          LoadingBayPreparationofworkareae:
+            operationalListObject.LoadingBayPreparationofworkareae
+              ? operationalListObject.LoadingBayPreparationofworkareae
+              : "",
+          FINALcheckasperSOP_x2013_WGorDep0:
+            operationalListObject.FINALcheckasperSOP_x2013_WGorDep0
+              ? operationalListObject.FINALcheckasperSOP_x2013_WGorDep0
+              : "",
+          FINALcheckasperSOP_x2013_WGorDep:
+            operationalListObject.FINALcheckasperSOP_x2013_WGorDep
+              ? operationalListObject.FINALcheckasperSOP_x2013_WGorDep
+              : "",
+          DebrisSeparationOfPlasticMetal:
+            operationalListObject.DebrisSeparationOfPlasticMetal
+              ? operationalListObject.DebrisSeparationOfPlasticMetal
+              : "",
+          DebrisSeparationOfPlasticMetalCo:
+            operationalListObject.DebrisSeparationOfPlasticMetalCo
+              ? operationalListObject.DebrisSeparationOfPlasticMetalCo
+              : "",
+          DebrisCleanUpLoadingbay: operationalListObject.DebrisCleanUpLoadingbay
+            ? operationalListObject.DebrisCleanUpLoadingbay
+            : "",
+          DebrisCleanUpLoadingbayComments:
+            operationalListObject.DebrisCleanUpLoadingbayComments
+              ? operationalListObject.DebrisCleanUpLoadingbayComments
+              : "",
+          JobCompletionConfirmation:
+            operationalListObject.JobCompletionConfirmation
+              ? operationalListObject.JobCompletionConfirmation
+              : "",
+          JobCompletionConfirmationComment:
+            operationalListObject.JobCompletionConfirmationComment
+              ? operationalListObject.JobCompletionConfirmationComment
+              : "",
+          SecondTruck: operationalListObject.SecondTruck
+            ? operationalListObject.SecondTruck
+            : "",
+          SecondTruckArrivalDateTime:
+            operationalListObject.SecondTruckArrivalDateTime
+              ? operationalListObject.SecondTruckArrivalDateTime
+              : "",
+          SecondTruckArrivalDateTimeCommen:
+            operationalListObject.SecondTruckArrivalDateTimeCommen
+              ? operationalListObject.SecondTruckArrivalDateTimeCommen
+              : "",
+          SecondTruckDepartureDateTime:
+            operationalListObject.SecondTruckDepartureDateTime
+              ? operationalListObject.SecondTruckDepartureDateTime
+              : "",
+          SecondTruckDepartureDateTimeComm:
+            operationalListObject.SecondTruckDepartureDateTimeComm
+              ? operationalListObject.SecondTruckDepartureDateTimeComm
+              : "",
+          Team1LoadingBay: operationalListObject.Team1LoadingBay
+            ? operationalListObject.Team1LoadingBay
+            : false,
+          Team2Rackpushing0toCOLLO:
+            operationalListObject.Team2Rackpushing0toCOLLO
+              ? operationalListObject.Team2Rackpushing0toCOLLO
+              : false,
+          ThirdTruck: operationalListObject.ThirdTruck
+            ? operationalListObject.ThirdTruck
+            : "",
+          ThirdTruckArrivalDateTime:
+            operationalListObject.ThirdTruckArrivalDateTime
+              ? operationalListObject.ThirdTruckArrivalDateTime
+              : "",
+          ThirdTruckArrivalDateTimeComment:
+            operationalListObject.ThirdTruckArrivalDateTimeComment
+              ? operationalListObject.ThirdTruckArrivalDateTimeComment
+              : "",
+          ThirdTruckDepartureDateTime:
+            operationalListObject.ThirdTruckDepartureDateTime
+              ? operationalListObject.ThirdTruckDepartureDateTime
+              : "",
+          ThirdTruckDepartureDateTimeComme:
+            operationalListObject.ThirdTruckDepartureDateTimeComme
+              ? operationalListObject.ThirdTruckDepartureDateTimeComme
+              : "",
+          SiteAccessDelays: operationalListObject.SiteAccessDelays
+            ? operationalListObject.SiteAccessDelays
+            : "",
+          SiteAccessDelaysTime: operationalListObject.SiteAccessDelaysTime
+            ? operationalListObject.SiteAccessDelaysTime
+            : "",
+          SiteAccessDelaysComments:
+            operationalListObject.SiteAccessDelaysComments
+              ? operationalListObject.SiteAccessDelaysComments
+              : "",
+          SecurityOrOtherDelays: operationalListObject.SecurityOrOtherDelays
+            ? operationalListObject.SecurityOrOtherDelays
+            : "",
+          SecurityorotherdelaysTime:
+            operationalListObject.SecurityorotherdelaysTime
+              ? operationalListObject.SecurityorotherdelaysTime
+              : "",
+          SecurityOrOtherDelaysComments:
+            operationalListObject.SecurityOrOtherDelaysComments
+              ? operationalListObject.SecurityOrOtherDelaysComments
+              : "",
+          FinalPositionCheckRacksFibres:
+            operationalListObject.FinalPositionCheckRacksFibres
+              ? operationalListObject.FinalPositionCheckRacksFibres
+              : "",
+          FinalPositionCheckRacksFibresCom:
+            operationalListObject.FinalPositionCheckRacksFibresCom
+              ? operationalListObject.FinalPositionCheckRacksFibresCom
+              : "",
+          // Finalrackpositioncheckedby:
+          //   operationalListObject.Finalrackpositioncheckedby
+          //     ? operationalListObject.Finalrackpositioncheckedby
+          //     : "",
+          FinalrackpositioncheckedbyCommen:
+            operationalListObject.FinalrackpositioncheckedbyCommen
+              ? operationalListObject.FinalrackpositioncheckedbyCommen
+              : "",
+          RackScanningbyAWSBBonSite:
+            operationalListObject.RackScanningbyAWSBBonSite
+              ? operationalListObject.RackScanningbyAWSBBonSite
+              : "",
+          RackScanningbyAWSBBonSiteComment:
+            operationalListObject.RackScanningbyAWSBBonSiteComment
+              ? operationalListObject.RackScanningbyAWSBBonSiteComment
+              : "",
+          AssetMismatch: operationalListObject.AssetMismatch
+            ? operationalListObject.AssetMismatch
+            : "",
+          AssetMismatchComments: operationalListObject.AssetMismatchComments
+            ? operationalListObject.AssetMismatchComments
+            : "",
+          RackInspectionwgteamleadOnly:
+            operationalListObject.RackInspectionwgteamleadOnly
+              ? operationalListObject.RackInspectionwgteamleadOnly
+              : "",
+          RackInspectionwgteamleadOnlyComm:
+            operationalListObject.RackInspectionwgteamleadOnlyComm
+              ? operationalListObject.RackInspectionwgteamleadOnlyComm
+              : "",
+          ConfirmIRISHCheckWithSiteReprese:
+            operationalListObject.ConfirmIRISHCheckWithSiteReprese
+              ? operationalListObject.ConfirmIRISHCheckWithSiteReprese
+              : "",
+          ConfirmIRISHCheckWithSiteReprese0:
+            operationalListObject.ConfirmIRISHCheckWithSiteReprese0
+              ? operationalListObject.ConfirmIRISHCheckWithSiteReprese0
+              : "",
+          MatchRackStickerPosition:
+            operationalListObject.MatchRackStickerPosition
+              ? operationalListObject.MatchRackStickerPosition
+              : "",
+          MatchRackStickerPositionComments:
+            operationalListObject.MatchRackStickerPositionComments
+              ? operationalListObject.MatchRackStickerPositionComments
+              : "",
+          CompleteStriderPosition: operationalListObject.CompleteStriderPosition
+            ? operationalListObject.CompleteStriderPosition
+            : "",
+          CompleteStriderPositionComments:
+            operationalListObject.CompleteStriderPositionComments
+              ? operationalListObject.CompleteStriderPositionComments
+              : "",
+          FinishCabling: operationalListObject.FinishCabling
+            ? operationalListObject.FinishCabling
+            : "",
+          FinishCablingComments: operationalListObject.FinishCablingComments
+            ? operationalListObject.FinishCablingComments
+            : "",
+          FinalAuditCheckAsPerSOP: operationalListObject.FinalAuditCheckAsPerSOP
+            ? operationalListObject.FinalAuditCheckAsPerSOP
+            : "",
+          FinalAuditCheckAsPerSOPComments:
+            operationalListObject.FinalAuditCheckAsPerSOPComments
+              ? operationalListObject.FinalAuditCheckAsPerSOPComments
+              : "",
+          CrewNameAuditCheckConductedByCom:
+            operationalListObject.CrewNameAuditCheckConductedByCom
+              ? operationalListObject.CrewNameAuditCheckConductedByCom
+              : "",
+          WalkthroughSUPERVISOROnly:
+            operationalListObject.WalkthroughSUPERVISOROnly
+              ? operationalListObject.WalkthroughSUPERVISOROnly
+              : "",
+          WalkthroughSUPERVISOROnlyComment:
+            operationalListObject.WalkthroughSUPERVISOROnlyComment
+              ? operationalListObject.WalkthroughSUPERVISOROnlyComment
+              : "",
+          Briefingconductedby: Briefingconductedby,
+          STARTofoperationoperationToCheck:
+            operationalListObject.STARTofoperationoperationToCheck
+              ? operationalListObject.STARTofoperationoperationToCheck
+              : "",
+          STARTofoperationoperationToCheck0:
+            operationalListObject.STARTofoperationoperationToCheck0
+              ? operationalListObject.STARTofoperationoperationToCheck0
+              : "",
+          Preparationofequipment: operationalListObject.Preparationofequipment
+            ? operationalListObject.Preparationofequipment
+            : "",
+          Preparationofequipmentomments:
+            operationalListObject.Preparationofequipmentomments
+              ? operationalListObject.Preparationofequipmentomments
+              : "",
+          EnsureSafeEnvironment: operationalListObject.EnsureSafeEnvironment
+            ? operationalListObject.EnsureSafeEnvironment
+            : "",
+          EnsureSafeEnvironmentComments:
+            operationalListObject.EnsureSafeEnvironmentComments
+              ? operationalListObject.EnsureSafeEnvironmentComments
+              : "",
+          RemovingRacksfromDH: operationalListObject.RemovingRacksfromDH
+            ? operationalListObject.RemovingRacksfromDH
+            : "",
+          RemovingRacksfromDHComments:
+            operationalListObject.RemovingRacksfromDHComments
+              ? operationalListObject.RemovingRacksfromDHComments
+              : "",
+          ContactwithAWSDecomTeam: operationalListObject.ContactwithAWSDecomTeam
+            ? operationalListObject.ContactwithAWSDecomTeam
+            : "",
+          AssetandsealNocheck: operationalListObject.AssetandsealNocheck
+            ? operationalListObject.AssetandsealNocheck
+            : "",
+          DCSMConfirmBFRackMovement:
+            operationalListObject.DCSMConfirmBFRackMovement
+              ? operationalListObject.DCSMConfirmBFRackMovement
+              : "",
+          Teamsplitting: operationalListObject.Teamsplitting
+            ? operationalListObject.Teamsplitting
+            : "",
+          TeamsplittingComments: operationalListObject.TeamsplittingComments
+            ? operationalListObject.TeamsplittingComments
+            : "",
+          TeamTask: operationalListObject.TeamTask
+            ? operationalListObject.TeamTask
+            : "",
+          TeamTaskComments: operationalListObject.TeamTaskComments
+            ? operationalListObject.TeamTaskComments
+            : "",
+          TruckSealingAndLocking: operationalListObject.TruckSealingAndLocking
+            ? operationalListObject.TruckSealingAndLocking
+            : "",
+          TruckSealingAndLockingComments:
+            operationalListObject.TruckSealingAndLockingComments
+              ? operationalListObject.TruckSealingAndLockingComments
+              : "",
+          RealtimepostingonJob: operationalListObject.RealtimepostingonJob
+            ? operationalListObject.RealtimepostingonJob
+            : "",
+          RealtimepostingonJobComments:
+            operationalListObject.RealtimepostingonJobComments
+              ? operationalListObject.RealtimepostingonJobComments
+              : "",
+          TruckparkingonLoadingbay:
+            operationalListObject.TruckparkingonLoadingbay
+              ? operationalListObject.TruckparkingonLoadingbay
+              : "",
+          TruckparkingonLoadingbayComments:
+            operationalListObject.TruckparkingonLoadingbayComments
+              ? operationalListObject.TruckparkingonLoadingbayComments
+              : "",
+          BriefingAndTaskbifurcation:
+            operationalListObject.BriefingAndTaskbifurcation
+              ? operationalListObject.BriefingAndTaskbifurcation
+              : "",
+          BriefingAndTaskbifurcationCommen:
+            operationalListObject.BriefingAndTaskbifurcationCommen
+              ? operationalListObject.BriefingAndTaskbifurcationCommen
+              : "",
+          Team1: operationalListObject.Team1 ? operationalListObject.Team1 : "",
+          Team2: operationalListObject.Team2 ? operationalListObject.Team2 : "",
+          Team3: operationalListObject.Team3 ? operationalListObject.Team3 : "",
+          TruckLoadAuditconductedby: TruckLoadAuditconductedby,
+
+          handSBriefingConductedby: handSBriefingConductedbyList
+            ? handSBriefingConductedbyList
+            : [],
+          OperationalRes: plan.OperationalRes,
+          ReviewComments: plan.InReviewComments,
+          ActionPlan: plan.ActionPlan,
+          EffectiveCommunication: plan.EffectiveCommunication,
+          WrappingUp: plan.WrappingUp,
+          WrappingUpID: plan.WrappingUpID,
+          // Milestone datas
+          MilestoneSiteCode: item.SiteCode ? item.SiteCode : "-",
+          Escalation: item.Mile_Escalation ? "Yes" : "No",
+          EscalationType: item.EscalationType ? item.EscalationType : "-",
+          EscalationTime: item.isMile_EscalationTime
+            ? item.isMile_EscalationTime
+            : "-",
+          MileStatus: item.StatusMileStone ? item.StatusMileStone : "-",
+          MileStatusTime: item.StatusMileStoneTime
+            ? item.StatusMileStoneTime.split(" ")[1]
+            : "-",
+          EscalationDescription: item.OthersEscalationType
+            ? item.OthersEscalationType
+            : "-",
+          incompleteType: item.IncompletionJobType
+            ? item.IncompletionJobType
+            : "-",
+          jobCancelType: item.JobCancelType ? item.JobCancelType : "-",
+          SupervisorSts: item.Mile_Supervisor ? item.Mile_Supervisor : "-",
+          SupervisorTiem: item.Mile_SupervisorDateTime
+            ? item.Mile_SupervisorDateTime
+            : "-",
+          WGCrewSts: item.Mile_Wgcrew ? item.Mile_Wgcrew : "-",
+          WGCrewTime: item.Mile_WgcrewDateTime ? item.Mile_WgcrewDateTime : "-",
+          Truck1Sts: item.Mile_Truck1 ? item.Mile_Truck1 : "-",
+          Truck1Time: item.Mile_Truck1Json ? item.Mile_Truck1Json : "-",
+          Truck2Sts: item.Mile_Truck2 ? item.Mile_Truck2 : "-",
+          Truck2Time: item.Mile_Truck2Json ? item.Mile_Truck2Json : "-",
+          Truck3Sts: item.Mile_Truck3 ? item.Mile_Truck3 : "-",
+          Truck3Time: item.Mile_Truck3Json ? item.Mile_Truck3Json : "-",
+          SafetyWalkSts: item.Mile_MicrosoftRms ? item.Mile_MicrosoftRms : "-",
+          SafetyWalkTime: item.Mile_MicrosoftRmsJson
+            ? item.Mile_MicrosoftRmsJson
+            : "-",
+          EscalationOwner: item.EscalationOwner ? item.EscalationOwner : "-",
+          AccessTracker: item.AccessTracker ? item.AccessTracker : "-",
+        });
+      });
+    } else {
+      // console.log(MilestoneItem);
+      globalPlanArr.push({
+        Id: plan.Id,
+        OperationalResponsId: operationalListObject.ID,
+        trackingNo: plan.trackingNumber,
+        rackQuantity: plan.racks,
+        siteCode: plan.siteCode,
+        country: plan.country,
+        client: plan.client,
+        supervisor: plan.supervisor,
+        deleteDate: plan.deleteDate ? plan.deleteDate : null,
+        deployementSupervisor: plan.deployementSupervisor,
+        mobilization: plan.mobilization,
+        driverName: plan.driverName,
+        isDriver: plan.isDriver,
+        status: plan.status,
+        healthSafetyPerformance: plan.healthSafetyPerformance,
+        driverNameYes: plan.driverNameYes,
+        siteAddress: plan.siteAddress,
+        additionalDeliveryComments: plan.additionalDeliveryComments,
+        wgcrew: plan.wgcrew ? plan.wgcrew : [],
+        notes: plan.notes,
+        isActionPlanCompleted: plan.isActionPlanCompleted,
+        escalated: plan.escalated,
+        city: plan.city,
+        joptype: plan.joptype,
+        accidentInformation: plan.accidentInformation,
+        accidentInformationComments: plan.accidentInformationComments,
+        goodSave: plan.goodSave,
+        safetyInitiative: plan.safetyInitiative,
+        DrivingforwSuggestion: plan.DrivingforwSuggestion,
+        goodSaveComments: plan.goodSaveComments,
+        safetyInitiativeComments: plan.safetyInitiativeComments,
+        drivingforwSuggestionComments: plan.drivingforwSuggestionComments,
+        goodSaveName: plan.goodSaveName,
+        safetyInitiativeName: plan.safetyInitiativeName,
+        drivingforwSuggestionName: plan.drivingforwSuggestionName,
+        wGCrewMemberData: plan.wGCrewMemberData,
+        isDelete: plan.isDelete,
+        CustomerFeedback: plan.CustomerFeedback,
+        CustomerFeedbackComments: plan.CustomerFeedbackComments,
+        ATCSupervvisorFeedback: plan.ATCSupervvisorFeedback,
+        ATCSupervisorFeedbackComments: plan.ATCSupervisorFeedbackComments,
+        ToolsOnChargeForNextDay: plan.ToolsOnChargeForNextDay,
+        ToolsOnChargeForNextDayComments: plan.ToolsOnChargeForNextDayComments,
+        VehicleIsCleanAndNotOnReserveFor: plan.VehicleIsCleanAndNotOnReserveFor,
+        VehicleIsCleanAndNotOnReserveFor0:
+          plan.VehicleIsCleanAndNotOnReserveFor0,
+        PaperWorkCompletePlanningTeamUpd: plan.PaperWorkCompletePlanningTeamUpd,
+        PaperWorkCompletePlanningTeamUpd0:
+          plan.PaperWorkCompletePlanningTeamUpd0,
+        Cablingspreadsheetupdate: plan.Cablingspreadsheetupdate,
+        CablingspreadsheetupdateComments: plan.CablingspreadsheetupdateComments,
+        AccidentInformation: plan.AccidentInformation,
+        AccidentInformationComments: plan.AccidentInformationComments,
+        Drivingforwsuggestion: plan.Drivingforwsuggestion,
+        siteAccessdelay: operationalListObject.SiteAccessDelays
+          ? operationalListObject.SiteAccessDelays
+          : "",
+        CrewNameAuditCheckConductedBy: CrewNameAuditCheckConductedBy
+          ? CrewNameAuditCheckConductedBy
+          : [],
+        Finalrackpositioncheckedby: Finalrackpositioncheckedby
+          ? Finalrackpositioncheckedby
+          : [],
+        siteAccessDelaysTime: operationalListObject.SiteAccessDelaysTime
+          ? operationalListObject.SiteAccessDelaysTime
+          : "",
+        securityOrOtherdelays: operationalListObject.SecurityOrOtherDelays
+          ? operationalListObject.SecurityOrOtherDelays
+          : "",
+        securityorotherdelaysTime:
+          operationalListObject.SecurityorotherdelaysTime
+            ? operationalListObject.SecurityorotherdelaysTime
+            : "",
+        full5PPE: operationalListObject.Full5PPE
+          ? operationalListObject.Full5PPE
+          : "",
+        siteAccessDelaysComments: operationalListObject.SiteAccessDelaysComments
+          ? operationalListObject.SiteAccessDelaysComments
+          : "",
+        securityOrOtherDelaysComments:
+          operationalListObject.SecurityOrOtherDelaysComments
+            ? operationalListObject.SecurityOrOtherDelaysComments
+            : "",
+        full5PPEComments: operationalListObject.Full5PPEComments
+          ? operationalListObject.Full5PPEComments
+          : "",
+        crewNameAuditCheckConductedByCom:
+          operationalListObject.CrewNameAuditCheckConductedByCom
+            ? operationalListObject.CrewNameAuditCheckConductedByCom
+            : "",
+        TruckSealBreak: operationalListObject.TruckSealBreak
+          ? operationalListObject.TruckSealBreak
+          : "",
+        TruckSealBreakComments: operationalListObject.TruckSealBreakComments
+          ? operationalListObject.TruckSealBreakComments
+          : "",
+        Truckdeparturedelays: operationalListObject.Truckdeparturedelays
+          ? operationalListObject.Truckdeparturedelays
+          : "",
+        TruckdeparturedelaysTime: operationalListObject.TruckdeparturedelaysTime
+          ? operationalListObject.TruckdeparturedelaysTime
+          : "",
+        TruckdeparturedelaysComments:
+          operationalListObject.TruckdeparturedelaysComments
+            ? operationalListObject.TruckdeparturedelaysComments
+            : "",
+        DCATsDelays: operationalListObject.DCATsDelays
+          ? operationalListObject.DCATsDelays
+          : "",
+        DCATsDelaysTime: operationalListObject.DCATsDelaysTime
+          ? operationalListObject.DCATsDelaysTime
+          : "",
+        DCATsDelaysComments: operationalListObject.DCATsDelaysComments
+          ? operationalListObject.DCATsDelaysComments
+          : "",
+        VendorWGCrewdelays: operationalListObject.VendorWGCrewdelays
+          ? operationalListObject.VendorWGCrewdelays
+          : "",
+        VendorWGCrewdelaysTime: operationalListObject.VendorWGCrewdelaysTime
+          ? operationalListObject.VendorWGCrewdelaysTime
+          : "",
+        VendorWGCrewdelaysComments:
+          operationalListObject.VendorWGCrewdelaysComments
+            ? operationalListObject.VendorWGCrewdelaysComments
+            : "",
+        BANKSMANPresent: operationalListObject.BANKSMANPresent
+          ? operationalListObject.BANKSMANPresent
+          : "",
+        BANKSMANPresentComments: operationalListObject.BANKSMANPresentComments
+          ? operationalListObject.BANKSMANPresentComments
+          : "",
+        PhoneMediaUsage: operationalListObject.PhoneMediaUsage
+          ? operationalListObject.PhoneMediaUsage
+          : "",
+        PhoneMediaUsageComments: operationalListObject.PhoneMediaUsageComments
+          ? operationalListObject.PhoneMediaUsageComments
+          : "",
+        RestingOnFloor: operationalListObject.RestingOnFloor
+          ? operationalListObject.RestingOnFloor
+          : "",
+        RestingOnFloorComments: operationalListObject.RestingOnFloorComments
+          ? operationalListObject.RestingOnFloorComments
+          : "",
+        TruckArrival: operationalListObject.TruckArrival
+          ? operationalListObject.TruckArrival
+          : "",
+        TruckArrivalLoadingbayComments:
+          operationalListObject.TruckArrivalLoadingbayComments
+            ? operationalListObject.TruckArrivalLoadingbayComments
+            : "",
+        TruckDeparture: operationalListObject.TruckDeparture
+          ? operationalListObject.TruckDeparture
+          : "",
+        TruckdepartureLoadingbayComments:
+          operationalListObject.TruckdepartureLoadingbayComments
+            ? operationalListObject.TruckdepartureLoadingbayComments
+            : "",
+        RealtimeETAs: operationalListObject.RealtimeETAs
+          ? operationalListObject.RealtimeETAs
+          : "",
+        RealtimeETAComments: operationalListObject.RealtimeETAComments
+          ? operationalListObject.RealtimeETAComments
+          : "",
+        COLLOaccessissues: operationalListObject.COLLOaccessissues
+          ? operationalListObject.COLLOaccessissues
+          : "",
+        COLLOaccessissuesTime: operationalListObject.COLLOaccessissuesTime
+          ? operationalListObject.COLLOaccessissuesTime
+          : "",
+        COLLOaccessissuesComments:
+          operationalListObject.COLLOaccessissuesComments
+            ? operationalListObject.COLLOaccessissuesComments
+            : "",
+        Induction: operationalListObject.Induction
+          ? operationalListObject.Induction
+          : "",
+        InductionComments: operationalListObject.InductionComments
+          ? operationalListObject.InductionComments
+          : "",
+        STARTofoperationMSFTstaff:
+          operationalListObject.STARTofoperationMSFTstaff
+            ? operationalListObject.STARTofoperationMSFTstaff
+            : "",
+        STARTofoperationMSFTstaffComment:
+          operationalListObject.STARTofoperationMSFTstaffComment
+            ? operationalListObject.STARTofoperationMSFTstaffComment
+            : "",
+        SmartTeamdelegating: operationalListObject.SmartTeamdelegating
+          ? operationalListObject.SmartTeamdelegating
+          : "",
+        SmartTeamdelegatingComments:
+          operationalListObject.SmartTeamdelegatingComments
+            ? operationalListObject.SmartTeamdelegatingComments
+            : "",
+        Rampsetup: operationalListObject.Rampsetup
+          ? operationalListObject.Rampsetup
+          : "",
+        RampsetupComments: operationalListObject.RampsetupComments
+          ? operationalListObject.RampsetupComments
+          : "",
+        LoadingBayPreparationofworkareae0:
+          operationalListObject.LoadingBayPreparationofworkareae0
+            ? operationalListObject.LoadingBayPreparationofworkareae0
+            : "",
+        LoadingBayPreparationofworkareae:
+          operationalListObject.LoadingBayPreparationofworkareae
+            ? operationalListObject.LoadingBayPreparationofworkareae
+            : "",
+        FINALcheckasperSOP_x2013_WGorDep0:
+          operationalListObject.FINALcheckasperSOP_x2013_WGorDep0
+            ? operationalListObject.FINALcheckasperSOP_x2013_WGorDep0
+            : "",
+        FINALcheckasperSOP_x2013_WGorDep:
+          operationalListObject.FINALcheckasperSOP_x2013_WGorDep
+            ? operationalListObject.FINALcheckasperSOP_x2013_WGorDep
+            : "",
+        DebrisSeparationOfPlasticMetal:
+          operationalListObject.DebrisSeparationOfPlasticMetal
+            ? operationalListObject.DebrisSeparationOfPlasticMetal
+            : "",
+        DebrisSeparationOfPlasticMetalCo:
+          operationalListObject.DebrisSeparationOfPlasticMetalCo
+            ? operationalListObject.DebrisSeparationOfPlasticMetalCo
+            : "",
+        DebrisCleanUpLoadingbay: operationalListObject.DebrisCleanUpLoadingbay
+          ? operationalListObject.DebrisCleanUpLoadingbay
+          : "",
+        DebrisCleanUpLoadingbayComments:
+          operationalListObject.DebrisCleanUpLoadingbayComments
+            ? operationalListObject.DebrisCleanUpLoadingbayComments
+            : "",
+        JobCompletionConfirmation:
+          operationalListObject.JobCompletionConfirmation
+            ? operationalListObject.JobCompletionConfirmation
+            : "",
+        JobCompletionConfirmationComment:
+          operationalListObject.JobCompletionConfirmationComment
+            ? operationalListObject.JobCompletionConfirmationComment
+            : "",
+        SecondTruck: operationalListObject.SecondTruck
+          ? operationalListObject.SecondTruck
+          : "",
+        SecondTruckArrivalDateTime:
+          operationalListObject.SecondTruckArrivalDateTime
+            ? operationalListObject.SecondTruckArrivalDateTime
+            : "",
+        SecondTruckArrivalDateTimeCommen:
+          operationalListObject.SecondTruckArrivalDateTimeCommen
+            ? operationalListObject.SecondTruckArrivalDateTimeCommen
+            : "",
+        SecondTruckDepartureDateTime:
+          operationalListObject.SecondTruckDepartureDateTime
+            ? operationalListObject.SecondTruckDepartureDateTime
+            : "",
+        SecondTruckDepartureDateTimeComm:
+          operationalListObject.SecondTruckDepartureDateTimeComm
+            ? operationalListObject.SecondTruckDepartureDateTimeComm
+            : "",
+        Team1LoadingBay: operationalListObject.Team1LoadingBay
+          ? operationalListObject.Team1LoadingBay
+          : false,
+        Team2Rackpushing0toCOLLO: operationalListObject.Team2Rackpushing0toCOLLO
+          ? operationalListObject.Team2Rackpushing0toCOLLO
+          : false,
+        ThirdTruck: operationalListObject.ThirdTruck
+          ? operationalListObject.ThirdTruck
+          : "",
+        ThirdTruckArrivalDateTime:
+          operationalListObject.ThirdTruckArrivalDateTime
+            ? operationalListObject.ThirdTruckArrivalDateTime
+            : "",
+        ThirdTruckArrivalDateTimeComment:
+          operationalListObject.ThirdTruckArrivalDateTimeComment
+            ? operationalListObject.ThirdTruckArrivalDateTimeComment
+            : "",
+        ThirdTruckDepartureDateTime:
+          operationalListObject.ThirdTruckDepartureDateTime
+            ? operationalListObject.ThirdTruckDepartureDateTime
+            : "",
+        ThirdTruckDepartureDateTimeComme:
+          operationalListObject.ThirdTruckDepartureDateTimeComme
+            ? operationalListObject.ThirdTruckDepartureDateTimeComme
+            : "",
+        SiteAccessDelays: operationalListObject.SiteAccessDelays
+          ? operationalListObject.SiteAccessDelays
+          : "",
+        SiteAccessDelaysTime: operationalListObject.SiteAccessDelaysTime
+          ? operationalListObject.SiteAccessDelaysTime
+          : "",
+        SiteAccessDelaysComments: operationalListObject.SiteAccessDelaysComments
+          ? operationalListObject.SiteAccessDelaysComments
+          : "",
+        SecurityOrOtherDelays: operationalListObject.SecurityOrOtherDelays
+          ? operationalListObject.SecurityOrOtherDelays
+          : "",
+        SecurityorotherdelaysTime:
+          operationalListObject.SecurityorotherdelaysTime
+            ? operationalListObject.SecurityorotherdelaysTime
+            : "",
+        SecurityOrOtherDelaysComments:
+          operationalListObject.SecurityOrOtherDelaysComments
+            ? operationalListObject.SecurityOrOtherDelaysComments
+            : "",
+        FinalPositionCheckRacksFibres:
+          operationalListObject.FinalPositionCheckRacksFibres
+            ? operationalListObject.FinalPositionCheckRacksFibres
+            : "",
+        FinalPositionCheckRacksFibresCom:
+          operationalListObject.FinalPositionCheckRacksFibresCom
+            ? operationalListObject.FinalPositionCheckRacksFibresCom
+            : "",
+        // Finalrackpositioncheckedby:
+        //   operationalListObject.Finalrackpositioncheckedby
+        //     ? operationalListObject.Finalrackpositioncheckedby
+        //     : "",
+        FinalrackpositioncheckedbyCommen:
+          operationalListObject.FinalrackpositioncheckedbyCommen
+            ? operationalListObject.FinalrackpositioncheckedbyCommen
+            : "",
+        RackScanningbyAWSBBonSite:
+          operationalListObject.RackScanningbyAWSBBonSite
+            ? operationalListObject.RackScanningbyAWSBBonSite
+            : "",
+        RackScanningbyAWSBBonSiteComment:
+          operationalListObject.RackScanningbyAWSBBonSiteComment
+            ? operationalListObject.RackScanningbyAWSBBonSiteComment
+            : "",
+        AssetMismatch: operationalListObject.AssetMismatch
+          ? operationalListObject.AssetMismatch
+          : "",
+        AssetMismatchComments: operationalListObject.AssetMismatchComments
+          ? operationalListObject.AssetMismatchComments
+          : "",
+        RackInspectionwgteamleadOnly:
+          operationalListObject.RackInspectionwgteamleadOnly
+            ? operationalListObject.RackInspectionwgteamleadOnly
+            : "",
+        RackInspectionwgteamleadOnlyComm:
+          operationalListObject.RackInspectionwgteamleadOnlyComm
+            ? operationalListObject.RackInspectionwgteamleadOnlyComm
+            : "",
+        ConfirmIRISHCheckWithSiteReprese:
+          operationalListObject.ConfirmIRISHCheckWithSiteReprese
+            ? operationalListObject.ConfirmIRISHCheckWithSiteReprese
+            : "",
+        ConfirmIRISHCheckWithSiteReprese0:
+          operationalListObject.ConfirmIRISHCheckWithSiteReprese0
+            ? operationalListObject.ConfirmIRISHCheckWithSiteReprese0
+            : "",
+        MatchRackStickerPosition: operationalListObject.MatchRackStickerPosition
+          ? operationalListObject.MatchRackStickerPosition
+          : "",
+        MatchRackStickerPositionComments:
+          operationalListObject.MatchRackStickerPositionComments
+            ? operationalListObject.MatchRackStickerPositionComments
+            : "",
+        CompleteStriderPosition: operationalListObject.CompleteStriderPosition
+          ? operationalListObject.CompleteStriderPosition
+          : "",
+        CompleteStriderPositionComments:
+          operationalListObject.CompleteStriderPositionComments
+            ? operationalListObject.CompleteStriderPositionComments
+            : "",
+        FinishCabling: operationalListObject.FinishCabling
+          ? operationalListObject.FinishCabling
+          : "",
+        FinishCablingComments: operationalListObject.FinishCablingComments
+          ? operationalListObject.FinishCablingComments
+          : "",
+        FinalAuditCheckAsPerSOP: operationalListObject.FinalAuditCheckAsPerSOP
+          ? operationalListObject.FinalAuditCheckAsPerSOP
+          : "",
+        FinalAuditCheckAsPerSOPComments:
+          operationalListObject.FinalAuditCheckAsPerSOPComments
+            ? operationalListObject.FinalAuditCheckAsPerSOPComments
+            : "",
+        CrewNameAuditCheckConductedByCom:
+          operationalListObject.CrewNameAuditCheckConductedByCom
+            ? operationalListObject.CrewNameAuditCheckConductedByCom
+            : "",
+        WalkthroughSUPERVISOROnly:
+          operationalListObject.WalkthroughSUPERVISOROnly
+            ? operationalListObject.WalkthroughSUPERVISOROnly
+            : "",
+        WalkthroughSUPERVISOROnlyComment:
+          operationalListObject.WalkthroughSUPERVISOROnlyComment
+            ? operationalListObject.WalkthroughSUPERVISOROnlyComment
+            : "",
+        Briefingconductedby: Briefingconductedby,
+        STARTofoperationoperationToCheck:
+          operationalListObject.STARTofoperationoperationToCheck
+            ? operationalListObject.STARTofoperationoperationToCheck
+            : "",
+        STARTofoperationoperationToCheck0:
+          operationalListObject.STARTofoperationoperationToCheck0
+            ? operationalListObject.STARTofoperationoperationToCheck0
+            : "",
+        Preparationofequipment: operationalListObject.Preparationofequipment
+          ? operationalListObject.Preparationofequipment
+          : "",
+        Preparationofequipmentomments:
+          operationalListObject.Preparationofequipmentomments
+            ? operationalListObject.Preparationofequipmentomments
+            : "",
+        EnsureSafeEnvironment: operationalListObject.EnsureSafeEnvironment
+          ? operationalListObject.EnsureSafeEnvironment
+          : "",
+        EnsureSafeEnvironmentComments:
+          operationalListObject.EnsureSafeEnvironmentComments
+            ? operationalListObject.EnsureSafeEnvironmentComments
+            : "",
+        RemovingRacksfromDH: operationalListObject.RemovingRacksfromDH
+          ? operationalListObject.RemovingRacksfromDH
+          : "",
+        RemovingRacksfromDHComments:
+          operationalListObject.RemovingRacksfromDHComments
+            ? operationalListObject.RemovingRacksfromDHComments
+            : "",
+        ContactwithAWSDecomTeam: operationalListObject.ContactwithAWSDecomTeam
+          ? operationalListObject.ContactwithAWSDecomTeam
+          : "",
+        AssetandsealNocheck: operationalListObject.AssetandsealNocheck
+          ? operationalListObject.AssetandsealNocheck
+          : "",
+        DCSMConfirmBFRackMovement:
+          operationalListObject.DCSMConfirmBFRackMovement
+            ? operationalListObject.DCSMConfirmBFRackMovement
+            : "",
+        Teamsplitting: operationalListObject.Teamsplitting
+          ? operationalListObject.Teamsplitting
+          : "",
+        TeamsplittingComments: operationalListObject.TeamsplittingComments
+          ? operationalListObject.TeamsplittingComments
+          : "",
+        TeamTask: operationalListObject.TeamTask
+          ? operationalListObject.TeamTask
+          : "",
+        TeamTaskComments: operationalListObject.TeamTaskComments
+          ? operationalListObject.TeamTaskComments
+          : "",
+        TruckSealingAndLocking: operationalListObject.TruckSealingAndLocking
+          ? operationalListObject.TruckSealingAndLocking
+          : "",
+        TruckSealingAndLockingComments:
+          operationalListObject.TruckSealingAndLockingComments
+            ? operationalListObject.TruckSealingAndLockingComments
+            : "",
+        RealtimepostingonJob: operationalListObject.RealtimepostingonJob
+          ? operationalListObject.RealtimepostingonJob
+          : "",
+        RealtimepostingonJobComments:
+          operationalListObject.RealtimepostingonJobComments
+            ? operationalListObject.RealtimepostingonJobComments
+            : "",
+        TruckparkingonLoadingbay: operationalListObject.TruckparkingonLoadingbay
+          ? operationalListObject.TruckparkingonLoadingbay
+          : "",
+        TruckparkingonLoadingbayComments:
+          operationalListObject.TruckparkingonLoadingbayComments
+            ? operationalListObject.TruckparkingonLoadingbayComments
+            : "",
+        BriefingAndTaskbifurcation:
+          operationalListObject.BriefingAndTaskbifurcation
+            ? operationalListObject.BriefingAndTaskbifurcation
+            : "",
+        BriefingAndTaskbifurcationCommen:
+          operationalListObject.BriefingAndTaskbifurcationCommen
+            ? operationalListObject.BriefingAndTaskbifurcationCommen
+            : "",
+        Team1: operationalListObject.Team1 ? operationalListObject.Team1 : "",
+        Team2: operationalListObject.Team2 ? operationalListObject.Team2 : "",
+        Team3: operationalListObject.Team3 ? operationalListObject.Team3 : "",
+        TruckLoadAuditconductedby: TruckLoadAuditconductedby,
+
+        handSBriefingConductedby: handSBriefingConductedbyList
+          ? handSBriefingConductedbyList
+          : [],
+        OperationalRes: plan.OperationalRes,
+        ReviewComments: plan.InReviewComments,
+        ActionPlan: plan.ActionPlan,
+        EffectiveCommunication: plan.EffectiveCommunication,
+        WrappingUp: plan.WrappingUp,
+        WrappingUpID: plan.WrappingUpID,
+        // Milestone datas
+        MilestoneSiteCode: "-",
+        Escalation: "-",
+        EscalationType: "-",
+        EscalationDescription: "-",
+        EscalationTime: "-",
+        MileStatus: "-",
+        MileStatusTime: "-",
+        incompleteType: "-",
+        jobCancelType: "-",
+        SupervisorSts: "-",
+        SupervisorTiem: "-",
+        WGCrewSts: "-",
+        WGCrewTime: "-",
+        Truck1Sts: "-",
+        Truck1Time: "-",
+        Truck2Sts: "-",
+        Truck2Time: "-",
+        Truck3Sts: "-",
+        Truck3Time: "-",
+        SafetyWalkSts: "-",
+        SafetyWalkTime: "-",
+        EscalationOwner: "-",
+        AccessTracker: "-",
+      });
+    }
+    // console.log(index, responsibilityItem.length - 1);
+    if (index == responsibilityItem.length - 1) {
+      getEffectivedata();
+      getactionplan();
+      globalPlanArr = globalPlanArr.sort(function (a, b) {
+        return moment(a.deleteDate) > moment(b.deleteDate)
+          ? -1
+          : moment(a.deleteDate) < moment(b.deleteDate)
+          ? 1
+          : 0;
+      });
+      if (loggedinuser == "davor.salkanovic@atc-logistics.de") {
+        // let onlyMobilizationYes = responsibilityData.filter(
+        //   (yes) => yes.mobilization == "Yes"
+        // );
+        globalPlanArr.forEach(async (data) => {
+          if (
+            data.country == "France" ||
+            data.country == "Poland" ||
+            data.country == "Sweden" ||
+            data.country == "Italy"
+          ) {
+            onlyMobilizationYes.push(data);
+          } else {
+            if (data.mobilization == "Yes") {
+              onlyMobilizationYes.push(data);
+            }
+          }
+        });
+        allFilterOptions(onlyMobilizationYes);
+        setMasterData([...onlyMobilizationYes]);
+        setDuplicateData([...onlyMobilizationYes]);
+        filterFunction(FilterKey, onlyMobilizationYes);
+        // setDisplayData([...onlyMobilizationYes]);
+        // setExportExcel([...onlyMobilizationYes]);
+        // paginateFunction(1, [...onlyMobilizationYes]);
+        setLoader(false);
+      } else {
+        setMasterData([...globalPlanArr]);
+        setDuplicateData([...globalPlanArr]);
+        filterFunction(FilterKey, globalPlanArr);
+
+        // setDisplayData([...responsibilityData]);
+        // setExportExcel([...responsibilityData]);
+        // paginateFunction(1, [...responsibilityData]);
+        allFilterOptions(globalPlanArr);
+        setLoader(false);
+      }
+    }
+  };
+
   const getWrappingData = (country) => {
     spweb.lists
       .getByTitle(`Wrapping Up`)
@@ -4479,7 +5690,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     tempKey[key] = text;
 
     setFilterKey({ ...tempKey });
-
     filterFunction(tempKey, duplicateData);
   };
   const filterFunction = (tempKey, tempArr) => {
@@ -4633,6 +5843,17 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       });
       // setDuplicateData(tempArr);
     }
+    if (tempKey.isCabled != "All") {
+      if (tempKey.isCabled == "Yes") {
+        tempArr = tempArr.filter((arr) => {
+          return arr.wGCrewMemberData != "";
+        });
+      } else {
+        tempArr = tempArr.filter((arr) => {
+          return arr.wGCrewMemberData == "";
+        });
+      }
+    }
 
     if (tempKey.search) {
       tempArr = tempArr.filter(
@@ -4689,6 +5910,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       handSBriefingConductedby: { text: "All", key: "All" },
       edgeregion: "All",
       siteCode: { text: "All", key: "All" },
+      isCabled: "All",
     });
     setOtherOptions(false);
   };
@@ -4719,6 +5941,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       let arrExport = list;
       const workbook = new Excel.Workbook();
       const worksheet = workbook.addWorksheet("My Sheet");
+      const EscalationWorksheet = workbook.addWorksheet("Escalation_Sheet");
+
       worksheet.columns = [
         { header: "Country", key: "country", width: 25 },
         { header: "Jop Type", key: "joptype", width: 25 },
@@ -4726,7 +5950,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         { header: "Client", key: "client", width: 25 },
         { header: "Tracking No", key: "trackingNo", width: 25 },
         { header: "Supervisor", key: "supervisor", width: 25 },
-        { header: "DeleteDate", key: "deleteDate", width: 25 },
+        { header: "Delivery Date", key: "delDate", width: 25 },
         { header: "RackQuantity", key: "rackQuantity", width: 25 },
         {
           header: "DeployementSupervisor",
@@ -4856,6 +6080,12 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           width: 25,
         },
       ];
+      EscalationWorksheet.columns = [
+        { header: "Escalation", key: "escalation", width: 25 },
+        { header: "Escalation Owner", key: "escalateOwner", width: 25 },
+        { header: "Escalation Type", key: "escalationType", width: 25 },
+        { header: "Description", key: "description", width: 25 },
+      ];
       // arrExport.wgcrew.forEach((ev, index) => {
       //   worksheet.columns.push({
       //     header: "White Glove Crew on Delivery",
@@ -4882,7 +6112,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           client: item.client ? item.client : "-",
           trackingNo: item.trackingNo ? item.trackingNo.toString() : "-",
           supervisor: item.supervisor ? item.supervisor : "-",
-          deleteDate: item.deleteDate ? dateFormater(item.deleteDate) : "-",
+          delDate: item.deleteDate ? dateFormater(item.deleteDate) : "-",
           rackQuantity: item.rackQuantity ? item.rackQuantity.toString() : "-",
           deployementSupervisor: item.deployementSupervisor
             ? item.deployementSupervisor
@@ -4947,6 +6177,14 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           wGCrewMemberData: item.wGCrewMemberData,
           ReviewComments: item.ReviewComments ? item.ReviewComments : "-",
         });
+        if (item.EscalationType != "-") {
+          EscalationWorksheet.addRow({
+            escalationType: item.EscalationType,
+            escalation: item.Escalation,
+            escalateOwner: item.EscalationOwner,
+            description: item.EscalationDescription,
+          });
+        }
       });
 
       await [
@@ -5070,6 +6308,20 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           fgColor: { argb: "FFFFFF" },
         };
       });
+
+      await ["A1", "B1", "C1", "D1"].map((val) => {
+        EscalationWorksheet.getCell(val).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "C5D9F1" },
+        };
+        EscalationWorksheet.getCell(val).color = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFFFFF" },
+        };
+      });
+
       await workbook.xlsx
         .writeBuffer()
         .then((buffer) => {
@@ -5610,6 +6862,16 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                   )}
                 />
               </div>
+              <Dropdown
+                label="IsCabled"
+                selectedKey={FilterKey.isCabled}
+                onChange={(e, option) => {
+                  filterHandleFunction("isCabled", option["text"]);
+                }}
+                placeholder="Select an option"
+                options={dropDownOptions.isCabled}
+                styles={dropdownStyles}
+              />
               {/* <Dropdown
                 label="Driving sugges"
                 selectedKey={FilterKey.DrivingforwSuggestion}
