@@ -18,6 +18,7 @@ import {
   Overlay,
   Popup,
 } from "@fluentui/react";
+import { log } from "sp-pnp-js";
 let spweb = Web(
   "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
 );
@@ -29,9 +30,12 @@ export default function FieldQualityView(props): JSX.Element {
     {
       key: "column1",
       name: "DCI",
-      fieldName: "name",
+      // fieldName: "name",
       minWidth: 100,
       maxWidth: 150,
+      onRender: (item) => {
+        return <div>{item.Name}</div>;
+      },
     },
     {
       key: "column2",
@@ -39,6 +43,9 @@ export default function FieldQualityView(props): JSX.Element {
       fieldName: "first",
       minWidth: 100,
       maxWidth: 150,
+      onRender: (item) => {
+        return <div>{item.cableQty ? item.cableQty : "-"}</div>;
+      },
     },
     {
       key: "column3",
@@ -46,6 +53,9 @@ export default function FieldQualityView(props): JSX.Element {
       fieldName: "second",
       minWidth: 100,
       maxWidth: 150,
+      onRender: (item) => {
+        return <div>{item.boltedQty ? item.boltedQty : "-"}</div>;
+      },
     },
   ];
   var b = [];
@@ -169,37 +179,65 @@ export default function FieldQualityView(props): JSX.Element {
       .expand("TrackingNumberReference")
       .get()
       .then((Response) => {
-        debugger;
         var wGCrewMemberDataList = [];
+        let wgCrewMemberDataCountry: any[] = [];
+        let wgCrewMemberDetails = [];
+        let json = [];
+        let total: number = 0;
+        // totalPlanningItem.pu
         // Response.filter((data)=>{
         //   if(planningData.Id == data.TrackingNumberReferenceId){
         //     console.log(data);
 
         //   }
         // })
-        if (planningData.WGCrewMemberData) {
-          var splitBy = planningData.WGCrewMemberData;
-          var splitByArr = splitBy.split("~");
-          splitByArr
-            ? splitByArr.forEach((data) => {
-                let splitObj = data != "" ? data.split("|") : "";
-                splitObj != ""
-                  ? splitObj[0] != "" || splitObj[1] != "" || splitObj[2] != ""
-                    ? wGCrewMemberDataList.push({
-                        first: splitObj[0],
-                        name: splitObj[1],
-                        second: splitObj[2],
-                      })
-                    : ""
-                  : "";
-              })
-            : "";
-        } else {
-          wGCrewMemberDataList.push({
-            first: "-",
-            name: "-",
-            second: "-",
-          });
+        // if (planningData.WGCrewMemberData) {
+        //   var splitBy = planningData.WGCrewMemberData;
+        //   var splitByArr = splitBy.split("~");
+        //   splitByArr
+        //     ? splitByArr.forEach((data) => {
+        //         let splitObj = data != "" ? data.split("|") : "";
+        //         splitObj != ""
+        //           ? splitObj[0] != "" || splitObj[1] != "" || splitObj[2] != ""
+        //             ? wGCrewMemberDataList.push({
+        //                 first: splitObj[0],
+        //                 name: splitObj[1],
+        //                 second: splitObj[2],
+        //               })
+        //             : ""
+        //           : "";
+        //       })
+        //     : "";
+        // } else {
+        //   wGCrewMemberDataList.push({
+        //     first: "-",
+        //     name: "-",
+        //     second: "-",
+        //   });
+        // }
+        if (planningData.WGCrewMemberData != null) {
+          json = planningData.WGCrewMemberData.split("~");
+          if (json.length > 0) {
+            let split = json.map((arr) => {
+              return arr.split("|");
+            });
+            split.forEach((num) => {
+              if (split.length > 0 && num[0] != "") {
+                let count = num[0];
+                total = total + parseInt(count);
+                wgCrewMemberDetails.push({
+                  cableQty: num[0],
+                  Name: num[1],
+                  boltedQty: num[2],
+                });
+                wgCrewMemberDataCountry = [
+                  // total,
+                  // planningData.Country,
+                  wgCrewMemberDetails,
+                ];
+              }
+            });
+          }
         }
 
         let operationalData = Response.filter(
@@ -276,6 +314,7 @@ export default function FieldQualityView(props): JSX.Element {
             drivingforwSuggestionName: wrappingData.drivingforwSuggestionName,
             wgcrewMemberData: wGCrewMemberDataList,
             isDelete: planningData.isDelete,
+            RacksCabled: wgCrewMemberDetails ? wgCrewMemberDetails : [],
           };
           setSingleData({ ...userData });
         }
@@ -295,8 +334,6 @@ export default function FieldQualityView(props): JSX.Element {
       .expand("Supervisor,DeploymentSupervisor,DriverNameYes,wgcrew")
       .get()
       .then((Response) => {
-        console.log(Response);
-
         let planningData = Response;
         getResponsibitydata(planningData, wrappingData);
       })
@@ -315,7 +352,7 @@ export default function FieldQualityView(props): JSX.Element {
       .get()
       .then((Response) => {
         if (Response.length > 0) {
-          console.log(Response);
+          // console.log(Response);
           let wrappingListData = Response.filter(
             (data) => data.TrackingNumberReferenceId == props.Id
           );
@@ -950,11 +987,7 @@ export default function FieldQualityView(props): JSX.Element {
           </div>
           <div>
             <DetailsList
-              items={
-                getSingleData.wgcrewMemberData
-                  ? getSingleData.wgcrewMemberData
-                  : ""
-              }
+              items={getSingleData.RacksCabled ? getSingleData.RacksCabled : ""}
               columns={columns}
               setKey="set"
               layoutMode={DetailsListLayoutMode.justified}

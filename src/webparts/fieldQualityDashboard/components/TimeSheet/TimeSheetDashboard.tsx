@@ -732,7 +732,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
                 //     : "",
                 // });
               });
-              getEmployeeConfig(timeFilterData);
+              // getEmployeeConfig(timeFilterData);
               // timeSheetData = timeSheetData.sort(function (a, b) {
               //   return moment(a.date) > moment(b.date)
               //     ? -1
@@ -783,13 +783,54 @@ export default function TimeSheetDashboard(props): JSX.Element {
             setLoader(false);
           }
         });
-
+        getTimeSheetHistory(allCitys, timeFilterData);
         // console.log(Response);
       })
       .catch((err) => {
         console.log(err);
       });
   };
+
+  const getTimeSheetHistory = (allCitys, oldData) => {
+    spweb.lists
+      .getByTitle(`Timesheet_History`)
+      .items.top(5000)
+      .get()
+      .then((data) => {
+        // console.log(data);
+        allCitys.forEach((city) => {
+          let filterCitys = data.filter((res) => {
+            return res.City == city.City || res.OrginCity == city.City;
+          });
+          if (filterCitys.length > 0) {
+            filterCitys.forEach((citys) => {
+              if (
+                userPermissionCitys.findIndex((dd) => {
+                  return dd.city == citys.City;
+                }) == -1
+              ) {
+                userPermissionCitys.push({
+                  city: citys.City,
+                });
+              }
+            });
+            if (filterCitys.length > 0) {
+              filterCitys.forEach((data) => {
+                oldData.push(data);
+              });
+              getEmployeeConfig(oldData);
+            }
+          } else {
+            setLoader(false);
+          }
+        });
+        // console.log(oldData);
+      })
+      .catch((err) => {
+        console.log(err, "timeSheetHistory");
+      });
+  };
+
   const getAdmin = () => {
     spweb.siteGroups
       .getByName("ATC FQT Owners")
@@ -1558,7 +1599,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
 </ViewFields>
 <RowLimit Paged='TRUE'>5000</RowLimit>
 </View>`;
-
     spweb.lists
       .getByTitle(`Timesheet_History`)
       .renderListDataAsStream({
@@ -1915,7 +1955,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         console.log(err, "getCRMActivityData");
       });
   };
-  const arrCreator = (timesheetData, CRMData, nasterData) => {
+  const arrCreator = (timesheetData, CRMData, masterData) => {
     let compareTime = totalHoursFunction(
       timesheetData.StartTime,
       timesheetData.FinishTime
@@ -2086,7 +2126,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       });
     }
 
-    if (tempCount == nasterData.length) {
+    if (tempCount == masterData.length) {
       localArr = localArr.sort(function (a, b) {
         return moment(a.date) > moment(b.date)
           ? -1
