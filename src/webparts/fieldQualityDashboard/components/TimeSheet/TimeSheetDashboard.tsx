@@ -803,9 +803,10 @@ export default function TimeSheetDashboard(props): JSX.Element {
     spweb.lists
       .getByTitle(`Timesheet_History`)
       .items.top(5000)
+      .select("*,Name/Title,OvertimecommentsDrp")
+      .expand("Name")
       .get()
       .then((data) => {
-        // console.log(data);
         allCitys.forEach((city) => {
           let filterCitys = data.filter((res) => {
             return res.City == city.City || res.OrginCity == city.City;
@@ -829,7 +830,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
               getEmployeeConfig(oldData);
             }
           } else {
-            debugger;
             setLoader(false);
           }
         });
@@ -1292,17 +1292,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
           { header: "Conversation Type", key: "conversationType", width: 25 },
         ];
       }
-      // CRMworksheet.addRow({
-      //   perName: "Test",
-      //   email: "test@gmail.com",
-      //   telNo: "98989882",
-      //   cmts: "Comments",
-      //   name: "Test2",
-      //   date: "24/08/2023",
-      //   client: "Client",
-      //   meetingConducted: "Inperson",
-      //   conversationType: "Type",
-      // });
 
       await getUniqeWeek.forEach(async (week) => {
         var TotalHour = 0;
