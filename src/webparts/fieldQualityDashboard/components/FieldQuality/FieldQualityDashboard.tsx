@@ -4069,12 +4069,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
             i,
             responsibilityItem
           );
-          // if (planningDataOnly) {
-          //   arrGenrator(responsibilityItem[i], tempArr, responsibilityResponse);
-          // } else {
-          //   arrGenrator(responsibilityItem[i], [], responsibilityResponse);
-          // }
-          // console.log(tempArr);
         }
       })
       .catch((err) => {
@@ -5259,6 +5253,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       .get()
       .then((Response) => {
         let wrappingData: any[] = [];
+        onlyMobilizationYes = [];
+
         if (Response.length > 0) {
           Response.forEach((data) => {
             wrappingData.push({
@@ -6088,7 +6084,7 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       ];
       // arrExport.wgcrew.forEach((ev, index) => {
       //   worksheet.columns.push({
-      //     header: "White Glove Crew on Delivery",
+      //     header: "White Glove Crew on Delivery",arr
       //     key: "wgcrew" + index + 1,
       //     width: 25,
       //   });

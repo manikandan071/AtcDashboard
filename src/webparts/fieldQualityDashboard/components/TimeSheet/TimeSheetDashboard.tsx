@@ -543,11 +543,19 @@ export default function TimeSheetDashboard(props): JSX.Element {
       fieldName: "city",
       minWidth: 50,
       maxWidth: 70,
-      onRender: (item) => (
-        <>
-          <div>{item.city}</div>
-        </>
-      ),
+      onRender: (item) => {
+        let cityName: string = "";
+        if (item.city) {
+          cityName = item.city;
+        } else if (item.originCity) {
+          cityName = item.originCity;
+        }
+        return (
+          <>
+            <div>{cityName}</div>
+          </>
+        );
+      },
     },
     {
       key: "columns16",
@@ -779,12 +787,12 @@ export default function TimeSheetDashboard(props): JSX.Element {
             //   // timeSheetPaginateFunction(1, [...timeSheetData]);
             //   // setLoader(false);
             // }
-          } else {
-            setLoader(false);
           }
+          // else {
+          //   setLoader(false);
+          // }
         });
         getTimeSheetHistory(allCitys, timeFilterData);
-        // console.log(Response);
       })
       .catch((err) => {
         console.log(err);
@@ -821,6 +829,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
               getEmployeeConfig(oldData);
             }
           } else {
+            debugger;
             setLoader(false);
           }
         });
@@ -1076,6 +1085,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       tempArr = tempArr.filter((arr) => {
         return arr.mobilization == tempKey.mobilization;
       });
+
       setDuplicateData(tempArr);
     }
     if (tempKey.supervisor.key != "All") {
@@ -2091,7 +2101,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
           ? timesheetData.OvertimecommentsDrp
           : "",
         Country: timesheetData.Country ? timesheetData.Country : "",
-        originCity: timesheetData.OriginCity ? timesheetData.OriginCity : "",
+        originCity: timesheetData.OrginCity ? timesheetData.OrginCity : "",
         originCountry: timesheetData.OrginCountry
           ? timesheetData.OrginCountry
           : "",
@@ -2125,7 +2135,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
         CRMId: "-",
       });
     }
-
     if (tempCount == masterData.length) {
       localArr = localArr.sort(function (a, b) {
         return moment(a.date) > moment(b.date)
@@ -2148,6 +2157,16 @@ export default function TimeSheetDashboard(props): JSX.Element {
             data.city == "Milan"
           ) {
             onlyMobilizationYes.push(data);
+          } else if (
+            data.supervisor == "Mateusz Wielechowski" ||
+            data.supervisor == "Massimiliano Lorenzo Vantini" ||
+            data.supervisor == "Kemal Sijah" ||
+            data.supervisor == "Vinod Kumar Gopala" ||
+            data.supervisor == "Carlos Martin Mazuelos Bravo"
+          ) {
+            if (data.mobilization == "Yes" || data.mobilization == "No") {
+              onlyMobilizationYes.push(data);
+            }
           } else {
             if (data.mobilization == "Yes") {
               onlyMobilizationYes.push(data);
