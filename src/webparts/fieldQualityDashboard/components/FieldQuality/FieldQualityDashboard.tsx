@@ -4035,6 +4035,10 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
                 EffectiveCommunication: data.EffectiveCommunication,
                 WrappingUp: data.WrappingUp,
                 WrappingUpID: refWrappingDataObject.WrappingUpID,
+                PlannerName: data.PlannerName,
+                PlannerTime: data.PlannerSubmissionDateTime,
+                SupervisorAssign: data.SupervisorAssign,
+                PreCheckTime: data.PreCheckTime,
               });
             });
           }
@@ -4677,6 +4681,10 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
             : "-",
           EscalationOwner: item.EscalationOwner ? item.EscalationOwner : "-",
           AccessTracker: item.AccessTracker ? item.AccessTracker : "-",
+          PlannerName: plan.PlannerName,
+          PlannerTime: plan.PlannerTime,
+          SupervisorAssign: plan.SupervisorAssign,
+          PreCheckTime: plan.PreCheckTime,
         });
       });
     } else {
@@ -5189,6 +5197,10 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         SafetyWalkTime: "-",
         EscalationOwner: "-",
         AccessTracker: "-",
+        PlannerName: plan.PlannerName,
+        PlannerTime: plan.PlannerTime,
+        SupervisorAssign: plan.SupervisorAssign,
+        PreCheckTime: plan.PreCheckTime,
       });
     }
     // console.log(index, responsibilityItem.length - 1);
@@ -5254,7 +5266,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       .then((Response) => {
         let wrappingData: any[] = [];
         onlyMobilizationYes = [];
-
         if (Response.length > 0) {
           Response.forEach((data) => {
             wrappingData.push({
@@ -6075,6 +6086,26 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           key: "ReviewComments",
           width: 25,
         },
+        {
+          header: "Planner Name",
+          key: "PlannerNames",
+          width: 25,
+        },
+        {
+          header: "Planner Submission Time",
+          key: "PlannerTime",
+          width: 25,
+        },
+        {
+          header: "Supervisor Assign",
+          key: "SupervisorAssign",
+          width: 25,
+        },
+        {
+          header: "PreCheck Time",
+          key: "PreCheckTime",
+          width: 25,
+        },
       ];
       EscalationWorksheet.columns = [
         { header: "Escalation", key: "escalation", width: 25 },
@@ -6172,6 +6203,10 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           drivingforwSuggestionName: item.drivingforwSuggestionName,
           wGCrewMemberData: item.wGCrewMemberData,
           ReviewComments: item.ReviewComments ? item.ReviewComments : "-",
+          PlannerNames: item.PlannerName ? item.PlannerName : "-",
+          PlannerTime: item.PlannerTime ? item.PlannerTime : "-",
+          SupervisorAssign: item.SupervisorAssign ? item.SupervisorAssign : "-",
+          PreCheckTime: item.PreCheckTime ? item.PreCheckTime : "-",
         });
         if (item.EscalationType != "-") {
           EscalationWorksheet.addRow({
@@ -6226,6 +6261,11 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         "AN1",
         "AO1",
         "AP1",
+        "AQ1",
+        "AR1",
+        "AS1",
+        "AT1",
+        "AU1",
       ].map((key) => {
         worksheet.getCell(key).fill = {
           type: "pattern",
@@ -6297,6 +6337,11 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         "AN1",
         "AO1",
         "AP1",
+        "AQ1",
+        "AR1",
+        "AS1",
+        "AT1",
+        "AU1",
       ].map((key) => {
         worksheet.getCell(key).color = {
           type: "pattern",
