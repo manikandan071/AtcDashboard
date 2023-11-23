@@ -805,6 +805,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       .items.top(5000)
       .select("*,Name/Title,OvertimecommentsDrp")
       .expand("Name")
+      .orderBy("Modified", false)
       .get()
       .then((data) => {
         allCitys.forEach((city) => {
