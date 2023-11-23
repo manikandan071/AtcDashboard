@@ -1097,7 +1097,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
     }
     if (tempKey.city != "All") {
       tempArr = tempArr.filter((arr) => {
-        return arr.city == tempKey.city;
+        return arr.city == tempKey.city || arr.originCity == tempKey.city;
       });
       setDuplicateData(tempArr);
     }
