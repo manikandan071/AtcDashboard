@@ -35,6 +35,9 @@ import { log } from "sp-pnp-js";
 let spweb = Web(
   "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
 );
+// let spweb = Web(
+//   "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
+// );
 let currentUrl = window.location.href;
 let globalPlanArr: any[] = [];
 let responsibilityData: any[] = [];
