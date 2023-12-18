@@ -10,6 +10,7 @@ import { Folder } from "sp-pnp-js";
 
 let spweb = Web(
   "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 const iconClass = mergeStyles({
   fontSize: 15,
@@ -70,10 +71,12 @@ export default function TimeSheetView(props: any): JSX.Element {
       .expand("Name")
       .get()
       .then(async (Response) => {
-        console.log(Response);
+        // console.log(Response);
         let personalUrl =
           "/sites/PlanningOperations/Field%20Quality/Shared Documents/TimeSheet/" +
           moment(Response.Date).format("MMMM-YYYY") +
+          "/" +
+          Response.City +
           "/" +
           Response.Name.Title +
           "-" +
@@ -83,15 +86,17 @@ export default function TimeSheetView(props: any): JSX.Element {
           "/sites/PlanningOperations/Field%20Quality/Shared Documents/TimeSheet/" +
           moment(Response.Date).format("MMMM-YYYY") +
           "/" +
+          Response.City +
+          "/" +
           Response.Name.Title +
           "-" +
           moment(Response.Date).format("YYYY-MM-DD") +
           "/ATC Card";
-        await sp.web
+        await spweb
           .getFolderByServerRelativeUrl(personalUrl)
           .files.get()
           .then((data) => {
-            console.log(data);
+            // console.log(data);
             if (data.length > 0) {
               let personalCardFiles = [];
               data.forEach((file) => {

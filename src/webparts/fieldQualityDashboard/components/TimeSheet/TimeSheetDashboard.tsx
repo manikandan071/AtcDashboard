@@ -46,6 +46,9 @@ interface ICRM {
   MeetingCon: string;
   ConversationType: string;
 }
+interface IDirRep {
+  Email: string;
+}
 let localArr = [];
 let tempCount: number = 0;
 let spweb = Web(
@@ -55,10 +58,11 @@ let spweb = Web(
 
 let tsWeb = Web(
   "https://atclogisticsie.sharepoint.com/sites/FieldQualityDashboard"
+  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 let currentUrl = window.location.href;
 let EmployeeConfig: IEmployee[] = [];
-let CRMArr: ICRM[] = [];
+let directReportsArr: IDirRep[] = [];
 
 export default function TimeSheetDashboard(props): JSX.Element {
   let loggedinuser = props.spcontext.pageContext.user.email;
@@ -72,14 +76,14 @@ export default function TimeSheetDashboard(props): JSX.Element {
     status: [{ key: "All", text: "All" }],
     costCenter: [{ key: "All", text: "All" }],
     city: [{ key: "All", text: "All" }],
-    mobilization:
-      loggedinuser != "davor.salkanovic@atc-logistics.de"
-        ? [
-            { key: "All", text: "All" },
-            { key: "Yes", text: "Yes" },
-            { key: "No", text: "No" },
-          ]
-        : [{ key: "Yes", text: "Yes" }],
+    mobilization: [{ key: "All", text: "All" }],
+    // loggedinuser != "davor.salkanovic@atc-logistics.de"
+    //   ? [
+    //       { key: "All", text: "All" },
+    //       { key: "Yes", text: "Yes" },
+    //       { key: "No", text: "No" },
+    //     ]
+    //   : [{ key: "Yes", text: "Yes" }],
     ifOverTime: [
       { key: "All", text: "All" },
       { key: "Yes", text: "Yes" },
@@ -607,7 +611,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
   const [approvelJson, setApprovelJson] = useState([...approvelJSON]);
   const [appprovelId, setApprovelID] = useState(null);
   const [otherOptions, setOtherOptions] = useState(false);
-
   const dateFormater = (date: Date): string => {
     return !date ? "" : moment(date).format("DD/MM/YYYY");
   };
@@ -616,48 +619,42 @@ export default function TimeSheetDashboard(props): JSX.Element {
     window.open(currentUrl + "?TsID=" + item);
   }, []);
 
-  const onRenderRow =
-    // useCallback(
-    //   (row, defaultRender) => {
-    //     return cloneElement(defaultRender(row), {
-    //       onClick: () => onItemInvoked(row.item.Id),
-    //     });
-    //   },
-    //   [onItemInvoked]
-    // );
-    (row, defaultRender) => {
-      let props = row.item;
-      let classNameColor: string = "";
-      // EmployeeConfig.forEach((col) => {
-      //   if (col.Name == props.supervisor && col.Mobilization) {
-      //     classNameColor = "colorRow";
-      //   }
-      // });
-      return (
-        <a
-          // className={classNameColor}
-          href={currentUrl + "?TsID=" + row.Id}
-          target="blank"
-        >
-          {defaultRender(row)}
-        </a>
-      );
-    };
+  const onRenderRow = (row, defaultRender) => {
+    return (
+      <a
+        // className={classNameColor}
+        href={currentUrl + "?TsID=" + row.Id}
+        target="blank"
+        onClick={() => onItemInvoked(row.item.Id)}
+      >
+        {defaultRender(row)}
+      </a>
+    );
+  };
 
-  const getEmployeeList = (allCitys) => {
+  const getEmployeeList = (allCitys, directReportees) => {
     spweb.lists
       .getByTitle(`Timesheet`)
       .items.top(5000)
-      .select("*,Name/Title,OvertimecommentsDrp")
+      .select("*,Name/Title,Name/EMail,OvertimecommentsDrp")
       .orderBy("ID", false)
       .expand("Name")
       .get()
       .then((Response) => {
-        // console.log(Response[0].Id);
-        let timeSheetData = [];
         tempCount = 0;
         localArr = [];
         let timeFilterData = [];
+        let DirRepData = [];
+        // new changes
+        // get direct reports array
+        if (directReportees.length) {
+          DirRepData = Response.filter((rep) => {
+            return directReportees.some((per) => {
+              return per.Email == rep.Name.EMail;
+            });
+          });
+        }
+        // console.log(DirRepData);
         allCitys.forEach((city) => {
           let filterCitys = Response.filter((res) => {
             return res.City == city.City || res.OrginCity == city.City;
@@ -674,167 +671,113 @@ export default function TimeSheetDashboard(props): JSX.Element {
                 });
               }
             });
-
             if (filterCitys.length > 0) {
               filterCitys.forEach((data) => {
                 timeFilterData.push(data);
-                // let compareTime = totalHoursFunction(
-                //   data.StartTime,
-                //   data.FinishTime
-                // );
-                // timeSheetData.push({
-                //   Id: data.Id,
-                //   week: data.Week ? data.Week : "",
-                //   date: data.Date ? data.Date : "",
-                //   supervisor: data.Name ? data.Name.Title : "",
-                //   startTime: data.StartTime ? data.StartTime : "",
-                //   finishTime: data.FinishTime ? data.FinishTime : "",
-                //   overTime: data.OverTime ? data.OverTime : "",
-                //   ifOverTime: data.OverTime ? "Yes" : "No",
-                //   status: data.Status ? data.Status : "",
-                //   siteCode: data.SiteCode ? data.SiteCode : "",
-                //   mobilization: data.Mobilization ? data.Mobilization : "",
-                //   travel: data.Travel ? data.Travel : "",
-                //   city: data.City ? data.City : "",
-                //   costCenter: data.CostCenter ? data.CostCenter : "",
-                //   otherSiteCode: data.OtherSiteCode ? data.OtherSiteCode : "",
-                //   comments: data.Comments ? data.Comments : "",
-                //   reviewComments: data.ReviewComments
-                //     ? data.ReviewComments
-                //     : "",
-                //   kmWithPrivateCar: data.KmWithPrivateCar
-                //     ? data.KmWithPrivateCar
-                //     : "",
-                //   cityOverNight: data.CityOverNight ? data.CityOverNight : "",
-                //   travelWithCar: data.TravelWithCar ? data.TravelWithCar : "",
-                //   overTimeComments: data.OverTimeComments
-                //     ? data.OverTimeComments
-                //     : "",
-                //   expense: data.Expense ? data.Expense : "",
-                //   totalHours: compareTime ? compareTime : "",
-                //   AtcCreditAmount: data.TotalAtcCredit,
-                //   personalCardAmount: data.TotalPersonalCard,
-                //   json: data.Json,
-                //   isRefund: data.IsRefundApproved ? "Yes" : "No",
-                //   overtimecommentsDrp: data.OvertimecommentsDrp
-                //     ? data.OvertimecommentsDrp
-                //     : "",
-                //   Country: data.Country ? data.Country : "",
-                //   originCity: data.OrginCity ? data.OrginCity : "",
-                //   originCountry: data.OrginCountry ? data.OrginCountry : "",
-                //   CRMActivity: data.CRM_Activity ? data.CRM_Activity : "",
-                //   ProjectType:
-                //     data.ProjectType && data.ProjectType.length > 0
-                //       ? data.ProjectType[0]
-                //       : "",
-                //   ProjectType_2:
-                //     data.ProjectType && data.ProjectType.length >= 1
-                //       ? data.ProjectType[1]
-                //       : "",
-                //   ProjectType_3:
-                //     data.ProjectType && data.ProjectType.length >= 2
-                //       ? data.ProjectType[2]
-                //       : "",
-                //   ProjectTypeOthers: data.ProjectTypeOthers
-                //     ? data.ProjectTypeOthers
-                //     : "",
-                // });
               });
-              // getEmployeeConfig(timeFilterData);
-              // timeSheetData = timeSheetData.sort(function (a, b) {
-              //   return moment(a.date) > moment(b.date)
-              //     ? -1
-              //     : moment(a.date) < moment(b.date)
-              //     ? 1
-              //     : 0;
-              // });
             }
-            // if (loggedinuser == "davor.salkanovic@atc-logistics.de") {
-            //   // let onlyMobilizationYes = timeSheetData.filter(
-            //   //   (yes) => yes.mobilization == "Yes"
-            //   // );
-            //   let onlyMobilizationYes = [];
-            //   timeSheetData.forEach((data) => {
-            //     if (
-            //       data.city == "Paris" ||
-            //       data.city == "Gavle" ||
-            //       data.city == "Warsaw" ||
-            //       data.city == "Milan"
-            //     ) {
-            //       onlyMobilizationYes.push(data);
-            //     } else {
-            //       if (data.mobilization == "Yes") {
-            //         onlyMobilizationYes.push(data);
-            //       }
-            //     }
-            //   });
-            //   getEmployeeConfig(timeFilterData);
-            //   // getEmployeeConfig(onlyMobilizationYes);
-            //   // allFilterOptions([...onlyMobilizationYes]);
-            //   // setMasterData([...onlyMobilizationYes]);
-            //   // setDuplicateData([...onlyMobilizationYes]);
-            //   // setDisplayData([...onlyMobilizationYes]);
-            //   // setExportExcel([...onlyMobilizationYes]);
-            //   // timeSheetPaginateFunction(1, [...onlyMobilizationYes]);
-            //   // setLoader(false);
-            // } else {
-            //   getEmployeeConfig(timeFilterData);
-            //   // allFilterOptions([...timeSheetData]);
-            //   // setMasterData([...timeSheetData]);
-            //   // setDuplicateData([...timeSheetData]);
-            //   // setDisplayData([...timeSheetData]);
-            //   // setExportExcel([...timeSheetData]);
-            //   // timeSheetPaginateFunction(1, [...timeSheetData]);
-            //   // setLoader(false);
-            // }
           }
-          // else {
-          //   setLoader(false);
-          // }
         });
-        getTimeSheetHistory(allCitys, timeFilterData);
+        // new changes params
+        getTimeSheetHistory(
+          allCitys,
+          timeFilterData,
+          DirRepData,
+          directReportees
+        );
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  const getTimeSheetHistory = (allCitys, oldData) => {
+  const getTimeSheetHistory = (
+    allCitys,
+    oldData,
+    DirRepData,
+    directReportees
+  ) => {
     spweb.lists
       .getByTitle(`Timesheet_History`)
       .items.top(5000)
-      .select("*,Name/Title,OvertimecommentsDrp")
+      .select("*,Name/Title,Name/EMail,OvertimecommentsDrp")
       .expand("Name")
       .orderBy("Modified", false)
       .get()
       .then((data) => {
-        allCitys.forEach((city) => {
-          let filterCitys = data.filter((res) => {
-            return res.City == city.City || res.OrginCity == city.City;
+        // dont forgot
+        // new changes
+        let dirReportersArr = [];
+        if (data.length) {
+          dirReportersArr = data.filter((rep) => {
+            return directReportees.some((per) => {
+              return per.Email == rep.Name.EMail;
+            });
           });
-          if (filterCitys.length > 0) {
-            filterCitys.forEach((citys) => {
-              if (
-                userPermissionCitys.findIndex((dd) => {
-                  return dd.city == citys.City;
-                }) == -1
-              ) {
-                userPermissionCitys.push({
-                  city: citys.City,
-                });
-              }
+          dirReportersArr = [...dirReportersArr, ...DirRepData];
+          allCitys.forEach((city) => {
+            let filterCitys = data.filter((res) => {
+              return res.City == city.City || res.OrginCity == city.City;
             });
             if (filterCitys.length > 0) {
-              filterCitys.forEach((data) => {
-                oldData.push(data);
+              filterCitys.forEach((citys) => {
+                if (
+                  userPermissionCitys.findIndex((dd) => {
+                    return dd.city == citys.City;
+                  }) == -1
+                ) {
+                  userPermissionCitys.push({
+                    city: citys.City,
+                  });
+                }
               });
-              getEmployeeConfig(oldData);
+              if (filterCitys.length > 0) {
+                filterCitys.forEach((data) => {
+                  oldData.push(data);
+                });
+                // dont forgot
+                getEmployeeConfig(oldData, dirReportersArr);
+              }
+            } else {
+              setLoader(false);
             }
-          } else {
-            setLoader(false);
-          }
-        });
-        // console.log(oldData);
+            // new changes params
+          });
+          // getEmployeeConfig(oldData, dirReportersArr);
+        } else {
+          dirReportersArr = DirRepData;
+          getEmployeeConfig(oldData, dirReportersArr);
+        }
+        // console.log(dirReportersArr);
+        // allCitys.forEach((city) => {
+        //   let filterCitys = data.filter((res) => {
+        //     return res.City == city.City || res.OrginCity == city.City;
+        //   });
+        //   if (filterCitys.length > 0) {
+        //     filterCitys.forEach((citys) => {
+        //       if (
+        //         userPermissionCitys.findIndex((dd) => {
+        //           return dd.city == citys.City;
+        //         }) == -1
+        //       ) {
+        //         userPermissionCitys.push({
+        //           city: citys.City,
+        //         });
+        //       }
+        //     });
+        //     if (filterCitys.length > 0) {
+        //       filterCitys.forEach((data) => {
+        //         oldData.push(data);
+        //       });
+        //       // dont forgot
+        //       getEmployeeConfig(oldData, dirReportersArr);
+        //     }
+        //   } else {
+        //     setLoader(false);
+        //   }
+        //   // new changes params
+        // });
+        // getEmployeeConfig(oldData, dirReportersArr);
       })
       .catch((err) => {
         console.log(err, "timeSheetHistory");
@@ -867,7 +810,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
                   }
                 });
               }
-              getEmployeeList(allCitys);
+              // new changes
+              getDirReports(allCitys);
             })
 
             .catch((err) => {
@@ -892,9 +836,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
                   }
                 });
               }
-              getEmployeeList(allCitys);
+              getDirReports(allCitys);
             })
-
             .catch((err) => {
               console.log(err);
             });
@@ -916,6 +859,32 @@ export default function TimeSheetDashboard(props): JSX.Element {
       })
       .catch((err) => {
         console.log(err);
+      });
+  };
+  // new changes
+  // get direct reportes using graph
+  const getDirReports = async (allCitys) => {
+    await props.spcontext._msGraphClientFactory
+      .getClient()
+      .then(async (client: any) => {
+        await client
+          .api("/me/directReports")
+          .top(999)
+          .get()
+          .then(async (member) => {
+            if (member.value.length) {
+              await member.value.forEach(async (per) => {
+                directReportsArr.push({
+                  Email: per.mail,
+                });
+              });
+            }
+            // new changes params
+            await getEmployeeList(allCitys, directReportsArr);
+          });
+      })
+      .catch((err) => {
+        console.log(err, "getATCTransportMembers");
       });
   };
   useEffect(() => {
@@ -996,6 +965,17 @@ export default function TimeSheetDashboard(props): JSX.Element {
         });
       }
       if (
+        _data.mobilization &&
+        drpDownForFilter.mobilization.findIndex((dd) => {
+          return dd.key == _data.mobilization;
+        }) == -1
+      ) {
+        drpDownForFilter.mobilization.push({
+          key: _data.mobilization,
+          text: _data.mobilization,
+        });
+      }
+      if (
         _data.supervisor &&
         drpDownForFilter.supervisor.findIndex((dd) => {
           return dd.key == _data.supervisor;
@@ -1070,6 +1050,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         }
       }
     });
+    debugger;
   };
   const filterHandleFunction = (key, text): void => {
     let tempArr = [...duplicateData];
@@ -1086,7 +1067,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
       tempArr = tempArr.filter((arr) => {
         return arr.mobilization == tempKey.mobilization;
       });
-
       setDuplicateData(tempArr);
     }
     if (tempKey.supervisor.key != "All") {
@@ -1167,6 +1147,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
     setExportExcel(masterData);
     setDuplicateData(masterData);
     setDeliveryStartDate(null);
+
     setDeliveryEndDate(null);
     setFilterKey({
       year: "All",
@@ -1903,11 +1884,12 @@ export default function TimeSheetDashboard(props): JSX.Element {
       approvelComment.style.color = "red";
     }
   };
-  const getEmployeeConfig = (TimesheetData) => {
+  const getEmployeeConfig = (TimesheetData, dirReportersArr) => {
     spweb.lists
       .getByTitle("EmployeeConfig")
       .items.select("*,Employee/Title,Employee/EMail")
       .expand("Employee")
+      .orderBy("Modified", false)
       // .filter(`EmployeeId eq 457`)
       .top(5000)
       .get()
@@ -1919,21 +1901,51 @@ export default function TimeSheetDashboard(props): JSX.Element {
             Mobilization: users.IsMobilization,
           });
         });
-        getCRMActivityData(TimesheetData);
+        // new changes params
+        getCRMActivityData(TimesheetData, dirReportersArr);
       })
       .catch((err) => {
         console.log(err, "getEmployeeConfig");
       });
   };
-  const getCRMActivityData = (TimesheetData) => {
+  const getCRMActivityData = (TimesheetData, dirReportersArr) => {
     spweb.lists
       .getByTitle("TMST_CRM_ActivityDetails")
       .items.top(5000)
       .select("*,Name/Title")
       .expand("Name")
+      .orderBy("Modified", false)
+      .top(5000)
       .get()
       .then((res: any) => {
-        let tempLocalArr = TimesheetData;
+        // new changes start
+        let masterTimesheetArr = [];
+        if (dirReportersArr.length) {
+          dirReportersArr.forEach((val) => {
+            TimesheetData.push(val);
+          });
+        }
+
+        if (TimesheetData.length) {
+          masterTimesheetArr = TimesheetData.filter(
+            (item, index) => TimesheetData.indexOf(item) === index
+          );
+          // TimesheetData.forEach((data) => {
+          //   if (
+          //     data.Id &&
+          //     masterTimesheetArr.findIndex((findId) => {
+          //       return findId.Id == data.Id;
+          //     }) == -1
+          //   ) {
+          //     masterTimesheetArr.push(data);
+          //   }
+          // });
+        } else {
+          masterTimesheetArr = dirReportersArr;
+        }
+        let tempLocalArr = masterTimesheetArr;
+        // new changes end
+        // let tempLocalArr = TimesheetData;
         for (let i = 0; i < tempLocalArr.length; i++) {
           let _isValueId: boolean = false;
           for (let j = 0; j < res.length; j++) {
@@ -2134,6 +2146,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
           : 0;
       });
 
+      // if (loggedinuser == "admin.sharepoint@atc-logistics.ie") {
       if (loggedinuser == "davor.salkanovic@atc-logistics.de") {
         // let onlyMobilizationYes = timeSheetData.filter(
         //   (yes) => yes.mobilization == "Yes"
