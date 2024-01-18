@@ -30,7 +30,6 @@ import Pagination from "@material-ui/lab/Pagination";
 import { TextField } from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-import { log } from "sp-pnp-js";
 
 let spweb = Web(
   "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"

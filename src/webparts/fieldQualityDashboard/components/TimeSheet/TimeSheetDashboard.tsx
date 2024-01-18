@@ -4,7 +4,7 @@ import * as Excel from "exceljs/dist/exceljs.min.js";
 import * as FileSaver from "file-saver";
 import CustomLoader from "../Loder/CustomLoder";
 import { Web } from "@pnp/sp/presets/all";
-import { ITextFieldStyles, Icon } from "@fluentui/react";
+import { Icon } from "@fluentui/react";
 import styles from "../FieldQualityDashboard.module.scss";
 import { useEffect, useState, useCallback, cloneElement } from "react";
 import {
@@ -28,7 +28,6 @@ import Pagination from "@material-ui/lab/Pagination";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { TextField } from "@material-ui/core";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
-import { log } from "sp-pnp-js";
 
 interface IEmployee {
   Email: string;
@@ -72,7 +71,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
   let drpDownForFilter = {
     year: [{ key: "All", text: "All" }],
     week: [{ key: "All", text: "All" }],
-    supervisor: [{ key: "All", text: "All" }],
+    // supervisor: [{ key: "All", text: "All" }],
+    supervisor: [],
     status: [{ key: "All", text: "All" }],
     costCenter: [{ key: "All", text: "All" }],
     city: [{ key: "All", text: "All" }],
@@ -100,7 +100,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
   let FilterItem = {
     year: "All",
     week: "All",
-    supervisor: { text: "All", key: "All" },
+    // supervisor: [{ text: "All", key: "All" }],
+    supervisor: [],
     mobilization:
       loggedinuser != "davor.salkanovic@atc-logistics.de" ? "All" : "Yes",
     ifOverTime: "All",
@@ -1050,7 +1051,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
         }
       }
     });
-    debugger;
   };
   const filterHandleFunction = (key, text): void => {
     let tempArr = [...duplicateData];
@@ -1069,9 +1069,10 @@ export default function TimeSheetDashboard(props): JSX.Element {
       });
       setDuplicateData(tempArr);
     }
-    if (tempKey.supervisor.key != "All") {
+    if (tempKey.supervisor.length) {
       tempArr = tempArr.filter((arr) => {
-        return arr.supervisor == tempKey.supervisor.key;
+        return tempKey.supervisor.some((val) => arr.supervisor == val.key);
+        // return arr.supervisor == tempKey.supervisor;
       });
       setDuplicateData(tempArr);
     }
@@ -1152,7 +1153,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
     setFilterKey({
       year: "All",
       status: "All",
-      supervisor: { text: "All", key: "All" },
+      supervisor: [{ text: "All", key: "All" }],
       mobilization:
         loggedinuser != "davor.salkanovic@atc-logistics.de" ? "All" : "Yes",
       ifOverTime: "All",
@@ -2760,21 +2761,25 @@ export default function TimeSheetDashboard(props): JSX.Element {
             <Autocomplete
               id="combo-box-demo"
               options={dropDownOptions.supervisor}
+              className={styles.autoComplete && "comboBox"}
               ListboxProps={{ style: { fontSize: 12 } }}
               value={FilterKey.supervisor}
               getOptionLabel={(option) => option.text}
               style={{ width: "100%", padding: "5px 20px 0px 0px" }}
+              multiple={true}
               onChange={(e, value) => {
                 filterHandleFunction("supervisor", value);
               }}
-              onBlur={() => {
-                FilterKey.supervisor
-                  ? null
-                  : filterHandleFunction("supervisor", {
-                      text: "All",
-                      key: "All",
-                    });
-              }}
+              // onBlur={() => {
+              //   FilterKey.supervisor
+              //     ? null
+              //     : filterHandleFunction("supervisor", [
+              //         // {
+              //         //   text: "All",
+              //         //   key: "All",
+              //         // },
+              //       ]);
+              // }}
               inputValue={supervisor}
               onInputChange={(event, newInputValue: any) => {
                 setSupervisor(newInputValue);
