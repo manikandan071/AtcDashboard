@@ -5205,7 +5205,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
         PreCheckTime: plan.PreCheckTime,
       });
     }
-    // console.log(index, responsibilityItem.length - 1);
     if (index == responsibilityItem.length - 1) {
       getEffectivedata();
       getactionplan();
