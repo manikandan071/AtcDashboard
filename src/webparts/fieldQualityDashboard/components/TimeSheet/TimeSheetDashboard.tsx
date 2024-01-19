@@ -2756,12 +2756,12 @@ export default function TimeSheetDashboard(props): JSX.Element {
             options={dropDownOptions.week}
             styles={dropdownStyles}
           />
-          <div style={{ margin: "5px 22px 0px 0px", width: "9%" }}>
+          <div style={{ margin: "5px 22px 0px 0px", width: "24%" }}>
             <span style={{ fontWeight: "500" }}>Supervisor</span>
             <Autocomplete
               id="combo-box-demo"
               options={dropDownOptions.supervisor}
-              className={styles.autoComplete && "comboBox"}
+              className={"comboBox"}
               ListboxProps={{ style: { fontSize: 12 } }}
               value={FilterKey.supervisor}
               getOptionLabel={(option) => option.text}
@@ -2861,16 +2861,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
             options={dropDownOptions.travel}
             styles={dropdownStyles}
           /> */}
-          <Dropdown
-            label="Over time reason"
-            selectedKey={FilterKey.overTimeReason}
-            onChange={(e, option) => {
-              filterHandleFunction("overTimeReason", option["text"]);
-            }}
-            placeholder="Select an option"
-            options={dropDownOptions.overTimeReason}
-            styles={dropdownStyles}
-          />
           <IconButton
             style={{ margin: "27px 10px 0px 0px" }}
             iconProps={Equalizer}
@@ -2901,6 +2891,16 @@ export default function TimeSheetDashboard(props): JSX.Element {
         </div>
         {otherOptions ? (
           <div className={styles.filtersection}>
+            <Dropdown
+              label="Over time reason"
+              selectedKey={FilterKey.overTimeReason}
+              onChange={(e, option) => {
+                filterHandleFunction("overTimeReason", option["text"]);
+              }}
+              placeholder="Select an option"
+              options={dropDownOptions.overTimeReason}
+              styles={dropdownStyles}
+            />
             <Dropdown
               label="Tracking"
               selectedKey={FilterKey.overTimeReason}
