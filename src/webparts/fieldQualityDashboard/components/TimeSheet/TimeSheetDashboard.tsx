@@ -2195,7 +2195,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
         setLoader(false);
       }
     }
-    // console.log(localArr);
   };
 
   return loader ? (
@@ -2756,7 +2755,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
             options={dropDownOptions.week}
             styles={dropdownStyles}
           />
-          <div style={{ margin: "5px 22px 0px 0px", width: "24%" }}>
+          <div style={{ margin: "5px 22px 0px 0px", width: "30%" }}>
             <span style={{ fontWeight: "500" }}>Supervisor</span>
             <Autocomplete
               id="combo-box-demo"
@@ -2861,6 +2860,44 @@ export default function TimeSheetDashboard(props): JSX.Element {
             options={dropDownOptions.travel}
             styles={dropdownStyles}
           /> */}
+          {otherOptions ? (
+            <>
+              <Dropdown
+                label="Over time reason"
+                selectedKey={FilterKey.overTimeReason}
+                onChange={(e, option) => {
+                  filterHandleFunction("overTimeReason", option["text"]);
+                }}
+                placeholder="Select an option"
+                options={dropDownOptions.overTimeReason}
+                styles={dropdownStyles}
+              />
+              <Dropdown
+                label="Tracking"
+                selectedKey={FilterKey.overTimeReason}
+                onChange={(e, option) => {
+                  filterHandleFunction("overTimeReason", option["text"]);
+                }}
+                placeholder="Select an option"
+                options={dropDownOptions.overTimeReason}
+                styles={dropdownStyles}
+              />
+              {/* {otherOptions ? (
+                <IconButton
+                  className={styles.resetbtn}
+                  style={{ marginTop: "27px" }}
+                  iconProps={Refresh}
+                  title="Refresh"
+                  ariaLabel="Refresh"
+                  onClick={() => resetFilterOptions()}
+                />
+              ) : (
+                ""
+              )} */}
+            </>
+          ) : (
+            ""
+          )}
           <IconButton
             style={{ margin: "27px 10px 0px 0px" }}
             iconProps={Equalizer}
@@ -2876,20 +2913,17 @@ export default function TimeSheetDashboard(props): JSX.Element {
             ariaLabel="Filter reset"
             onClick={() => resetFilterOptions()}
           /> */}
-          {!otherOptions ? (
-            <IconButton
-              className={styles.resetbtn}
-              style={{ marginTop: "27px" }}
-              iconProps={Refresh}
-              title="Filter reset"
-              ariaLabel="Filter reset"
-              onClick={() => resetFilterOptions()}
-            />
-          ) : (
-            ""
-          )}
+
+          <IconButton
+            className={styles.resetbtn}
+            style={{ marginTop: "27px" }}
+            iconProps={Refresh}
+            title="Filter reset"
+            ariaLabel="Filter reset"
+            onClick={() => resetFilterOptions()}
+          />
         </div>
-        {otherOptions ? (
+        {/* {otherOptions ? (
           <div className={styles.filtersection}>
             <Dropdown
               label="Over time reason"
@@ -2926,7 +2960,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
           </div>
         ) : (
           ""
-        )}
+        )} */}
       </div>
       <div>
         <DetailsList
