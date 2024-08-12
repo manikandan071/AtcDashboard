@@ -637,11 +637,30 @@ export default function TimeSheetDashboard(props): JSX.Element {
     spweb.lists
       .getByTitle(`Timesheet`)
       .items.top(5000)
-      .select("*,Name/Title,Name/EMail,OvertimecommentsDrp")
+      .select(
+        "*,Name/Title,Name/EMail,OvertimecommentsDrp,OneToOneMeetingParticipants/Title"
+      )
+
+      .expand("Name,OneToOneMeetingParticipants")
       .orderBy("ID", false)
-      .expand("Name")
-      .get()
-      .then((Response) => {
+      // .get()
+      .getPaged()
+      .then(async (Response) => {
+        let res = [...Response.results];
+        let nextRef = Response.hasNext;
+        // get more than 5000 data
+        while (nextRef) {
+          await Response.getNext()
+            .then(async (_res) => {
+              Response = _res;
+              await res.push(..._res.results);
+              nextRef = _res.hasNext;
+            })
+            .catch((err) => {
+              console.log(err, "getEmployeeList");
+            });
+        }
+
         tempCount = 0;
         localArr = [];
         let timeFilterData = [];
@@ -649,7 +668,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         // new changes
         // get direct reports array
         if (directReportees.length) {
-          DirRepData = Response.filter((rep) => {
+          DirRepData = res.filter((rep) => {
             return directReportees.some((per) => {
               return per.Email == rep.Name.EMail;
             });
@@ -657,8 +676,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
         }
         // console.log(DirRepData);
         allCitys.forEach((city) => {
-          let filterCitys = Response.filter((res) => {
-            return res.City == city.City || res.OrginCity == city.City;
+          let filterCitys = res.filter((filres) => {
+            return filres.City == city.City || filres.OrginCity == city.City;
           });
           if (filterCitys.length > 0) {
             filterCitys.forEach((citys) => {
@@ -700,24 +719,43 @@ export default function TimeSheetDashboard(props): JSX.Element {
   ) => {
     spweb.lists
       .getByTitle(`Timesheet_History`)
-      .items.top(5000)
-      .select("*,Name/Title,Name/EMail,OvertimecommentsDrp")
+      .items.select("*,Name/Title,Name/EMail,OvertimecommentsDrp")
       .expand("Name")
       .orderBy("Modified", false)
-      .get()
-      .then((data) => {
+      .top(5000)
+      // .get()
+      .getPaged()
+      .then(async (data) => {
+        // get more than 5000 items
+        let res = [...data.results];
+        let nextRef = data.hasNext;
+        // get more than 5000 data
+        while (nextRef) {
+          await data
+            .getNext()
+            .then(async (_res) => {
+              data = _res;
+              await res.push(..._res.results);
+              nextRef = _res.hasNext;
+            })
+            .catch((err) => {
+              console.log(err, "getTimeSheetHistory");
+            });
+        }
+
         // dont forgot
         // new changes
+
         let dirReportersArr = [];
-        if (data.length) {
-          dirReportersArr = data.filter((rep) => {
+        if (res.length) {
+          dirReportersArr = res.filter((rep) => {
             return directReportees.some((per) => {
               return per.Email == rep.Name.EMail;
             });
           });
           dirReportersArr = [...dirReportersArr, ...DirRepData];
           allCitys.forEach((city) => {
-            let filterCitys = data.filter((res) => {
+            let filterCitys = res.filter((res) => {
               return res.City == city.City || res.OrginCity == city.City;
             });
             if (filterCitys.length > 0) {
@@ -1261,6 +1299,13 @@ export default function TimeSheetDashboard(props): JSX.Element {
         { header: "Project Type3", key: "ProjType3", width: 25 },
         // { header: "Project Type4", key: "ProjTyp4", width: 25 },
         { header: "Project Type Others", key: "ProjeTypeOthers", width: 25 },
+        { header: "One To One Meeting", key: "oneToOneMeeting", width: 25 },
+        {
+          header: "One To One Meeting Participants",
+          key: "meetingPerson",
+          width: 25,
+        },
+        { header: "OnCall", key: "onCall", width: 25 },
       ];
       if (crmFlag) {
         CRMworksheet.columns = [
@@ -1292,7 +1337,21 @@ export default function TimeSheetDashboard(props): JSX.Element {
         //   return 0;
         // };
         // filterWeeklyData = filterWeeklyData.sort(sortFunction);
-        await filterWeeklyData.forEach((item, index) => {
+        await filterWeeklyData.forEach(async (item, index) => {
+          let _tempOneToOneMeetingPerson: string = "";
+          if (item.oneToOneMeetingPerson.length > 1) {
+            await item.oneToOneMeetingPerson.forEach((_per: any, i: number) => {
+              if (i == item.oneToOneMeetingPerson.length - 1) {
+                _tempOneToOneMeetingPerson = _tempOneToOneMeetingPerson + _per;
+              } else {
+                _tempOneToOneMeetingPerson =
+                  _tempOneToOneMeetingPerson + _per + ",";
+              }
+            });
+          } else {
+            _tempOneToOneMeetingPerson = item.oneToOneMeetingPerson[0];
+          }
+
           if (item.totalHours != "") {
             let timeSplit = item.totalHours.split(":");
             TotalHour += parseInt(timeSplit[0]);
@@ -1361,6 +1420,11 @@ export default function TimeSheetDashboard(props): JSX.Element {
             ProjeTypeOthers: item.ProjectTypeOthers
               ? item.ProjectTypeOthers
               : "-",
+            oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+            meetingPerson: _tempOneToOneMeetingPerson
+              ? _tempOneToOneMeetingPerson
+              : "-",
+            onCall: item.onCallVisible ? "Yes" : "No",
           });
           EmployeeConfig.forEach((col) => {
             if (col.Name == item.supervisor && col.Mobilization) {
@@ -1487,6 +1551,9 @@ export default function TimeSheetDashboard(props): JSX.Element {
         "AF1",
         "AG1",
         "AH1",
+        "AI1",
+        "AJ1",
+        "AK1",
       ].map((key) => {
         worksheet.getCell(key).fill = {
           type: "pattern",
@@ -1529,6 +1596,9 @@ export default function TimeSheetDashboard(props): JSX.Element {
         "AF1",
         "AG1",
         "AH1",
+        "AI1",
+        "AJ1",
+        "AK1",
       ].map((key) => {
         worksheet.getCell(key).color = {
           type: "pattern",
@@ -1912,10 +1982,9 @@ export default function TimeSheetDashboard(props): JSX.Element {
   const getCRMActivityData = (TimesheetData, dirReportersArr) => {
     spweb.lists
       .getByTitle("TMST_CRM_ActivityDetails")
-      .items.top(5000)
-      .select("*,Name/Title")
+      .items.select("*,Name/Title")
       .expand("Name")
-      .orderBy("Modified", false)
+      .orderBy("ID", false)
       .top(5000)
       .get()
       .then((res: any) => {
@@ -2055,6 +2124,13 @@ export default function TimeSheetDashboard(props): JSX.Element {
           ? CRMData.ConversationType
           : "-",
         CRMId: CRMData.TMST_CRM_IDId ? CRMData.TMST_CRM_IDId : "-",
+        oneTOoneMeeting: timesheetData.OneToOneMeeting,
+        oneToOneMeetingPerson: timesheetData.OneToOneMeetingParticipants
+          ? timesheetData.OneToOneMeetingParticipants.map(
+              (_person: any) => _person.Title
+            )
+          : [],
+        onCallVisible: timesheetData.OnCallVisible,
       });
     } else {
       tempCount++;
@@ -2136,6 +2212,13 @@ export default function TimeSheetDashboard(props): JSX.Element {
         MeetingCon: "-",
         ConversationType: "-",
         CRMId: "-",
+        oneTOoneMeeting: timesheetData.OneToOneMeeting,
+        oneToOneMeetingPerson: timesheetData.OneToOneMeetingParticipants
+          ? timesheetData.OneToOneMeetingParticipants.map(
+              (_person: any) => _person.Title
+            )
+          : [],
+        onCallVisible: timesheetData.OnCallVisible,
       });
     }
     if (tempCount == masterData.length) {
@@ -2703,7 +2786,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
           <DefaultButton
             disabled={onlyTimeSheetPermission.length > 0 ? true : false}
             text={"Field Quality"}
-            onClick={() => props.DashboardChangeFun(true)}
+            onClick={() => props.DashboardChangeFun("fieldQualityDashboard")}
+            // onClick={() => props.DashboardChangeFun(true)}
             style={{
               backgroundColor: "#dacbcc8c",
               color: "#a83037",
@@ -2718,6 +2802,15 @@ export default function TimeSheetDashboard(props): JSX.Element {
               border: "none",
             }}
           />
+          {/* <DefaultButton
+            text={"Travel Expense"}
+            onClick={() => props.DashboardChangeFun("Travel Expense")}
+            style={{
+              backgroundColor: "#dacbcc8c",
+              color: "#a83037",
+              border: "none",
+            }}
+          /> */}
         </div>
         <div>
           {/* <DefaultButton
@@ -2840,64 +2933,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
             options={dropDownOptions.mobilization}
             styles={dropdownStyles}
           />
-          <Dropdown
-            label="Over time"
-            selectedKey={FilterKey.ifOverTime}
-            onChange={(e, option) => {
-              filterHandleFunction("ifOverTime", option["text"]);
-            }}
-            placeholder="Select an option"
-            options={dropDownOptions.ifOverTime}
-            styles={dropdownStyles}
-          />
-          {/* <Dropdown
-            label="Travel"
-            selectedKey={FilterKey.travel}
-            onChange={(e, option) => {
-              filterHandleFunction("travel", option["text"]);
-            }}
-            placeholder="Select an option"
-            options={dropDownOptions.travel}
-            styles={dropdownStyles}
-          /> */}
-          {otherOptions ? (
-            <>
-              <Dropdown
-                label="Over time reason"
-                selectedKey={FilterKey.overTimeReason}
-                onChange={(e, option) => {
-                  filterHandleFunction("overTimeReason", option["text"]);
-                }}
-                placeholder="Select an option"
-                options={dropDownOptions.overTimeReason}
-                styles={dropdownStyles}
-              />
-              <Dropdown
-                label="Tracking"
-                selectedKey={FilterKey.overTimeReason}
-                onChange={(e, option) => {
-                  filterHandleFunction("overTimeReason", option["text"]);
-                }}
-                placeholder="Select an option"
-                options={dropDownOptions.overTimeReason}
-                styles={dropdownStyles}
-              />
-              {/* {otherOptions ? (
-                <IconButton
-                  className={styles.resetbtn}
-                  style={{ marginTop: "27px" }}
-                  iconProps={Refresh}
-                  title="Refresh"
-                  ariaLabel="Refresh"
-                  onClick={() => resetFilterOptions()}
-                />
-              ) : (
-                ""
-              )} */}
-            </>
-          ) : (
-            ""
-          )}
           <IconButton
             style={{ margin: "27px 10px 0px 0px" }}
             iconProps={Equalizer}
@@ -2913,18 +2948,29 @@ export default function TimeSheetDashboard(props): JSX.Element {
             ariaLabel="Filter reset"
             onClick={() => resetFilterOptions()}
           /> */}
-
-          <IconButton
-            className={styles.resetbtn}
-            style={{ marginTop: "27px" }}
-            iconProps={Refresh}
-            title="Filter reset"
-            ariaLabel="Filter reset"
-            onClick={() => resetFilterOptions()}
-          />
+          {!otherOptions && (
+            <IconButton
+              className={styles.resetbtn}
+              style={{ marginTop: "27px" }}
+              iconProps={Refresh}
+              title="Filter reset"
+              ariaLabel="Filter reset"
+              onClick={() => resetFilterOptions()}
+            />
+          )}
         </div>
-        {/* {otherOptions ? (
+        {otherOptions ? (
           <div className={styles.filtersection}>
+            <Dropdown
+              label="Over time"
+              selectedKey={FilterKey.ifOverTime}
+              onChange={(e, option) => {
+                filterHandleFunction("ifOverTime", option["text"]);
+              }}
+              placeholder="Select an option"
+              options={dropDownOptions.ifOverTime}
+              styles={dropdownStyles}
+            />
             <Dropdown
               label="Over time reason"
               selectedKey={FilterKey.overTimeReason}
@@ -2960,7 +3006,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
           </div>
         ) : (
           ""
-        )} */}
+        )}
       </div>
       <div>
         <DetailsList
