@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as moment from "moment";
-import { IFile, Web } from "@pnp/sp/presets/all";
+import { IFile, sp, Web } from "@pnp/sp/presets/all";
 import { TextField, ITextFieldStyles, Icon } from "@fluentui/react";
 import styles from "../FieldQualityDashboard.module.scss";
 import { useEffect, useState } from "react";
@@ -277,29 +277,38 @@ export default function FieldQualityView(props): JSX.Element {
       });
   };
   const getRacksCabledAttachements = (planningData, wrappingData): void => {
+    let siteUrl: string = "";
     spweb
-      .getFolderByServerRelativeUrl(
-        `${props.spcontext.pageContext.web.serverRelativeUrl}/Shared Documents/Field Quality Tool/${planningData.Client}/${planningData.trackingNumber}/CablingReport`
-        // `${props.spcontext.pageContext.web.serverRelativeUrl}/Shared Documents/Field Quality Tool/MSFT/4300114357/CablingReport`
-      )
-      .files.get()
-      .then((res: any) => {
-        let _tempfiles: IFiles[] = [];
-        if (res.length) {
-          res.forEach((_item: any, i: number) => {
-            _tempfiles.push({
-              filename: _item.Name ? _item.Name : "",
-              url: _item.ServerRelativeUrl ? _item.ServerRelativeUrl : "",
-            });
-            if (res.length - 1 == i) {
-              getResponsibitydata(planningData, wrappingData, [..._tempfiles]);
+      .get()
+      .then((w) => {
+        siteUrl = w.ServerRelativeUrl;
+        spweb
+          .getFolderByServerRelativeUrl(
+            `${siteUrl}/Shared Documents/Field Quality Tool/${planningData.Client}/${planningData.trackingNumber}/CablingReport`
+            // `${props.spcontext.pageContext.web.serverRelativeUrl}/Shared Documents/Field Quality Tool/MSFT/40000509/CablingReport`
+          )
+          .files.get()
+          .then((res: any) => {
+            let _tempfiles: IFiles[] = [];
+            if (res.length) {
+              res.forEach((_item: any, i: number) => {
+                _tempfiles.push({
+                  filename: _item.Name ? _item.Name : "",
+                  url: _item.ServerRelativeUrl ? _item.ServerRelativeUrl : "",
+                });
+                if (res.length - 1 == i) {
+                  getResponsibitydata(planningData, wrappingData, [
+                    ..._tempfiles,
+                  ]);
+                }
+              });
+            } else {
+              getResponsibitydata(planningData, wrappingData, _tempfiles);
             }
-          });
-        } else {
-          getResponsibitydata(planningData, wrappingData, _tempfiles);
-        }
+          })
+          .catch((err) => console.log(err, "getRacksCabledAttachements"));
       })
-      .catch((err) => console.log(err, "getRacksCabledAttachements"));
+      .catch((err) => console.log(err, "get-spweb-err"));
   };
   const getResponsibitydata = (planningData, wrappingData, racksCableFiles) => {
     spweb.lists
