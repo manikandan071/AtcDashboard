@@ -5,12 +5,17 @@ import FieldQualityDashboard from "./FieldQuality/FieldQualityDashboard";
 import FieldQualityView from "./FieldQuality/FieldQualityView";
 import TimeSheet from "./TimeSheet/TimeSheetDashboard";
 import TimeSheetView from "./TimeSheet/TimeSheetView";
+import TravelExpense from "./TravelExpense";
 let tsWeb = Web(
   "https://atclogisticsie.sharepoint.com/sites/FieldQualityDashboard"
 );
 export default function Dashboard(props: any): JSX.Element {
   let loggedinuser = props.spcontext.pageContext.user.email;
-  const [showDashboard, setShowDashboard] = useState(true);
+  // const [showDashboard, setShowDashboard] = useState(true);
+  const [showDashboard, setShowDashboard] = useState<string>(
+    "fieldQualityDashboard"
+  );
+  // const [showDashboard, setShowDashboard] = useState<string>("Travel Expense");
   const [fieldQualityDash, setFieldQualityDash] = useState(
     "fieldQualityDashboard"
   );
@@ -29,57 +34,77 @@ export default function Dashboard(props: any): JSX.Element {
           return user.Email == loggedinuser;
         });
         setOnlyTimeSheetPermission([...onlyTSPermission]);
+        init([...onlyTSPermission]);
       })
       .catch((err) => {
         console.log(err, "User don't have permission ");
       });
   };
-  useEffect(() => {
-    getOnlyTimeSheetPermissions();
+
+  const init = (res: any[]): void => {
     const urlParams = new URLSearchParams(window.location.search);
     let fQID = urlParams.get("FqID");
     let tSID = urlParams.get("TsID");
 
     if (fQID) {
       setFieldQualityId(parseInt(fQID));
+      setShowDashboard("fieldQualityView");
       setFieldQualityDash("fieldQualityView");
     } else {
       setFieldQualityDash("fieldQualityDashboard");
     }
     if (tSID) {
-      setShowDashboard(false);
+      // setShowDashboard(false);
       setTimeSheetId(parseInt(tSID));
+      setShowDashboard("timeSheetView");
       setTimeSheetDash("timeSheetView");
-    } else {
+    } else if (res.length) {
+      setShowDashboard("timeSheetDashboard");
       setTimeSheetDash("timeSheetDashboard");
     }
+  };
+
+  useEffect(() => {
+    getOnlyTimeSheetPermissions();
   }, []);
   return (
     <div>
       {onlyTimeSheetPermission.length == 0 ? (
-        showDashboard ? (
-          fieldQualityDash == "fieldQualityDashboard" ? (
-            <FieldQualityDashboard
-              DashboardChangeFun={setShowDashboard}
-              spcontext={props.spcontext}
-            />
-          ) : (
-            <FieldQualityView Id={fieldQualityId} />
-          )
-        ) : timeSheetDash == "timeSheetDashboard" ? (
+        // showDashboard == "fieldQualityDashboard" ? (
+        showDashboard == "fieldQualityDashboard" ? (
+          <FieldQualityDashboard
+            DashboardChangeFun={setShowDashboard}
+            spcontext={props.spcontext}
+          />
+        ) : showDashboard == "fieldQualityView" ? (
+          <FieldQualityView Id={fieldQualityId} spcontext={props.spcontext} />
+        ) : // )
+        showDashboard == "timeSheetDashboard" ? (
           <TimeSheet
             DashboardChangeFun={setShowDashboard}
             spcontext={props.spcontext}
           />
         ) : (
+          // : showDashboard == "Travel Expense" ? (
+          //   <TravelExpense
+          //     DashboardChangeFun={setShowDashboard}
+          //     spcontext={props.spcontext}
+          //   />
+          // )
           <TimeSheetView Id={timeSheetId} />
         )
-      ) : timeSheetDash == "timeSheetDashboard" ? (
+      ) : showDashboard == "timeSheetDashboard" ? (
         <TimeSheet
           DashboardChangeFun={setShowDashboard}
           spcontext={props.spcontext}
         />
       ) : (
+        // : showDashboard == "Travel Expense" ? (
+        //   <TravelExpense
+        //     DashboardChangeFun={setShowDashboard}
+        //     spcontext={props.spcontext}
+        //   />
+        // )
         <TimeSheetView Id={timeSheetId} />
       )}
     </div>

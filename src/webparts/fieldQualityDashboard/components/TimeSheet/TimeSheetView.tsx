@@ -6,7 +6,7 @@ import { TextField, ITextFieldStyles, Icon } from "@fluentui/react";
 import { FontIcon } from "@fluentui/react/lib/Icon";
 import { mergeStyles, mergeStyleSets } from "@fluentui/react/lib/Styling";
 import styles from "../FieldQualityDashboard.module.scss";
-import { Folder } from "sp-pnp-js";
+import { Folder, log } from "sp-pnp-js";
 
 let spweb = Web(
   "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
@@ -28,7 +28,6 @@ export default function TimeSheetView(props: any): JSX.Element {
   const [timeSheetObj, setTimeSheetObj]: any = useState({});
   const [personalCard, setPersonalCard]: any = useState([]);
   const [atcCard, setAtcCard]: any = useState([]);
-  console.log(personalCard);
 
   const dateFormater = (date: Date): string => {
     return !date ? "" : moment(date).format("DD/MM/YYYY");
@@ -62,11 +61,12 @@ export default function TimeSheetView(props: any): JSX.Element {
     field: { fontSize: 14, color: "#000" },
   };
 
-  const getTimeSheetlist = () => {
+  const getTimeSheetlist = (Id: number) => {
     var OvertimecommentsDrpList = "";
     spweb.lists
       .getByTitle(`Timesheet`)
-      .items.getById(props.Id)
+      .items.getById(Id)
+      // .getById(props.Id)
       .select("*,Name/Title")
       .expand("Name")
       .get()
@@ -169,7 +169,9 @@ export default function TimeSheetView(props: any): JSX.Element {
       });
   };
   useEffect(() => {
-    getTimeSheetlist();
+    const urlParams = new URLSearchParams(window.location.search);
+    let tSID = urlParams.get("TsID");
+    getTimeSheetlist(parseInt(tSID));
   }, []);
 
   const fileOpenFunction = (url) => {

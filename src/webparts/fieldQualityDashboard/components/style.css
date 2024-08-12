@@ -32,7 +32,7 @@ input[type="text" i] {
 }
 
 .comboBox .MuiFormControl-root {
-  height: 54px;
+  /* height: 54px; */
   overflow: auto;
 }
 .comboBox input[type="text" i] {

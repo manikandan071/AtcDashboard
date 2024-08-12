@@ -1899,7 +1899,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
       }
     });
 
-    debugger;
     setOperationalResId(OperationResID);
     setOperationalRes(operationalres);
   };
@@ -3232,13 +3231,14 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
     // let onlyMobilizationYes = [];
     spweb.lists
       .getByTitle(`Operational Responsibilities`)
-      .items.top(5000)
-      .select(
+      .items.select(
         "*,TrackingNumberReference/trackingNumber,TrackingNumberReference/delDate,TrackingNumberReference/racks,TrackingNumberReference/SiteCode,TrackingNumberReference/Country,TrackingNumberReference/Client,HandSBriefingConductedby/Title,HandSBriefingConductedby/EMail,HandSBriefingConductedby/Id,Finalrackpositioncheckedby/EMail,Finalrackpositioncheckedby/Id,CrewNameAuditCheckConductedBy/EMail,TruckLoadAuditconductedby/EMail,TruckLoadAuditconductedby/Id,Briefingconductedby/EMail,Briefingconductedby/Id"
       )
       .expand(
         "TrackingNumberReference,HandSBriefingConductedby,Finalrackpositioncheckedby,CrewNameAuditCheckConductedBy,TruckLoadAuditconductedby,Briefingconductedby"
       )
+      .orderBy("ID", false)
+      .top(5000)
       .get()
       .then((Response) => {
         // console.log(Response, "Response");
@@ -3898,11 +3898,12 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   const getQualityPlanningData = (wrappingData, country) => {
     spweb.lists
       .getByTitle(`ATC Field Quality Planning`)
-      .items.top(5000)
-      .select(
+      .items.select(
         "*,Supervisor/Title,DeploymentSupervisor/Title,DriverNameYes/Title,wgcrew/Title"
       )
       .expand("Supervisor,DeploymentSupervisor,DriverNameYes,wgcrew")
+      .orderBy("ID", false)
+      .top(5000)
       .get()
       .then((Response) => {
         let planningData: any[] = [];
@@ -4056,7 +4057,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   const getMileStoneData = (responsibilityItem, responsibilityResponse) => {
     spweb.lists
       .getByTitle(`FQT_MileStone`)
-      .items.top(5000)
+      .items.orderBy("ID", false)
+      .top(5000)
       // .select("*","Title")
       // .expand("Title")
       .get()
@@ -5258,11 +5260,12 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   const getWrappingData = (country) => {
     spweb.lists
       .getByTitle(`Wrapping Up`)
-      .items.top(5000)
-      .select(
+      .items.select(
         "*,GoodSaveName/Title,SafetyinitiativeName/Title,Drivingforw/Title"
       )
       .expand("GoodSaveName,SafetyinitiativeName,Drivingforw")
+      .orderBy("ID", false)
+      .top(5000)
       .get()
       .then((Response) => {
         let wrappingData: any[] = [];
@@ -5348,7 +5351,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   const getEffectivedata = () => {
     spweb.lists
       .getByTitle("Effective Communication")
-      .items.top(5000)
+      .items.orderBy("ID", false)
+      .top(5000)
       .get()
       .then((Response) => {
         let effectiveData: any[] = [];
@@ -5405,7 +5409,8 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
   const getactionplan = () => {
     spweb.lists
       .getByTitle("Action Plan")
-      .items.top(5000)
+      .items.orderBy("ID", false)
+      .top(5000)
       .get()
       .then((Response) => {
         let actionplandata: any[] = [];
@@ -6524,7 +6529,6 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
           <div>
             <DefaultButton
               text={"Field Quality"}
-              //   onClick={() => generateExcel(exportExcel)}
               style={{
                 backgroundColor: "#a83037",
                 color: "#fff",
@@ -6533,13 +6537,23 @@ export default function FieldQualityDashboard(props: any): JSX.Element {
             />
             <DefaultButton
               text={"Time Sheet"}
-              onClick={() => props.DashboardChangeFun(false)}
+              // onClick={() => props.DashboardChangeFun(false)}
+              onClick={() => props.DashboardChangeFun("timeSheetDashboard")}
               style={{
                 backgroundColor: "#dacbcc8c",
                 color: "#a83037",
                 border: "none",
               }}
             />
+            {/* <DefaultButton
+              text={"Travel Expense"}
+              onClick={() => props.DashboardChangeFun("Travel Expense")}
+              style={{
+                backgroundColor: "#dacbcc8c",
+                color: "#a83037",
+                border: "none",
+              }}
+            /> */}
           </div>
           <DefaultButton
             iconProps={Save}

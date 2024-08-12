@@ -1,6 +1,6 @@
 import * as React from "react";
 import * as moment from "moment";
-import { Web } from "@pnp/sp/presets/all";
+import { IFile, sp, Web } from "@pnp/sp/presets/all";
 import { TextField, ITextFieldStyles, Icon } from "@fluentui/react";
 import styles from "../FieldQualityDashboard.module.scss";
 import { useEffect, useState } from "react";
@@ -18,13 +18,23 @@ import {
   Overlay,
   Popup,
 } from "@fluentui/react";
-import { log } from "sp-pnp-js";
+import { FontIcon } from "@fluentui/react/lib/Icon";
+import { mergeStyles } from "@fluentui/react/lib/Styling";
+
+interface IFiles {
+  filename: string;
+  url: string;
+}
+
 let spweb = Web(
   "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
+
 let currentUrl = window.location.href;
 const Delete: IIconProps = { iconName: "Delete" };
 const Close: IIconProps = { iconName: "ChromeClose" };
+
 export default function FieldQualityView(props): JSX.Element {
   let columns = [
     {
@@ -58,11 +68,22 @@ export default function FieldQualityView(props): JSX.Element {
       },
     },
   ];
-  var b = [];
+  const iconClass = mergeStyles({
+    fontSize: 15,
+    height: 14,
+    width: 15,
+    margin: "3px 5px 0px 5px",
+  });
+  const classNames = mergeStyleSets({
+    deepSkyBlue: [{ color: "deepskyblue" }, iconClass],
+    greenYellow: [{ color: "#3e55b0" }, iconClass],
+    salmon: [{ color: "salmon" }, iconClass],
+  });
 
   const [getSingleData, setSingleData]: any = useState({});
   const [isDelPopupVisible, setIsDelPopupVisible] = useState(false);
   const [deleteItemID, setDeleteItemID] = useState(null);
+  const [racksCabledFiles, setracksCabledFiles] = useState<IFiles[]>([]);
 
   const dateFormater = (date: Date): string => {
     return !date ? "" : moment(date).format("DD/MM/YYYY");
@@ -169,7 +190,127 @@ export default function FieldQualityView(props): JSX.Element {
     field: { fontSize: 14, color: "#000" },
   };
 
-  const getResponsibitydata = (planningData, wrappingData) => {
+  const getWrappingList = () => {
+    spweb.lists
+      .getByTitle(`Wrapping Up`)
+      .items.select(
+        "*,GoodSaveName/Title,SafetyinitiativeName/Title,Drivingforw/Title"
+      )
+      .expand("GoodSaveName,SafetyinitiativeName,Drivingforw")
+      .orderBy("ID", false)
+      .top(5000)
+      .get()
+      .then((Response) => {
+        if (Response.length > 0) {
+          // console.log(Response);
+          let wrappingListData = Response.filter(
+            (data) => data.TrackingNumberReferenceId == props.Id
+          );
+          let wrappingList =
+            wrappingListData.length > 0 ? wrappingListData[0] : {};
+          if (wrappingList) {
+            let wrappingData = {
+              accidentInformation: wrappingList.AccidentInformation,
+              goodSave: wrappingList.GoodSave ? wrappingList.GoodSave : "",
+              safetyInitiative: wrappingList.Safetyinitiative
+                ? wrappingList.Safetyinitiative
+                : "",
+              drivingforwSuggestion: wrappingList.Drivingforwsuggestion
+                ? wrappingList.Drivingforwsuggestion
+                : "",
+              goodSaveComments: wrappingList.GoodSaveComments,
+              safetyInitiativeComments: wrappingList.SafetyinitiativeComments,
+              drivingforwSuggestionComments:
+                wrappingList.DrivingforwsuggestionComments,
+              goodSaveName: wrappingList.GoodSaveName
+                ? wrappingList.GoodSaveName.Title
+                : "",
+              safetyInitiativeName: wrappingList.SafetyinitiativeName
+                ? wrappingList.SafetyinitiativeName.Title
+                : "",
+              drivingforwSuggestionName: wrappingList.Drivingforw
+                ? wrappingList.Drivingforw.Title
+                : "",
+              wGCrewMemberData: wrappingList.WGCrewMemberData
+                ? wrappingList.WGCrewMemberData
+                : "",
+            };
+            getFieldQualityData(wrappingData);
+          } else {
+            let wrappingData = {
+              accidentInformation: "",
+              goodSave: "",
+              safetyInitiative: "",
+              drivingforwSuggestion: "",
+              goodSaveComments: "",
+              safetyInitiativeComments: "",
+              drivingforwSuggestionComments: "",
+              goodSaveName: "",
+              safetyInitiativeName: "",
+              drivingforwSuggestionName: "",
+              wGCrewMemberData: "",
+            };
+            getFieldQualityData(wrappingData);
+          }
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const getFieldQualityData = (wrappingData) => {
+    spweb.lists
+      .getByTitle(`ATC Field Quality Planning`)
+      .items.getById(props.Id)
+      .select(
+        "*,Supervisor/Title,DeploymentSupervisor/Title,DriverNameYes/Title,wgcrew/Title"
+      )
+      .expand("Supervisor,DeploymentSupervisor,DriverNameYes,wgcrew")
+      .get()
+      .then((Response) => {
+        let planningData = Response;
+        // getResponsibitydata(planningData, wrappingData);
+        getRacksCabledAttachements(planningData, wrappingData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  const getRacksCabledAttachements = (planningData, wrappingData): void => {
+    let siteUrl: string = "";
+    spweb
+      .get()
+      .then((w) => {
+        siteUrl = w.ServerRelativeUrl;
+        spweb
+          .getFolderByServerRelativeUrl(
+            `${siteUrl}/Shared Documents/Field Quality Tool/${planningData.Client}/${planningData.trackingNumber}/CablingReport`
+            // `${props.spcontext.pageContext.web.serverRelativeUrl}/Shared Documents/Field Quality Tool/MSFT/40000509/CablingReport`
+          )
+          .files.get()
+          .then((res: any) => {
+            let _tempfiles: IFiles[] = [];
+            if (res.length) {
+              res.forEach((_item: any, i: number) => {
+                _tempfiles.push({
+                  filename: _item.Name ? _item.Name : "",
+                  url: _item.ServerRelativeUrl ? _item.ServerRelativeUrl : "",
+                });
+                if (res.length - 1 == i) {
+                  getResponsibitydata(planningData, wrappingData, [
+                    ..._tempfiles,
+                  ]);
+                }
+              });
+            } else {
+              getResponsibitydata(planningData, wrappingData, _tempfiles);
+            }
+          })
+          .catch((err) => console.log(err, "getRacksCabledAttachements"));
+      })
+      .catch((err) => console.log(err, "get-spweb-err"));
+  };
+  const getResponsibitydata = (planningData, wrappingData, racksCableFiles) => {
     spweb.lists
       .getByTitle(`Operational Responsibilities`)
       .items.top(5000)
@@ -184,11 +325,10 @@ export default function FieldQualityView(props): JSX.Element {
         let wgCrewMemberDetails = [];
         let json = [];
         let total: number = 0;
-        // totalPlanningItem.pu
+
         // Response.filter((data)=>{
         //   if(planningData.Id == data.TrackingNumberReferenceId){
         //     console.log(data);
-
         //   }
         // })
         // if (planningData.WGCrewMemberData) {
@@ -315,98 +455,19 @@ export default function FieldQualityView(props): JSX.Element {
             wgcrewMemberData: wGCrewMemberDataList,
             isDelete: planningData.isDelete,
             RacksCabled: wgCrewMemberDetails ? wgCrewMemberDetails : [],
+            // racksCabledAttachments: racksCableFiles,
           };
-          setSingleData({ ...userData });
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
 
-  const getFieldQualityData = (wrappingData) => {
-    spweb.lists
-      .getByTitle(`ATC Field Quality Planning`)
-      .items.getById(props.Id)
-      .select(
-        "*,Supervisor/Title,DeploymentSupervisor/Title,DriverNameYes/Title,wgcrew/Title"
-      )
-      .expand("Supervisor,DeploymentSupervisor,DriverNameYes,wgcrew")
-      .get()
-      .then((Response) => {
-        let planningData = Response;
-        getResponsibitydata(planningData, wrappingData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-  const getWrappingList = () => {
-    spweb.lists
-      .getByTitle(`Wrapping Up`)
-      .items.top(5000)
-      .select(
-        "*,GoodSaveName/Title,SafetyinitiativeName/Title,Drivingforw/Title"
-      )
-      .expand("GoodSaveName,SafetyinitiativeName,Drivingforw")
-      .get()
-      .then((Response) => {
-        if (Response.length > 0) {
-          // console.log(Response);
-          let wrappingListData = Response.filter(
-            (data) => data.TrackingNumberReferenceId == props.Id
-          );
-          let wrappingList =
-            wrappingListData.length > 0 ? wrappingListData[0] : {};
-          if (wrappingList) {
-            let wrappingData = {
-              accidentInformation: wrappingList.AccidentInformation,
-              goodSave: wrappingList.GoodSave ? wrappingList.GoodSave : "",
-              safetyInitiative: wrappingList.Safetyinitiative
-                ? wrappingList.Safetyinitiative
-                : "",
-              drivingforwSuggestion: wrappingList.Drivingforwsuggestion
-                ? wrappingList.Drivingforwsuggestion
-                : "",
-              goodSaveComments: wrappingList.GoodSaveComments,
-              safetyInitiativeComments: wrappingList.SafetyinitiativeComments,
-              drivingforwSuggestionComments:
-                wrappingList.DrivingforwsuggestionComments,
-              goodSaveName: wrappingList.GoodSaveName
-                ? wrappingList.GoodSaveName.Title
-                : "",
-              safetyInitiativeName: wrappingList.SafetyinitiativeName
-                ? wrappingList.SafetyinitiativeName.Title
-                : "",
-              drivingforwSuggestionName: wrappingList.Drivingforw
-                ? wrappingList.Drivingforw.Title
-                : "",
-              wGCrewMemberData: wrappingList.WGCrewMemberData
-                ? wrappingList.WGCrewMemberData
-                : "",
-            };
-            getFieldQualityData(wrappingData);
-          } else {
-            let wrappingData = {
-              accidentInformation: "",
-              goodSave: "",
-              safetyInitiative: "",
-              drivingforwSuggestion: "",
-              goodSaveComments: "",
-              safetyInitiativeComments: "",
-              drivingforwSuggestionComments: "",
-              goodSaveName: "",
-              safetyInitiativeName: "",
-              drivingforwSuggestionName: "",
-              wGCrewMemberData: "",
-            };
-            getFieldQualityData(wrappingData);
-          }
+          setSingleData({ ...userData });
+          setracksCabledFiles([...racksCableFiles]);
         }
       })
       .catch((err) => {
         console.log(err);
       });
+  };
+  const fileOpenFunction = (url) => {
+    window.open("https://atclogisticsie.sharepoint.com" + url);
   };
 
   useEffect(() => {
@@ -414,12 +475,12 @@ export default function FieldQualityView(props): JSX.Element {
   }, []);
 
   const DeleteItem = (id) => {
-    console.log(id);
+    // console.log(id);
     spweb.lists
       .getByTitle(`ATC Field Quality Planning`)
       .items.getById(id)
       .update({ isDelete: true })
-      .then((Response) => {
+      .then(() => {
         setIsDelPopupVisible(false);
         console.log(currentUrl);
         let index = currentUrl.indexOf("?");
@@ -983,6 +1044,58 @@ export default function FieldQualityView(props): JSX.Element {
                 rows={3}
                 resizable={false}
               />
+            </div>
+          </div>
+
+          <div style={{ width: "24%" }}>
+            <div className={styles.fileSectionlabel}>
+              <span>Racks Cabled Attachments</span>
+            </div>
+            <div className={styles.withFiles}>
+              {racksCabledFiles.length > 0 ? (
+                racksCabledFiles.map((file) => (
+                  <div>
+                    <span
+                      className={styles.files}
+                      onClick={() => fileOpenFunction(file.url)}
+                    >
+                      {" "}
+                      {file.filename.toLowerCase().match(".jpg") ||
+                      file.filename.toLowerCase().match(".jpeg") ? (
+                        <FontIcon
+                          iconName="PictureFill"
+                          className={classNames.deepSkyBlue}
+                        />
+                      ) : file.filename.toLowerCase().match(".pdf") ? (
+                        <FontIcon
+                          iconName="PDF"
+                          className={classNames.greenYellow}
+                        />
+                      ) : file.filename.toLowerCase().match(".xlsx") ||
+                        file.filename.toLowerCase().match(".doc") ||
+                        file.filename.toLowerCase().match(".xml") ? (
+                        <FontIcon
+                          iconName="TextDocument"
+                          className={classNames.salmon}
+                        />
+                      ) : (
+                        ""
+                      )}
+                      {file.filename}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div style={{ backgroundColor: "#f3f2f1" }}>
+                  <span className={styles.files}>
+                    <FontIcon
+                      iconName="EmptyRecycleBin"
+                      className={classNames.salmon}
+                    />
+                    No Files
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           <div>
