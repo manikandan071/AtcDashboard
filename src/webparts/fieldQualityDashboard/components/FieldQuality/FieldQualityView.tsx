@@ -27,8 +27,8 @@ interface IFiles {
 }
 
 let spweb = Web(
-  "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
-  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
+  // "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 
 let currentUrl = window.location.href;
