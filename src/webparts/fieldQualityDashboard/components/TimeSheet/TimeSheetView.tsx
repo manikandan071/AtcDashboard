@@ -2,7 +2,15 @@ import * as React from "react";
 import { useState, useEffect } from "react";
 import * as moment from "moment";
 import { sp, Web } from "@pnp/sp/presets/all";
-import { TextField, ITextFieldStyles, Icon } from "@fluentui/react";
+import {
+  TextField,
+  ITextFieldStyles,
+  Icon,
+  DetailsList,
+  SelectionMode,
+  IDetailsListStyles,
+  IColumn,
+} from "@fluentui/react";
 import { FontIcon } from "@fluentui/react/lib/Icon";
 import { mergeStyles, mergeStyleSets } from "@fluentui/react/lib/Styling";
 import styles from "../FieldQualityDashboard.module.scss";
@@ -27,7 +35,81 @@ const classNames = mergeStyleSets({
 export default function TimeSheetView(props: any): JSX.Element {
   const [timeSheetObj, setTimeSheetObj]: any = useState({});
   const [personalCard, setPersonalCard]: any = useState([]);
+  const [serviceDetails, setServiceDetails] = useState([]);
   const [atcCard, setAtcCard]: any = useState([]);
+
+  const columns = [
+    {
+      key: "column1",
+      name: "Site Code",
+      fieldName: "sitecode",
+      minWidth: 100,
+      maxWidth: 200,
+      onRender: (item) => {
+        return <div title={item.sitecode}>{item.sitecode}</div>;
+      },
+    },
+    {
+      key: "column2",
+      name: "Client",
+      fieldName: "client",
+      minWidth: 50,
+      maxWidth: 100,
+      onRender: (item) => (
+        <>
+          <div>{item.client}</div>
+        </>
+      ),
+    },
+    {
+      key: "column3",
+      name: "Service Code",
+      fieldName: "serCode",
+      minWidth: 50,
+      maxWidth: 100,
+      onRender: (item) => (
+        <>
+          <div>{item.serCode}</div>
+        </>
+      ),
+    },
+    {
+      key: "column4",
+      name: "Service Description",
+      fieldName: "serDescription",
+      minWidth: 100,
+      maxWidth: 200,
+      onRender: (item) => (
+        <>
+          <div>{item.serDescription}</div>
+        </>
+      ),
+    },
+    {
+      key: "column5",
+      name: "Start Time",
+      fieldName: "startTime",
+      minWidth: 50,
+      maxWidth: 100,
+      onRender: (item) => (
+        <>
+          <div>{item.startTime}</div>
+        </>
+      ),
+    },
+    {
+      key: "column6",
+      name: "Finish Time",
+      fieldName: "finishTime",
+      minWidth: 50,
+      maxWidth: 100,
+      onRender: (item) => (
+        <>
+          <div>{item.finishTime}</div>
+        </>
+      ),
+    },
+  ];
 
   const dateFormater = (date: Date): string => {
     return !date ? "" : moment(date).format("DD/MM/YYYY");
@@ -60,9 +142,44 @@ export default function TimeSheetView(props: any): JSX.Element {
     },
     field: { fontSize: 14, color: "#000" },
   };
+  const gridStyles: Partial<IDetailsListStyles> = {
+    root: {
+      selectors: {
+        "& [role=grid]": {
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "start",
+          ".ms-DetailsRow-cell": {
+            display: "flex",
+            alignItems: "center",
+            height: 50,
+            minHeight: 50,
+            padding: "5px 10px",
+            margin: "auto",
+          },
+          ".ms-DetailsHeader-cellName": {
+            color: "#c56b70",
+          },
+          ".ms-DetailsHeader-cellTitle": {
+            padding: "0px 8px 0px 10px",
+          },
+        },
+        ".root-140": {
+          borderBottom: "1px solid #b8bbde",
+        },
+      },
+    },
+    headerWrapper: {
+      flex: "0 0 auto",
+    },
+    contentWrapper: {
+      flex: "1 1 auto",
+      overflowY: "auto",
+      overflowX: "hidden",
+    },
+  };
 
   const getTimeSheetlist = (Id: number) => {
-    var OvertimecommentsDrpList = "";
     spweb.lists
       .getByTitle(`Timesheet`)
       .items.getById(Id)
@@ -71,7 +188,6 @@ export default function TimeSheetView(props: any): JSX.Element {
       .expand("Name")
       .get()
       .then(async (Response) => {
-        // console.log(Response);
         let personalUrl =
           "/sites/PlanningOperations/Field%20Quality/Shared Documents/TimeSheet/" +
           moment(Response.Date).format("MMMM-YYYY") +
@@ -162,12 +278,53 @@ export default function TimeSheetView(props: any): JSX.Element {
             ? Response.OvertimecommentsDrp.join()
             : "",
         };
-        setTimeSheetObj({ ...timeSheetObject });
+
+        if (timeSheetObject) {
+          getTMSTServiceDetails(Id, timeSheetObject);
+        }
       })
       .catch((err) => {
         console.log(err);
       });
   };
+
+  const getTMSTServiceDetails = (Id: number, timeSheetObject: any) => {
+    spweb.lists
+      .getByTitle("TMST_ServiceDetails")
+      .items.select("*,ServiceCode/Title,ServiceDescription/ServiceDescription")
+      .expand("ServiceCode,ServiceDescription")
+      .filter(`TMST_IDId eq ${Id}`)
+      .orderBy("ID", false)
+      .get()
+      .then(async (data: any) => {
+        let _tempTMSTSServiceDetails = [];
+        if (data.length) {
+          data.forEach((ser: any, i: number) => {
+            _tempTMSTSServiceDetails.push({
+              sitecode: ser.SiteCode ? ser.SiteCode : "",
+              client: ser.Client ? ser.Client : "",
+              serCode: ser.ServiceCode ? ser.ServiceCode.Title : "",
+              serDescription: ser.ServiceDescription
+                ? ser.ServiceDescription.ServiceDescription
+                : "",
+              startTime: ser.StartTime ? ser.StartTime : "",
+              finishTime: ser.FinishTime ? ser.FinishTime : "",
+              serviceID: ser.TMST_IDId,
+              otherSitecode: ser.OtherSiteCode ? ser.OtherSiteCode : "",
+            });
+            if (data.length - 1 == i) {
+              setTimeSheetObj({ ...timeSheetObject });
+              setServiceDetails([..._tempTMSTSServiceDetails]);
+            }
+          });
+        } else {
+          setTimeSheetObj({});
+          setServiceDetails([]);
+        }
+      })
+      .catch((err) => console.log(err, "getTMSTServiceDetails"));
+  };
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     let tSID = urlParams.get("TsID");
@@ -242,7 +399,7 @@ export default function TimeSheetView(props: any): JSX.Element {
             label="Finish time"
             styles={generalDetailsTextbox}
           />
-          <TextField
+          {/* <TextField
             disabled
             value={timeSheetObj.siteCode ? timeSheetObj.siteCode : "-"}
             label="Site code"
@@ -255,7 +412,7 @@ export default function TimeSheetView(props: any): JSX.Element {
             }
             label="Other sitecode"
             styles={generalDetailsTextbox}
-          />
+          /> */}
           <TextField
             disabled
             value={timeSheetObj.comments ? timeSheetObj.comments : "-"}
@@ -487,6 +644,24 @@ export default function TimeSheetView(props: any): JSX.Element {
           </div>
         </div>
       </div>
+
+      {/* Service Details detailslist */}
+      <div className={styles.generalDetails}>
+        <Icon
+          style={{ marginRight: "10px", width: "1%" }}
+          iconName="ContactCard"
+        />
+        <h4 style={{ width: "10%", color: "#be4545", margin: "0px" }}>
+          ServiceType Details
+        </h4>
+        <div className={styles.underline}></div>
+      </div>
+      <DetailsList
+        items={serviceDetails}
+        columns={columns}
+        selectionMode={SelectionMode.none}
+        styles={gridStyles}
+      />
     </div>
   );
 }

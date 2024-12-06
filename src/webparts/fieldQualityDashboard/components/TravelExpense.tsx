@@ -169,7 +169,7 @@ const TravelExpense = (props: IProps) => {
     },
     {
       key: "column5",
-      name: "Departure Date",
+      name: "DepaturedayOrBusinessTrip",
       fieldName: "depaturedayOrBusinessTrip",
       minWidth: 130,
       maxWidth: 150,

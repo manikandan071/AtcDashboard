@@ -1,25 +1,26 @@
-import * as React from 'react';
-import * as ReactDom from 'react-dom';
-import { Version } from '@microsoft/sp-core-library';
+import * as React from "react";
+import * as ReactDom from "react-dom";
+import { Version } from "@microsoft/sp-core-library";
 import {
   IPropertyPaneConfiguration,
-  PropertyPaneTextField
-} from '@microsoft/sp-property-pane';
-import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
-import { IReadonlyTheme } from '@microsoft/sp-component-base';
+  PropertyPaneTextField,
+} from "@microsoft/sp-property-pane";
+import { BaseClientSideWebPart } from "@microsoft/sp-webpart-base";
+import { IReadonlyTheme } from "@microsoft/sp-component-base";
+import { SPComponentLoader } from "@microsoft/sp-loader";
 
-import * as strings from 'FieldQualityDashboardWebPartStrings';
-import FieldQualityDashboard from './components/FieldQualityDashboard';
-import { IFieldQualityDashboardProps } from './components/IFieldQualityDashboardProps';
+import * as strings from "FieldQualityDashboardWebPartStrings";
+import FieldQualityDashboard from "./components/FieldQualityDashboard";
+import { IFieldQualityDashboardProps } from "./components/IFieldQualityDashboardProps";
+require("../../../node_modules/primereact/resources/primereact.min.css");
 
 export interface IFieldQualityDashboardWebPartProps {
   description: string;
 }
 
 export default class FieldQualityDashboardWebPart extends BaseClientSideWebPart<IFieldQualityDashboardWebPartProps> {
-
   private _isDarkTheme: boolean = false;
-  private _environmentMessage: string = '';
+  private _environmentMessage: string = "";
 
   protected onInit(): Promise<void> {
     this._environmentMessage = this._getEnvironmentMessage();
@@ -27,28 +28,36 @@ export default class FieldQualityDashboardWebPart extends BaseClientSideWebPart<
     return super.onInit();
   }
 
+  public constructor() {
+    super();
+    SPComponentLoader.loadCss("https://unpkg.com/primeicons/primeicons.css");
+  }
+
   public render(): void {
-    const element: React.ReactElement<IFieldQualityDashboardProps> = React.createElement(
-      FieldQualityDashboard,
-      {
+    const element: React.ReactElement<IFieldQualityDashboardProps> =
+      React.createElement(FieldQualityDashboard, {
         description: this.properties.description,
         isDarkTheme: this._isDarkTheme,
         environmentMessage: this._environmentMessage,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
-        context:this.context
-      }
-    );
+        context: this.context,
+      });
 
     ReactDom.render(element, this.domElement);
   }
 
   private _getEnvironmentMessage(): string {
-    if (!!this.context.sdks.microsoftTeams) { // running in Teams
-      return this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentTeams : strings.AppTeamsTabEnvironment;
+    if (!!this.context.sdks.microsoftTeams) {
+      // running in Teams
+      return this.context.isServedFromLocalhost
+        ? strings.AppLocalEnvironmentTeams
+        : strings.AppTeamsTabEnvironment;
     }
 
-    return this.context.isServedFromLocalhost ? strings.AppLocalEnvironmentSharePoint : strings.AppSharePointEnvironment;
+    return this.context.isServedFromLocalhost
+      ? strings.AppLocalEnvironmentSharePoint
+      : strings.AppSharePointEnvironment;
   }
 
   protected onThemeChanged(currentTheme: IReadonlyTheme | undefined): void {
@@ -57,13 +66,13 @@ export default class FieldQualityDashboardWebPart extends BaseClientSideWebPart<
     }
 
     this._isDarkTheme = !!currentTheme.isInverted;
-    const {
-      semanticColors
-    } = currentTheme;
-    this.domElement.style.setProperty('--bodyText', semanticColors.bodyText);
-    this.domElement.style.setProperty('--link', semanticColors.link);
-    this.domElement.style.setProperty('--linkHovered', semanticColors.linkHovered);
-
+    const { semanticColors } = currentTheme;
+    this.domElement.style.setProperty("--bodyText", semanticColors.bodyText);
+    this.domElement.style.setProperty("--link", semanticColors.link);
+    this.domElement.style.setProperty(
+      "--linkHovered",
+      semanticColors.linkHovered
+    );
   }
 
   protected onDispose(): void {
@@ -71,7 +80,7 @@ export default class FieldQualityDashboardWebPart extends BaseClientSideWebPart<
   }
 
   protected get dataVersion(): Version {
-    return Version.parse('1.0');
+    return Version.parse("1.0");
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
@@ -79,20 +88,20 @@ export default class FieldQualityDashboardWebPart extends BaseClientSideWebPart<
       pages: [
         {
           header: {
-            description: strings.PropertyPaneDescription
+            description: strings.PropertyPaneDescription,
           },
           groups: [
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
-                })
-              ]
-            }
-          ]
-        }
-      ]
+                PropertyPaneTextField("description", {
+                  label: strings.DescriptionFieldLabel,
+                }),
+              ],
+            },
+          ],
+        },
+      ],
     };
   }
 }

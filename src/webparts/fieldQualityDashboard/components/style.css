@@ -38,3 +38,18 @@ input[type="text" i] {
 .comboBox input[type="text" i] {
   border: none !important;
 }
+
+.p-datatable {
+  margin-top: 16px !important;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+.p-datatable .p-datatable-thead > tr > th {
+  font-size: 14px !important;
+  color: rgb(197, 107, 112) !important;
+  border: none !important;
+  padding: 0.5rem 0.5rem;
+}
+.p-datatable .p-datatable-tbody > tr > td {
+  font-size: 12px !important;
+  padding: 0.5rem 0.5rem;
+}

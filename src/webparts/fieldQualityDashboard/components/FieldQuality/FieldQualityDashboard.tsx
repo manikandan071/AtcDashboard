@@ -32,11 +32,10 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 
 let spweb = Web(
-  "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  // "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
+
 );
-// let spweb = Web(
-//   "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
-// );
 let currentUrl = window.location.href;
 let globalPlanArr: any[] = [];
 let responsibilityData: any[] = [];

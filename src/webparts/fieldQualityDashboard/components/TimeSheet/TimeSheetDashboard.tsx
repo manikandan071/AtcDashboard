@@ -28,6 +28,8 @@ import Pagination from "@material-ui/lab/Pagination";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { TextField } from "@material-ui/core";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 
 interface IEmployee {
   Email: string;
@@ -48,6 +50,18 @@ interface ICRM {
 interface IDirRep {
   Email: string;
 }
+
+interface IServiceDetails {
+  sitecode: string;
+  client: string;
+  serCode: string;
+  serDescription: string;
+  startTime: string;
+  finishTime: string;
+  serviceID: number;
+  otherSitecode: string;
+}
+
 let localArr = [];
 let tempCount: number = 0;
 let spweb = Web(
@@ -431,7 +445,11 @@ export default function TimeSheetDashboard(props): JSX.Element {
       maxWidth: 70,
       onRender: (item) => (
         <>
-          <div>{item.overTime ? item.overTime : "-"}</div>
+          <div>
+            {item.overTime && item.overtimeSts == "Approved"
+              ? item.overTime
+              : "-"}
+          </div>
         </>
       ),
     },
@@ -612,26 +630,28 @@ export default function TimeSheetDashboard(props): JSX.Element {
   const [approvelJson, setApprovelJson] = useState([...approvelJSON]);
   const [appprovelId, setApprovelID] = useState(null);
   const [otherOptions, setOtherOptions] = useState(false);
+  const [expandedRows, setExpandedRows] = useState(null);
+
   const dateFormater = (date: Date): string => {
     return !date ? "" : moment(date).format("DD/MM/YYYY");
   };
 
-  const onItemInvoked = useCallback((item) => {
-    window.open(currentUrl + "?TsID=" + item);
-  }, []);
+  // const onItemInvoked = useCallback((item) => {
+  //   window.open(currentUrl + "?TsID=" + item);
+  // }, []);
 
-  const onRenderRow = (row, defaultRender) => {
-    return (
-      <a
-        // className={classNameColor}
-        href={currentUrl + "?TsID=" + row.Id}
-        target="blank"
-        onClick={() => onItemInvoked(row.item.Id)}
-      >
-        {defaultRender(row)}
-      </a>
-    );
-  };
+  // const onRenderRow = (row, defaultRender) => {
+  //   return (
+  //     <a
+  //       // className={classNameColor}
+  //       href={currentUrl + "?TsID=" + row.Id}
+  //       target="blank"
+  //       onClick={() => onItemInvoked(row.item.Id)}
+  //     >
+  //       {defaultRender(row)}
+  //     </a>
+  //   );
+  // };
 
   const getEmployeeList = (allCitys, directReportees) => {
     spweb.lists
@@ -1220,6 +1240,9 @@ export default function TimeSheetDashboard(props): JSX.Element {
   };
 
   const generateTimeSheetExcel = async (list) => {
+    let firstIndex: number = 2;
+    let lastIndex: number = 2;
+
     if (list.length != 0) {
       let arrExport = list;
       let excelCount = 2;
@@ -1243,6 +1266,14 @@ export default function TimeSheetDashboard(props): JSX.Element {
         { header: "Week", key: "week", width: 25 },
         { header: "Date", key: "date", width: 25 },
         { header: "Supervisor", key: "supervisor", width: 25 },
+        {
+          header: "Sitecode",
+          key: "siteCode",
+          width: 25,
+        },
+        { header: "Client", key: "client", width: 25 },
+        { header: "Service Code", key: "serCode", width: 25 },
+        { header: "Service Description", key: "serDescription", width: 25 },
         { header: "Start time", key: "startTime", width: 25 },
         { header: "Finish time", key: "finishTime", width: 25 },
         { header: "Total hours", key: "totalHours", width: 25 },
@@ -1250,11 +1281,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         { header: "Over time", key: "overTime", width: 25 },
         { header: "Status", key: "status", width: 25 },
         { header: "Cost center", key: "costCenter", width: 25 },
-        {
-          header: "Sitecode",
-          key: "siteCode",
-          width: 25,
-        },
+
         { header: "MobilizationJob", key: "mobilization", width: 25 },
         { header: "Travel", key: "travel", width: 25 },
         { header: "City", key: "city", width: 25 },
@@ -1294,11 +1321,11 @@ export default function TimeSheetDashboard(props): JSX.Element {
         { header: "OrginCity", key: "orgCity", width: 25 },
         { header: "OrginCountry", key: "orgCountry", width: 25 },
         { header: "CRM Activity", key: "CRMActivity", width: 25 },
-        { header: "Project Type", key: "ProjType", width: 25 },
-        { header: "Project Type2", key: "ProjType2", width: 25 },
-        { header: "Project Type3", key: "ProjType3", width: 25 },
-        // { header: "Project Type4", key: "ProjTyp4", width: 25 },
-        { header: "Project Type Others", key: "ProjeTypeOthers", width: 25 },
+        // { header: "Project Type", key: "ProjType", width: 25 },
+        // { header: "Project Type2", key: "ProjType2", width: 25 },
+        // { header: "Project Type3", key: "ProjType3", width: 25 },
+        // // { header: "Project Type4", key: "ProjTyp4", width: 25 },
+        // { header: "Project Type Others", key: "ProjeTypeOthers", width: 25 },
         { header: "One To One Meeting", key: "oneToOneMeeting", width: 25 },
         {
           header: "One To One Meeting Participants",
@@ -1375,19 +1402,26 @@ export default function TimeSheetDashboard(props): JSX.Element {
               conversationType: item.ConversationType,
             });
           }
-          var row = worksheet.addRow({
+
+          let _r: any = {
             week: item.week ? item.week : "-",
             date: item.date ? dateFormater(item.date) : "-",
             city: item.city ? item.city : "-",
             supervisor: item.supervisor ? item.supervisor : "-",
+            // siteCode: item.siteCode ? item.siteCode : "-",
+            // client: item.client ? item.client : "-",
+            // serCode: item.serCode ? item.serCode : "-",
+            // serDescription: item.serDescription ? item.serDescription : "-",
+            // startTime: item.startTime ? item.startTime : "-",
+            // finishTime: item.finishTime ? item.finishTime : "-",
             costCenter: item.costCenter ? item.costCenter : "-",
-            startTime: item.startTime ? item.startTime : "-",
-            finishTime: item.finishTime ? item.finishTime : "-",
             totalHours: item.totalHours ? item.totalHours : "-",
             ifOverTime: item.overTime ? "Yes" : "No",
-            overTime: item.overTime ? item.overTime : "-",
+            overTime:
+              item.overTime && item.overtimeSts == "Approved"
+                ? item.overTime
+                : "-",
             status: item.status ? item.status : "-",
-            siteCode: item.siteCode ? item.siteCode : "-",
             mobilization: item.mobilization ? item.mobilization : "-",
             travel: item.travel ? item.travel : "-",
             otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
@@ -1414,43 +1448,88 @@ export default function TimeSheetDashboard(props): JSX.Element {
             orgCity: item.originCity ? item.originCity : "-",
             orgCountry: item.originCountry ? item.originCountry : "-",
             CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
-            ProjType: item.ProjectType ? item.ProjectType : "-",
-            ProjType2: item.ProjectType_2 ? item.ProjectType_2 : "-",
-            ProjType3: item.ProjectType_3 ? item.ProjectType_3 : "-",
-            ProjeTypeOthers: item.ProjectTypeOthers
-              ? item.ProjectTypeOthers
-              : "-",
+            // ProjType: item.ProjectType ? item.ProjectType : "-",
+            // ProjType2: item.ProjectType_2 ? item.ProjectType_2 : "-",
+            // ProjType3: item.ProjectType_3 ? item.ProjectType_3 : "-",
+            // ProjeTypeOthers: item.ProjectTypeOthers
+            //   ? item.ProjectTypeOthers
+            //   : "-",
             oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
             meetingPerson: _tempOneToOneMeetingPerson
               ? _tempOneToOneMeetingPerson
               : "-",
             onCall: item.onCallVisible ? "Yes" : "No",
-          });
-          EmployeeConfig.forEach((col) => {
-            if (col.Name == item.supervisor && col.Mobilization) {
-              row._cells[2].fill = {
-                type: "pattern",
-                pattern: "solid",
-                fgColor: {
-                  argb: "f8696b",
-                },
-              };
+          };
 
-              // row.fill = {
-              //   type: "pattern",
-              //   pattern: "solid",
-              //   fgColor: {
-              //     argb: "f8696b",
-              //   },
-              // };
+          if (item.serviceDetails.length) {
+            for (let i = 0; i < item.serviceDetails.length; i++) {
+              let _i = item.serviceDetails[i];
+
+              _r.siteCode =
+                _i.sitecode == "Other"
+                  ? _i.otherSiteCode
+                  : _i.sitecode
+                  ? _i.sitecode
+                  : "-";
+              _r.client = _i.client ? _i.client : "-";
+              _r.serCode = _i.serCode ? _i.serCode : "-";
+              _r.serDescription = _i.serDescription ? _i.serDescription : "-";
+              _r.startTime = _i.startTime ? _i.startTime : "-";
+              _r.finishTime = _i.finishTime ? _i.finishTime : "-";
+
+              let row = worksheet.addRow(_r);
+
+              EmployeeConfig.forEach((col) => {
+                if (col.Name == item.supervisor && col.Mobilization) {
+                  row._cells[2].fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: {
+                      argb: "f8696b",
+                    },
+                  };
+                }
+              });
             }
-          });
+          }
 
           if (filterWeeklyData.length == index + 1) {
             worksheet.addRow({
               totalHours: `Total = ${TotalHour}:${TotalMin}`,
             });
           }
+          lastIndex = lastIndex + item.serviceDetails.length;
+
+          worksheet._rows[0]._cells.forEach((cell) => {
+            let cellName: any = "";
+            if (cell._address.split("").length == 2) {
+              cellName = cell._address.split("")[0];
+            } else {
+              cellName =
+                cell._address.split("")[0] + cell._address.split("")[1];
+            }
+            if (
+              cellName == "D" ||
+              cellName == "E" ||
+              cellName == "F" ||
+              cellName == "G" ||
+              cellName == "H" ||
+              cellName == "I"
+            ) {
+              worksheet.mergeCells(
+                `${cellName}${firstIndex}:${cellName}${firstIndex}`
+              );
+            } else {
+              worksheet.mergeCells(
+                `${cellName}${firstIndex}:${cellName}${lastIndex - 1}`
+              );
+              worksheet.getCell(`${cellName}${firstIndex}`).alignment = {
+                vertical: "middle",
+                horizontal: "center",
+              };
+            }
+          });
+          firstIndex = firstIndex + item.serviceDetails.length;
         });
         for (let i = 0; i < filterWeeklyData.length; i++) {
           let date = new Date(filterWeeklyData[i].date);
@@ -1465,7 +1544,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
           }
           if (excelCount + filterWeeklyData.length === excelCount + i + 1) {
             worksheet.getCell(
-              "F" + (excelCount + filterWeeklyData.length)
+              // "J" + (excelCount + filterWeeklyData.length + 1)
+              "J" + lastIndex
             ).fill = {
               type: "pattern",
               pattern: "solid",
@@ -1473,46 +1553,37 @@ export default function TimeSheetDashboard(props): JSX.Element {
             };
           }
           if (filterWeeklyData[i].overTime) {
-            worksheet.getCell("G" + (i + excelCount)).fill = {
+            worksheet.getCell("K" + (i + excelCount)).fill = {
               type: "pattern",
               pattern: "solid",
               fgColor: { argb: "f8696b" },
             };
           }
           if (filterWeeklyData[i].status == "Submitted") {
-            worksheet.getCell("I" + (i + excelCount)).fill = {
+            worksheet.getCell("M" + (i + excelCount)).fill = {
               type: "pattern",
               pattern: "solid",
               fgColor: { argb: "90EE90" },
             };
           } else if (filterWeeklyData[i].status == "Draft") {
-            worksheet.getCell("I" + (i + excelCount)).fill = {
+            worksheet.getCell("M" + (i + excelCount)).fill = {
               type: "pattern",
               pattern: "solid",
               fgColor: { argb: "d3d3d3" },
             };
           } else if (filterWeeklyData[i].status == "Pending Approval") {
-            worksheet.getCell("I" + (i + excelCount)).fill = {
+            worksheet.getCell("M" + (i + excelCount)).fill = {
               type: "pattern",
               pattern: "solid",
               fgColor: { argb: "f4f2bf" },
             };
           } else if (filterWeeklyData[i].status == "InReview") {
-            worksheet.getCell("I" + (i + excelCount)).fill = {
+            worksheet.getCell("M" + (i + excelCount)).fill = {
               type: "pattern",
               pattern: "solid",
               fgColor: { argb: "f4f2bf" },
             };
           }
-          // if (i + 1 == filterWeeklyData.length) {
-          //   console.log("equal");
-          //   worksheet.getCell("F" + (i + 3)).fill = {
-          //     type: "pattern",
-          //     values: `${TotalHour}:${TotalMin}`,
-          //     pattern: "solid",
-          //     fgColor: { argb: "90EE90" },
-          //   };
-          // }
         }
         excelCount += filterWeeklyData.length + 1;
       });
@@ -1973,13 +2044,59 @@ export default function TimeSheetDashboard(props): JSX.Element {
           });
         });
         // new changes params
-        getCRMActivityData(TimesheetData, dirReportersArr);
+        getTMSTServiceDetails(TimesheetData, dirReportersArr);
+        // getCRMActivityData(TimesheetData, dirReportersArr);
       })
       .catch((err) => {
         console.log(err, "getEmployeeConfig");
       });
   };
-  const getCRMActivityData = (TimesheetData, dirReportersArr) => {
+
+  const getTMSTServiceDetails = (TimesheetData, dirReportersArr) => {
+    spweb.lists
+      .getByTitle("TMST_ServiceDetails")
+      .items.top(5000)
+      .select("*,ServiceCode/Title,ServiceDescription/ServiceDescription")
+      .expand("ServiceCode,ServiceDescription")
+      .orderBy("ID", false)
+      // .get()
+      .getPaged()
+      .then(async (data: any) => {
+        let res = [...data.results];
+        let nextRef = data.hasNext;
+        // get more than 5000 data
+        while (nextRef) {
+          await data
+            .getNext()
+            .then(async (_res) => {
+              data = _res;
+              await res.push(..._res.results);
+              nextRef = _res.hasNext;
+            })
+            .catch((err) => {
+              console.log(err, "getTMSTServiceDetailsgetNext");
+            });
+        }
+
+        if (res.length) {
+          let tmstServiceDetails = res;
+          getCRMActivityData(
+            TimesheetData,
+            dirReportersArr,
+            tmstServiceDetails
+          );
+        } else {
+          getCRMActivityData(TimesheetData, dirReportersArr, []);
+        }
+      })
+      .catch((err) => console.log(err, "getTMSTServiceDetails"));
+  };
+
+  const getCRMActivityData = (
+    TimesheetData,
+    dirReportersArr,
+    tmstServiceDetails
+  ) => {
     spweb.lists
       .getByTitle("TMST_CRM_ActivityDetails")
       .items.select("*,Name/Title")
@@ -2000,22 +2117,13 @@ export default function TimeSheetDashboard(props): JSX.Element {
           masterTimesheetArr = TimesheetData.filter(
             (item, index) => TimesheetData.indexOf(item) === index
           );
-          // TimesheetData.forEach((data) => {
-          //   if (
-          //     data.Id &&
-          //     masterTimesheetArr.findIndex((findId) => {
-          //       return findId.Id == data.Id;
-          //     }) == -1
-          //   ) {
-          //     masterTimesheetArr.push(data);
-          //   }
-          // });
         } else {
           masterTimesheetArr = dirReportersArr;
         }
+
         let tempLocalArr = masterTimesheetArr;
+
         // new changes end
-        // let tempLocalArr = TimesheetData;
         for (let i = 0; i < tempLocalArr.length; i++) {
           let _isValueId: boolean = false;
           for (let j = 0; j < res.length; j++) {
@@ -2025,11 +2133,16 @@ export default function TimeSheetDashboard(props): JSX.Element {
               res[j].TMST_CRM_IDId == tempLocalArr[i].Id
             ) {
               _isValueId = true;
-              arrCreator(tempLocalArr[i], res[j], tempLocalArr);
+              arrCreator(
+                tempLocalArr[i],
+                res[j],
+                tempLocalArr,
+                tmstServiceDetails
+              );
             }
           }
           if (!_isValueId) {
-            arrCreator(tempLocalArr[i], "", tempLocalArr);
+            arrCreator(tempLocalArr[i], "", tempLocalArr, tmstServiceDetails);
           }
         }
       })
@@ -2037,11 +2150,50 @@ export default function TimeSheetDashboard(props): JSX.Element {
         console.log(err, "getCRMActivityData");
       });
   };
-  const arrCreator = (timesheetData, CRMData, masterData) => {
+
+  const findServiceDetails = (
+    tmstServiceDetails,
+    tmstId
+  ): IServiceDetails[] => {
+    let _tempTMSTSServiceDetails: IServiceDetails[] = [];
+
+    let findServices = tmstServiceDetails.filter(
+      (item: any) => item.TMST_IDId == tmstId
+    );
+
+    if (findServices.length) {
+      findServices.forEach((ser: any) => {
+        _tempTMSTSServiceDetails.push({
+          sitecode: ser.SiteCode ? ser.SiteCode : "",
+          client: ser.Client ? ser.Client : "",
+          serCode: ser.ServiceCode ? ser.ServiceCode.Title : "",
+          serDescription: ser.ServiceDescription
+            ? ser.ServiceDescription.ServiceDescription
+            : "",
+          startTime: ser.StartTime ? ser.StartTime : "",
+          finishTime: ser.FinishTime ? ser.FinishTime : "",
+          serviceID: ser.TMST_IDId,
+          otherSitecode: ser.OtherSiteCode ? ser.OtherSiteCode : "",
+        });
+      });
+    }
+
+    return _tempTMSTSServiceDetails;
+  };
+
+  const arrCreator = (
+    timesheetData,
+    CRMData,
+    masterData,
+    tmstServiceDetails
+  ) => {
     let compareTime = totalHoursFunction(
       timesheetData.StartTime,
       timesheetData.FinishTime
     );
+
+    let tmstServices = findServiceDetails(tmstServiceDetails, timesheetData.Id);
+
     if (CRMData) {
       tempCount++;
       localArr.push({
@@ -2050,11 +2202,11 @@ export default function TimeSheetDashboard(props): JSX.Element {
         date: timesheetData.Date ? timesheetData.Date : "",
         supervisor: timesheetData.Name ? timesheetData.Name.Title : "",
         startTime: timesheetData.StartTime ? timesheetData.StartTime : "",
-        finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
-        overTime: timesheetData.OverTime ? timesheetData.OverTime : "",
+        // finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
+        // overTime: timesheetData.OverTime ? timesheetData.OverTime : "",
         ifOverTime: timesheetData.OverTime ? "Yes" : "No",
         status: timesheetData.Status ? timesheetData.Status : "",
-        siteCode: timesheetData.SiteCode ? timesheetData.SiteCode : "",
+        // siteCode: timesheetData.SiteCode ? timesheetData.SiteCode : "",
         mobilization: timesheetData.Mobilization
           ? timesheetData.Mobilization
           : "",
@@ -2131,6 +2283,10 @@ export default function TimeSheetDashboard(props): JSX.Element {
             )
           : [],
         onCallVisible: timesheetData.OnCallVisible,
+        overtimeSts: timesheetData.OverTimeStatus
+          ? timesheetData.OverTimeStatus
+          : "",
+        serviceDetails: tmstServices,
       });
     } else {
       tempCount++;
@@ -2139,12 +2295,12 @@ export default function TimeSheetDashboard(props): JSX.Element {
         week: timesheetData.Week ? timesheetData.Week : "",
         date: timesheetData.Date ? timesheetData.Date : "",
         supervisor: timesheetData.Name ? timesheetData.Name.Title : "",
-        startTime: timesheetData.StartTime ? timesheetData.StartTime : "",
-        finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
+        // startTime: timesheetData.StartTime ? timesheetData.StartTime : "",
+        // finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
         overTime: timesheetData.OverTime ? timesheetData.OverTime : "",
         ifOverTime: timesheetData.OverTime ? "Yes" : "No",
         status: timesheetData.Status ? timesheetData.Status : "",
-        siteCode: timesheetData.SiteCode ? timesheetData.SiteCode : "",
+        // siteCode: timesheetData.SiteCode ? timesheetData.SiteCode : "",
         mobilization: timesheetData.Mobilization
           ? timesheetData.Mobilization
           : "",
@@ -2219,6 +2375,10 @@ export default function TimeSheetDashboard(props): JSX.Element {
             )
           : [],
         onCallVisible: timesheetData.OnCallVisible,
+        overtimeSts: timesheetData.OverTimeStatus
+          ? timesheetData.OverTimeStatus
+          : "",
+        serviceDetails: tmstServices,
       });
     }
     if (tempCount == masterData.length) {
@@ -2278,6 +2438,158 @@ export default function TimeSheetDashboard(props): JSX.Element {
         setLoader(false);
       }
     }
+  };
+
+  // datatable functions
+  const allowExpansion = (rowData) => {
+    return rowData.serviceDetails.length > 0;
+  };
+  const overTimePillTemplate = (rowData) => {
+    return (
+      <div
+        style={{
+          width: "100%",
+          textAlign: "center",
+          backgroundColor: rowData.overTime != "" ? "#6aad6ac7" : "#be3535ed",
+          padding: "3px 5px 5px 5px",
+          borderRadius: "50px",
+          color: rowData.overTime != "" ? "#000" : "#fff",
+        }}
+      >
+        {rowData.overTime ? "Yes" : "No"}
+      </div>
+    );
+  };
+  const dateTemplate = (rowData) => {
+    return (
+      <div>
+        {rowData.date ? moment(rowData.date).format("DD/MM/YYYY") : "-"}
+      </div>
+    );
+  };
+  const overTimeTemplate = (rowData) => {
+    return (
+      <div>
+        {rowData.overTime && rowData.overtimeSts == "Approved"
+          ? rowData.overTime
+          : "-"}
+      </div>
+    );
+  };
+  const overTimeCmtsTemplate = (rowData) => {
+    return (
+      <div>
+        {rowData.overtimecommentsDrp
+          ? rowData.overtimecommentsDrp.map((data) => {
+              return data + ",";
+            })
+          : "-"}
+      </div>
+    );
+  };
+  const stsTemplate = (rowData) => {
+    return (
+      <div
+        style={{
+          width: "100%",
+          textAlign: "center",
+          fontSize: "11px",
+          backgroundColor:
+            rowData.status == "Submitted"
+              ? "#c3ff68cf"
+              : rowData.status == "Draft"
+              ? "#d3d3d3"
+              : rowData.status == "Pending Approval"
+              ? "#f3d78a"
+              : rowData.status == "InReview"
+              ? "#f3d78a"
+              : "",
+          padding: "3px 5px 5px 5px",
+          borderRadius: "50px",
+          color:
+            rowData.status == "Completed"
+              ? "#000"
+              : rowData.status == "Draft"
+              ? "#5960a3"
+              : rowData.status == "Pending approval" ||
+                rowData.status == "InReview"
+              ? "#000"
+              : "",
+        }}
+      >
+        {rowData.status}
+      </div>
+    );
+  };
+  const costCenterTemplate = (rowData) => {
+    return <div>{rowData.costCenter ? rowData.costCenter : "-"}</div>;
+  };
+
+  const mobilizationTemplate = (rowData) => {
+    return <div>{rowData.mobilization ? rowData.mobilization : "-"}</div>;
+  };
+  const travelTemplate = (rowData) => {
+    return <div>{rowData.travel ? rowData.travel : "-"}</div>;
+  };
+  const cityTemplate = (rowData) => {
+    let cityName: string = "";
+    if (rowData.city) {
+      cityName = rowData.city;
+    } else if (rowData.originCity) {
+      cityName = rowData.originCity;
+    }
+    return <div>{cityName}</div>;
+  };
+  const approveTemplate = (rowData) => {
+    return (
+      <div>
+        {rowData.status == "Pending Approval" ? (
+          <IconButton
+            iconProps={CloudUpload}
+            style={{ cursor: "pointer" }}
+            title="Approve"
+            ariaLabel="Approve"
+            onClick={(ev) => (
+              ev.stopPropagation(),
+              uploadApprove(rowData.Id, rowData.json),
+              setIsApprovePopup(true)
+            )}
+          />
+        ) : (
+          ""
+        )}
+      </div>
+    );
+  };
+  const serviceSitecodeTemplate = (rowData) => {
+    let _tempSiteCode: string = rowData.sitecode;
+    if (rowData.sitecode == "Others") {
+      _tempSiteCode = rowData.otherSitecode;
+    }
+    return <div>{_tempSiteCode}</div>;
+  };
+
+  const rowExpansionTemplate = (data) => {
+    return (
+      <div>
+        <DataTable value={data.serviceDetails}>
+          <Column
+            field="sitecode"
+            header="Site Code"
+            body={serviceSitecodeTemplate}
+          ></Column>
+          <Column field="client" header="Client"></Column>
+          <Column field="serCode" header="Service Code"></Column>
+          <Column field="serDescription" header="Service Description"></Column>
+          <Column field="startTime" header="Start Time"></Column>
+          <Column field="finishTime" header="Finish Time"></Column>
+        </DataTable>
+      </div>
+    );
+  };
+
+  const onRowClicked = (event) => {
+    window.open(currentUrl + "?TsID=" + event.data.Id);
   };
 
   return loader ? (
@@ -3009,7 +3321,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         )}
       </div>
       <div>
-        <DetailsList
+        {/* <DetailsList
           items={displayData}
           columns={columns}
           setKey="set"
@@ -3017,7 +3329,45 @@ export default function TimeSheetDashboard(props): JSX.Element {
           selectionMode={SelectionMode.none}
           styles={gridStyles}
           onRenderRow={onRenderRow}
-        />
+        /> */}
+        <DataTable
+          value={displayData}
+          expandedRows={expandedRows}
+          onRowToggle={(e) => setExpandedRows(e.data)}
+          rowExpansionTemplate={rowExpansionTemplate}
+          onRowClick={onRowClicked}
+        >
+          <Column expander={allowExpansion} style={{ width: "5rem" }} />
+          <Column field="week" header="Week" />
+          <Column field="date" header="Date" body={dateTemplate} />
+          <Column field="supervisor" header="Supervisor" />
+          <Column field="totalHours" header="Total hours" />
+          <Column
+            field="overTime"
+            header="Over Time"
+            body={overTimePillTemplate}
+          />
+          <Column field="overTime" header="Over Time" body={overTimeTemplate} />
+          <Column
+            field="overtimecommentsDrp"
+            header="Over time reason"
+            body={overTimeCmtsTemplate}
+          />
+          <Column field="status" header="Status" body={stsTemplate} />
+          <Column
+            field="costCenter"
+            header="Cost Center"
+            body={costCenterTemplate}
+          />
+          <Column
+            field="mobilization"
+            header="Mobilization"
+            body={mobilizationTemplate}
+          />
+          <Column field="travel" header="Travel" body={travelTemplate} />
+          <Column field="city" header="City" body={cityTemplate} />
+          <Column field="city" header="Approve/Review" body={approveTemplate} />
+        </DataTable>
         <div className={styles.pagination}></div>
         {displayData.length == 0 ? (
           <div className={styles.noRecordsec}>
