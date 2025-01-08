@@ -17,8 +17,8 @@ import styles from "../FieldQualityDashboard.module.scss";
 import { Folder, log } from "sp-pnp-js";
 
 let spweb = Web(
-  "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
-  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
+  // "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 const iconClass = mergeStyles({
   fontSize: 15,
@@ -69,7 +69,7 @@ export default function TimeSheetView(props: any): JSX.Element {
       maxWidth: 100,
       onRender: (item) => (
         <>
-          <div>{item.serCode}</div>
+          <div>{item.serCode ? item.serCode : "-"}</div>
         </>
       ),
     },
@@ -318,8 +318,24 @@ export default function TimeSheetView(props: any): JSX.Element {
             }
           });
         } else {
-          setTimeSheetObj({});
-          setServiceDetails([]);
+          _tempTMSTSServiceDetails.push({
+            sitecode: timeSheetObject.siteCode ? timeSheetObject.siteCode : "",
+            client: timeSheetObject.supervisor
+              ? timeSheetObject.supervisor
+              : "",
+            serCode: "-",
+            serDescription: "-",
+            startTime: timeSheetObject.startTime
+              ? timeSheetObject.startTime
+              : "",
+            finishTime: timeSheetObject.finishTime
+              ? timeSheetObject.finishTime
+              : "",
+            serviceID: null,
+            otherSitecode: "-",
+          });
+          setTimeSheetObj({ ...timeSheetObject });
+          setServiceDetails([..._tempTMSTSServiceDetails]);
         }
       })
       .catch((err) => console.log(err, "getTMSTServiceDetails"));
@@ -387,7 +403,7 @@ export default function TimeSheetView(props: any): JSX.Element {
             label="Cost Center"
             styles={generalDetailsTextbox}
           />
-          <TextField
+          {/* <TextField
             disabled
             value={timeSheetObj.startTime ? timeSheetObj.startTime : "-"}
             label="Start time"
@@ -398,7 +414,7 @@ export default function TimeSheetView(props: any): JSX.Element {
             value={timeSheetObj.finishTime ? timeSheetObj.finishTime : "-"}
             label="Finish time"
             styles={generalDetailsTextbox}
-          />
+          /> */}
           {/* <TextField
             disabled
             value={timeSheetObj.siteCode ? timeSheetObj.siteCode : "-"}

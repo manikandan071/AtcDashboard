@@ -109,6 +109,7 @@ export default function Dashboard(props: any): JSX.Element {
         // )
         <TimeSheetView Id={timeSheetId} />
       )}
+      <div style={{ fontWeight: 700, textAlign: "right" }}>V-Prod: 1.1</div>
     </div>
   );
 }

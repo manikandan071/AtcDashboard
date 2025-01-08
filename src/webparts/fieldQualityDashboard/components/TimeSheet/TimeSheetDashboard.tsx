@@ -65,13 +65,13 @@ interface IServiceDetails {
 let localArr = [];
 let tempCount: number = 0;
 let spweb = Web(
-  "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
-  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
+  // "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 
 let tsWeb = Web(
-  "https://atclogisticsie.sharepoint.com/sites/FieldQualityDashboard"
-  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
+  // "https://atclogisticsie.sharepoint.com/sites/FieldQualityDashboard"
+  "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 let currentUrl = window.location.href;
 let EmployeeConfig: IEmployee[] = [];
@@ -79,6 +79,7 @@ let directReportsArr: IDirRep[] = [];
 
 export default function TimeSheetDashboard(props): JSX.Element {
   let loggedinuser = props.spcontext.pageContext.user.email;
+
   let currpage = 1;
   let totalPageItems = 30;
 
@@ -636,34 +637,32 @@ export default function TimeSheetDashboard(props): JSX.Element {
     return !date ? "" : moment(date).format("DD/MM/YYYY");
   };
 
-  // const onItemInvoked = useCallback((item) => {
-  //   window.open(currentUrl + "?TsID=" + item);
-  // }, []);
+  const onItemInvoked = useCallback((item) => {
+    window.open(currentUrl + "?TsID=" + item);
+  }, []);
 
-  // const onRenderRow = (row, defaultRender) => {
-  //   return (
-  //     <a
-  //       // className={classNameColor}
-  //       href={currentUrl + "?TsID=" + row.Id}
-  //       target="blank"
-  //       onClick={() => onItemInvoked(row.item.Id)}
-  //     >
-  //       {defaultRender(row)}
-  //     </a>
-  //   );
-  // };
+  const onRenderRow = (row, defaultRender) => {
+    return (
+      <a
+        // className={classNameColor}
+        href={currentUrl + "?TsID=" + row.Id}
+        target="blank"
+        onClick={() => onItemInvoked(row.item.Id)}
+      >
+        {defaultRender(row)}
+      </a>
+    );
+  };
 
   const getEmployeeList = (allCitys, directReportees) => {
     spweb.lists
       .getByTitle(`Timesheet`)
       .items.top(5000)
       .select(
-        "*,Name/Title,Name/EMail,OvertimecommentsDrp,OneToOneMeetingParticipants/Title"
+        "*,Name/Title,Name/EMail,OvertimecommentsDrp,OneToOneMeetingParticipants/Title,FieldValuesAsText/Date"
       )
-
-      .expand("Name,OneToOneMeetingParticipants")
+      .expand("Name,OneToOneMeetingParticipants,FieldValuesAsText")
       .orderBy("ID", false)
-      // .get()
       .getPaged()
       .then(async (Response) => {
         let res = [...Response.results];
@@ -690,7 +689,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         if (directReportees.length) {
           DirRepData = res.filter((rep) => {
             return directReportees.some((per) => {
-              return per.Email == rep.Name.EMail;
+              return per.Email == rep && rep.Name.EMail;
             });
           });
         }
@@ -798,7 +797,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
                 getEmployeeConfig(oldData, dirReportersArr);
               }
             } else {
-              setLoader(false);
+              // setLoader(false);
             }
             // new changes params
           });
@@ -903,7 +902,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         }
       })
       .catch((error) => {
-        alert(error);
+        console.log(error);
       });
   };
   const getOnlyTimeSheetPermissions = () => {
@@ -948,7 +947,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
   };
   useEffect(() => {
     getAdmin();
-    // getCRMActivityData();
     getOnlyTimeSheetPermissions();
   }, []);
 
@@ -1168,7 +1166,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
       setDeliveryStartDate(tempKey.filterStartDate);
       if (tempKey.filterStartDate) {
         tempArr = tempArr.filter((arr) => {
-          return moment(tempKey.filterStartDate) <= moment(arr.date);
+          return new Date(arr.date) >= new Date(tempKey.filterStartDate);
         });
         setDuplicateData(tempArr);
       }
@@ -1176,8 +1174,13 @@ export default function TimeSheetDashboard(props): JSX.Element {
     if (tempKey.filterEndDate != "All") {
       setDeliveryEndDate(tempKey.filterEndDate);
       if (tempKey.filterEndDate) {
+        let modifydate: Date = new Date(tempKey.filterEndDate);
+        modifydate.setHours(23);
+        modifydate.setMinutes(59);
+
         tempArr = tempArr.filter((arr) => {
-          return moment(tempKey.filterEndDate).add("d", 1) >= moment(arr.date);
+          // return moment(tempKey.filterEndDate).add("d", 1) >= moment(arr.date)
+          return new Date(arr.date) <= new Date(modifydate);
         });
         setDuplicateData(tempArr);
       }
@@ -1240,9 +1243,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
   };
 
   const generateTimeSheetExcel = async (list) => {
-    let firstIndex: number = 2;
-    let lastIndex: number = 2;
-
     if (list.length != 0) {
       let arrExport = list;
       let excelCount = 2;
@@ -1321,11 +1321,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
         { header: "OrginCity", key: "orgCity", width: 25 },
         { header: "OrginCountry", key: "orgCountry", width: 25 },
         { header: "CRM Activity", key: "CRMActivity", width: 25 },
-        // { header: "Project Type", key: "ProjType", width: 25 },
-        // { header: "Project Type2", key: "ProjType2", width: 25 },
-        // { header: "Project Type3", key: "ProjType3", width: 25 },
-        // // { header: "Project Type4", key: "ProjTyp4", width: 25 },
-        // { header: "Project Type Others", key: "ProjeTypeOthers", width: 25 },
         { header: "One To One Meeting", key: "oneToOneMeeting", width: 25 },
         {
           header: "One To One Meeting Participants",
@@ -1348,24 +1343,16 @@ export default function TimeSheetDashboard(props): JSX.Element {
         ];
       }
 
-      await getUniqeWeek.forEach(async (week) => {
+      // await getUniqeWeek.forEach(async (week) => {
+      for (let i = 0; i < getUniqeWeek.length; i++) {
         var TotalHour = 0;
         var TotalMin = 0;
+        let week = getUniqeWeek[i];
         var filterWeeklyData = arrExport.filter((item) => item.week == week);
-        // const sortFunction = (a, b) => {
-        //   let firstvalue = a.supervisor.toLowerCase(),
-        //     lastValue = b.supervisor.toLowerCase();
-        //   if (firstvalue < lastValue) {
-        //     return -1;
-        //   }
-        //   if (firstvalue > lastValue) {
-        //     return 1;
-        //   }
-        //   return 0;
-        // };
-        // filterWeeklyData = filterWeeklyData.sort(sortFunction);
-        await filterWeeklyData.forEach(async (item, index) => {
+        // await filterWeeklyData.forEach(async (item, index) => {
+        for (let index = 0; index < filterWeeklyData.length; index++) {
           let _tempOneToOneMeetingPerson: string = "";
+          let item = filterWeeklyData[index];
           if (item.oneToOneMeetingPerson.length > 1) {
             await item.oneToOneMeetingPerson.forEach((_per: any, i: number) => {
               if (i == item.oneToOneMeetingPerson.length - 1) {
@@ -1403,138 +1390,367 @@ export default function TimeSheetDashboard(props): JSX.Element {
             });
           }
 
-          let _r: any = {
-            week: item.week ? item.week : "-",
-            date: item.date ? dateFormater(item.date) : "-",
-            city: item.city ? item.city : "-",
-            supervisor: item.supervisor ? item.supervisor : "-",
-            // siteCode: item.siteCode ? item.siteCode : "-",
-            // client: item.client ? item.client : "-",
-            // serCode: item.serCode ? item.serCode : "-",
-            // serDescription: item.serDescription ? item.serDescription : "-",
-            // startTime: item.startTime ? item.startTime : "-",
-            // finishTime: item.finishTime ? item.finishTime : "-",
-            costCenter: item.costCenter ? item.costCenter : "-",
-            totalHours: item.totalHours ? item.totalHours : "-",
-            ifOverTime: item.overTime ? "Yes" : "No",
-            overTime:
-              item.overTime && item.overtimeSts == "Approved"
-                ? item.overTime
-                : "-",
-            status: item.status ? item.status : "-",
-            mobilization: item.mobilization ? item.mobilization : "-",
-            travel: item.travel ? item.travel : "-",
-            otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
-            comments: item.comments ? item.comments.toString() : "-",
-            reviewComments: item.reviewComments ? item.reviewComments : "-",
-            kmWithPrivateCar: item.kmWithPrivateCar
-              ? item.kmWithPrivateCar
-              : "-",
-            cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
-            travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
-            overTimeComments: item.overTimeComments
-              ? item.overTimeComments
-              : "-",
-            expense: item.expense ? item.expense : "-",
-            AtcCreditAmount: item.AtcCreditAmount ? item.AtcCreditAmount : "-",
-            personalCardAmount: item.personalCardAmount
-              ? item.personalCardAmount
-              : "-",
-            isRefund: item.isRefund,
-            overtimecommentsDrp: item.overtimecommentsDrp
-              ? item.overtimecommentsDrp.join(",")
-              : "-",
-            country: item.Country ? item.Country : "-",
-            orgCity: item.originCity ? item.originCity : "-",
-            orgCountry: item.originCountry ? item.originCountry : "-",
-            CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
-            // ProjType: item.ProjectType ? item.ProjectType : "-",
-            // ProjType2: item.ProjectType_2 ? item.ProjectType_2 : "-",
-            // ProjType3: item.ProjectType_3 ? item.ProjectType_3 : "-",
-            // ProjeTypeOthers: item.ProjectTypeOthers
-            //   ? item.ProjectTypeOthers
-            //   : "-",
-            oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
-            meetingPerson: _tempOneToOneMeetingPerson
-              ? _tempOneToOneMeetingPerson
-              : "-",
-            onCall: item.onCallVisible ? "Yes" : "No",
-          };
-
           if (item.serviceDetails.length) {
+            let firstIndex = worksheet._rows.length + 1;
+            let lastIndex = worksheet._rows.length + item.serviceDetails.length;
+
             for (let i = 0; i < item.serviceDetails.length; i++) {
               let _i = item.serviceDetails[i];
 
-              _r.siteCode =
-                _i.sitecode == "Other"
-                  ? _i.otherSiteCode
-                  : _i.sitecode
-                  ? _i.sitecode
-                  : "-";
-              _r.client = _i.client ? _i.client : "-";
-              _r.serCode = _i.serCode ? _i.serCode : "-";
-              _r.serDescription = _i.serDescription ? _i.serDescription : "-";
-              _r.startTime = _i.startTime ? _i.startTime : "-";
-              _r.finishTime = _i.finishTime ? _i.finishTime : "-";
-
-              let row = worksheet.addRow(_r);
-
-              EmployeeConfig.forEach((col) => {
-                if (col.Name == item.supervisor && col.Mobilization) {
-                  row._cells[2].fill = {
-                    type: "pattern",
-                    pattern: "solid",
-                    fgColor: {
-                      argb: "f8696b",
-                    },
-                  };
-                }
+              worksheet.addRow({
+                week: item.week ? item.week : "-",
+                date: item.date ? dateFormater(item.date) : "-",
+                city: item.city ? item.city : "-",
+                supervisor: item.supervisor ? item.supervisor : "-",
+                siteCode:
+                  _i.sitecode == "Other"
+                    ? _i.otherSiteCode
+                    : _i.sitecode
+                    ? _i.sitecode
+                    : "-",
+                client: _i.client ? _i.client : "-",
+                serCode: _i.serCode ? _i.serCode : "-",
+                serDescription: _i.serDescription ? _i.serDescription : "-",
+                startTime: _i.startTime ? _i.startTime : "-",
+                finishTime: _i.finishTime ? _i.finishTime : "-",
+                costCenter: item.costCenter ? item.costCenter : "-",
+                totalHours: item.totalHours ? item.totalHours : "-",
+                ifOverTime: item.overTime ? "Yes" : "No",
+                overTime:
+                  item.overTime && item.overtimeSts == "Approved"
+                    ? item.overTime
+                    : "-",
+                status: item.status ? item.status : "-",
+                mobilization: item.mobilization ? item.mobilization : "-",
+                travel: item.travel ? item.travel : "-",
+                otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
+                comments: item.comments ? item.comments.toString() : "-",
+                reviewComments: item.reviewComments ? item.reviewComments : "-",
+                kmWithPrivateCar: item.kmWithPrivateCar
+                  ? item.kmWithPrivateCar
+                  : "-",
+                cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
+                travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
+                overTimeComments: item.overTimeComments
+                  ? item.overTimeComments
+                  : "-",
+                expense: item.expense ? item.expense : "-",
+                AtcCreditAmount: item.AtcCreditAmount
+                  ? item.AtcCreditAmount
+                  : "-",
+                personalCardAmount: item.personalCardAmount
+                  ? item.personalCardAmount
+                  : "-",
+                isRefund: item.isRefund,
+                overtimecommentsDrp: item.overtimecommentsDrp
+                  ? item.overtimecommentsDrp.join(",")
+                  : "-",
+                country: item.Country ? item.Country : "-",
+                orgCity: item.originCity ? item.originCity : "-",
+                orgCountry: item.originCountry ? item.originCountry : "-",
+                CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
+                oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+                meetingPerson: _tempOneToOneMeetingPerson
+                  ? _tempOneToOneMeetingPerson
+                  : "-",
+                onCall: item.onCallVisible ? "Yes" : "No",
               });
             }
+            worksheet._rows[0]._cells.forEach((cell) => {
+              let cellName: any = "";
+              if (cell._address.split("").length == 2) {
+                cellName = cell._address.split("")[0];
+              } else {
+                cellName =
+                  cell._address.split("")[0] + cell._address.split("")[1];
+              }
+              if (
+                cellName == "C" ||
+                cellName == "D" ||
+                cellName == "E" ||
+                cellName == "F" ||
+                cellName == "G" ||
+                cellName == "H" ||
+                cellName == "I"
+              ) {
+                worksheet.mergeCells(
+                  `${cellName}${firstIndex}:${cellName}${firstIndex}`
+                );
+              } else {
+                worksheet.mergeCells(
+                  `${cellName}${firstIndex}:${cellName}${lastIndex}`
+                );
+              }
+            });
+          } else {
+            worksheet.addRow({
+              week: item.week ? item.week : "-",
+              date: item.date ? dateFormater(item.date) : "-",
+              city: item.city ? item.city : "-",
+              supervisor: item.supervisor ? item.supervisor : "-",
+              siteCode: item.siteCode ? item.siteCode : "-",
+              client: item.client ? item.client : "-",
+              serCode: item.serCode ? item.serCode : "-",
+              serDescription: item.serDescription ? item.serDescription : "-",
+              startTime: item.startTime ? item.startTime : "-",
+              finishTime: item.finishTime ? item.finishTime : "-",
+              costCenter: item.costCenter ? item.costCenter : "-",
+              totalHours: item.totalHours ? item.totalHours : "-",
+              ifOverTime: item.overTime ? "Yes" : "No",
+              overTime:
+                item.overTime && item.overtimeSts == "Approved"
+                  ? item.overTime
+                  : "-",
+              status: item.status ? item.status : "-",
+              mobilization: item.mobilization ? item.mobilization : "-",
+              travel: item.travel ? item.travel : "-",
+              otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
+              comments: item.comments ? item.comments.toString() : "-",
+              reviewComments: item.reviewComments ? item.reviewComments : "-",
+              kmWithPrivateCar: item.kmWithPrivateCar
+                ? item.kmWithPrivateCar
+                : "-",
+              cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
+              travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
+              overTimeComments: item.overTimeComments
+                ? item.overTimeComments
+                : "-",
+              expense: item.expense ? item.expense : "-",
+              AtcCreditAmount: item.AtcCreditAmount
+                ? item.AtcCreditAmount
+                : "-",
+              personalCardAmount: item.personalCardAmount
+                ? item.personalCardAmount
+                : "-",
+              isRefund: item.isRefund,
+              overtimecommentsDrp: item.overtimecommentsDrp
+                ? item.overtimecommentsDrp.join(",")
+                : "-",
+              country: item.Country ? item.Country : "-",
+              orgCity: item.originCity ? item.originCity : "-",
+              orgCountry: item.originCountry ? item.originCountry : "-",
+              CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
+              oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+              meetingPerson: _tempOneToOneMeetingPerson
+                ? _tempOneToOneMeetingPerson
+                : "-",
+              onCall: item.onCallVisible ? "Yes" : "No",
+            });
           }
 
-          if (filterWeeklyData.length == index + 1) {
+          if (filterWeeklyData.length - 1 == index) {
             worksheet.addRow({
               totalHours: `Total = ${TotalHour}:${TotalMin}`,
             });
+            worksheet.getCell(`J + ${worksheet._rows.length}`).fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: "f8696b" },
+            };
           }
-          lastIndex = lastIndex + item.serviceDetails.length;
+        }
+        // let _tempOneToOneMeetingPerson: string = "";
+        // if (item.oneToOneMeetingPerson.length > 1) {
+        //   await item.oneToOneMeetingPerson.forEach((_per: any, i: number) => {
+        //     if (i == item.oneToOneMeetingPerson.length - 1) {
+        //       _tempOneToOneMeetingPerson = _tempOneToOneMeetingPerson + _per;
+        //     } else {
+        //       _tempOneToOneMeetingPerson =
+        //         _tempOneToOneMeetingPerson + _per + ",";
+        //     }
+        //   });
+        // } else {
+        //   _tempOneToOneMeetingPerson = item.oneToOneMeetingPerson[0];
+        // }
 
-          worksheet._rows[0]._cells.forEach((cell) => {
-            let cellName: any = "";
-            if (cell._address.split("").length == 2) {
-              cellName = cell._address.split("")[0];
-            } else {
-              cellName =
-                cell._address.split("")[0] + cell._address.split("")[1];
-            }
-            if (
-              cellName == "D" ||
-              cellName == "E" ||
-              cellName == "F" ||
-              cellName == "G" ||
-              cellName == "H" ||
-              cellName == "I"
-            ) {
-              worksheet.mergeCells(
-                `${cellName}${firstIndex}:${cellName}${firstIndex}`
-              );
-            } else {
-              worksheet.mergeCells(
-                `${cellName}${firstIndex}:${cellName}${lastIndex - 1}`
-              );
-              worksheet.getCell(`${cellName}${firstIndex}`).alignment = {
-                vertical: "middle",
-                horizontal: "center",
-              };
-            }
-          });
-          firstIndex = firstIndex + item.serviceDetails.length;
-        });
+        // if (item.totalHours != "") {
+        //   let timeSplit = item.totalHours.split(":");
+        //   TotalHour += parseInt(timeSplit[0]);
+        //   if (TotalMin < 60) {
+        //     TotalMin += parseInt(timeSplit[1]);
+        //   } else {
+        //     TotalHour += 1;
+        //     TotalMin = 0;
+        //   }
+        // }
+        // if (crmFlag && item.CRMActivity == "Yes") {
+        //   CRMworksheet.addRow({
+        //     perName: item.PersonName,
+        //     email: item.Email,
+        //     telNo: item.TelNumber,
+        //     cmts: item.Comments,
+        //     name: item.Name,
+        //     date: item.Date,
+        //     client: item.Client,
+        //     meetingConducted: item.MeetingCon,
+        //     conversationType: item.ConversationType,
+        //   });
+        // }
+
+        // if (item.serviceDetails.length) {
+        //   let firstIndex = worksheet._rows.length + 1;
+        //   let lastIndex = worksheet._rows.length + item.serviceDetails.length;
+
+        //   for (let i = 0; i < item.serviceDetails.length; i++) {
+        //     let _i = item.serviceDetails[i];
+
+        //     worksheet.addRow({
+        //       week: item.week ? item.week : "-",
+        //       date: item.date ? dateFormater(item.date) : "-",
+        //       city: item.city ? item.city : "-",
+        //       supervisor: item.supervisor ? item.supervisor : "-",
+        //       siteCode:
+        //         _i.sitecode == "Other"
+        //           ? _i.otherSiteCode
+        //           : _i.sitecode
+        //           ? _i.sitecode
+        //           : "-",
+        //       client: _i.client ? _i.client : "-",
+        //       serCode: _i.serCode ? _i.serCode : "-",
+        //       serDescription: _i.serDescription ? _i.serDescription : "-",
+        //       startTime: _i.startTime ? _i.startTime : "-",
+        //       finishTime: _i.finishTime ? _i.finishTime : "-",
+        //       costCenter: item.costCenter ? item.costCenter : "-",
+        //       totalHours: item.totalHours ? item.totalHours : "-",
+        //       ifOverTime: item.overTime ? "Yes" : "No",
+        //       overTime:
+        //         item.overTime && item.overtimeSts == "Approved"
+        //           ? item.overTime
+        //           : "-",
+        //       status: item.status ? item.status : "-",
+        //       mobilization: item.mobilization ? item.mobilization : "-",
+        //       travel: item.travel ? item.travel : "-",
+        //       otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
+        //       comments: item.comments ? item.comments.toString() : "-",
+        //       reviewComments: item.reviewComments ? item.reviewComments : "-",
+        //       kmWithPrivateCar: item.kmWithPrivateCar
+        //         ? item.kmWithPrivateCar
+        //         : "-",
+        //       cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
+        //       travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
+        //       overTimeComments: item.overTimeComments
+        //         ? item.overTimeComments
+        //         : "-",
+        //       expense: item.expense ? item.expense : "-",
+        //       AtcCreditAmount: item.AtcCreditAmount
+        //         ? item.AtcCreditAmount
+        //         : "-",
+        //       personalCardAmount: item.personalCardAmount
+        //         ? item.personalCardAmount
+        //         : "-",
+        //       isRefund: item.isRefund,
+        //       overtimecommentsDrp: item.overtimecommentsDrp
+        //         ? item.overtimecommentsDrp.join(",")
+        //         : "-",
+        //       country: item.Country ? item.Country : "-",
+        //       orgCity: item.originCity ? item.originCity : "-",
+        //       orgCountry: item.originCountry ? item.originCountry : "-",
+        //       CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
+        //       oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+        //       meetingPerson: _tempOneToOneMeetingPerson
+        //         ? _tempOneToOneMeetingPerson
+        //         : "-",
+        //       onCall: item.onCallVisible ? "Yes" : "No",
+        //     });
+        //   }
+        //   worksheet._rows[0]._cells.forEach((cell) => {
+        //     let cellName: any = "";
+        //     if (cell._address.split("").length == 2) {
+        //       cellName = cell._address.split("")[0];
+        //     } else {
+        //       cellName =
+        //         cell._address.split("")[0] + cell._address.split("")[1];
+        //     }
+        //     if (
+        //       cellName == "D" ||
+        //       cellName == "E" ||
+        //       cellName == "F" ||
+        //       cellName == "G" ||
+        //       cellName == "H" ||
+        //       cellName == "I"
+        //     ) {
+        //       worksheet.mergeCells(
+        //         `${cellName}${firstIndex}:${cellName}${firstIndex}`
+        //       );
+        //     } else {
+        //       worksheet.mergeCells(
+        //         `${cellName}${firstIndex}:${cellName}${lastIndex}`
+        //       );
+        //     }
+        //   });
+        // } else {
+        //   worksheet.addRow({
+        //     week: item.week ? item.week : "-",
+        //     date: item.date ? dateFormater(item.date) : "-",
+        //     city: item.city ? item.city : "-",
+        //     supervisor: item.supervisor ? item.supervisor : "-",
+        //     siteCode: item.siteCode ? item.siteCode : "-",
+        //     client: item.client ? item.client : "-",
+        //     serCode: item.serCode ? item.serCode : "-",
+        //     serDescription: item.serDescription ? item.serDescription : "-",
+        //     startTime: item.startTime ? item.startTime : "-",
+        //     finishTime: item.finishTime ? item.finishTime : "-",
+        //     costCenter: item.costCenter ? item.costCenter : "-",
+        //     totalHours: item.totalHours ? item.totalHours : "-",
+        //     ifOverTime: item.overTime ? "Yes" : "No",
+        //     overTime:
+        //       item.overTime && item.overtimeSts == "Approved"
+        //         ? item.overTime
+        //         : "-",
+        //     status: item.status ? item.status : "-",
+        //     mobilization: item.mobilization ? item.mobilization : "-",
+        //     travel: item.travel ? item.travel : "-",
+        //     otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
+        //     comments: item.comments ? item.comments.toString() : "-",
+        //     reviewComments: item.reviewComments ? item.reviewComments : "-",
+        //     kmWithPrivateCar: item.kmWithPrivateCar
+        //       ? item.kmWithPrivateCar
+        //       : "-",
+        //     cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
+        //     travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
+        //     overTimeComments: item.overTimeComments
+        //       ? item.overTimeComments
+        //       : "-",
+        //     expense: item.expense ? item.expense : "-",
+        //     AtcCreditAmount: item.AtcCreditAmount
+        //       ? item.AtcCreditAmount
+        //       : "-",
+        //     personalCardAmount: item.personalCardAmount
+        //       ? item.personalCardAmount
+        //       : "-",
+        //     isRefund: item.isRefund,
+        //     overtimecommentsDrp: item.overtimecommentsDrp
+        //       ? item.overtimecommentsDrp.join(",")
+        //       : "-",
+        //     country: item.Country ? item.Country : "-",
+        //     orgCity: item.originCity ? item.originCity : "-",
+        //     orgCountry: item.originCountry ? item.originCountry : "-",
+        //     CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
+        //     oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+        //     meetingPerson: _tempOneToOneMeetingPerson
+        //       ? _tempOneToOneMeetingPerson
+        //       : "-",
+        //     onCall: item.onCallVisible ? "Yes" : "No",
+        //   });
+        // }
+
+        // if (filterWeeklyData.length - 1 == index) {
+        //   worksheet.addRow({
+        //     totalHours: `Total = ${TotalHour}:${TotalMin}`,
+        //   });
+        //   worksheet.getCell(`J + ${worksheet._rows.length}`).fill = {
+        //     type: "pattern",
+        //     pattern: "solid",
+        //     fgColor: { argb: "f8696b" },
+        //   };
+        // }
+        // });
         for (let i = 0; i < filterWeeklyData.length; i++) {
           let date = new Date(filterWeeklyData[i].date);
+          let isMobilization = EmployeeConfig.some(
+            (a) => a.Name == filterWeeklyData[i].supervisor && a.Mobilization
+          );
           let day = date.toLocaleString("en-us", { weekday: "long" });
-          // console.log(day);
           if (day == "Saturday" || day == "Sunday") {
             worksheet.getCell("B" + (i + excelCount)).fill = {
               type: "pattern",
@@ -1542,16 +1758,15 @@ export default function TimeSheetDashboard(props): JSX.Element {
               fgColor: { argb: "f8696b" },
             };
           }
-          if (excelCount + filterWeeklyData.length === excelCount + i + 1) {
-            worksheet.getCell(
-              // "J" + (excelCount + filterWeeklyData.length + 1)
-              "J" + lastIndex
-            ).fill = {
+
+          if (isMobilization) {
+            worksheet.getCell("C" + (i + excelCount)).fill = {
               type: "pattern",
               pattern: "solid",
               fgColor: { argb: "f8696b" },
             };
           }
+
           if (filterWeeklyData[i].overTime) {
             worksheet.getCell("K" + (i + excelCount)).fill = {
               type: "pattern",
@@ -1586,7 +1801,285 @@ export default function TimeSheetDashboard(props): JSX.Element {
           }
         }
         excelCount += filterWeeklyData.length + 1;
-      });
+      }
+      // var TotalHour = 0;
+      // var TotalMin = 0;
+      // var filterWeeklyData = arrExport.filter((item) => item.week == week);
+      // const sortFunction = (a, b) => {
+      //   let firstvalue = a.supervisor.toLowerCase(),
+      //     lastValue = b.supervisor.toLowerCase();
+      //   if (firstvalue < lastValue) {
+      //     return -1;
+      //   }
+      //   if (firstvalue > lastValue) {
+      //     return 1;
+      //   }
+      //   return 0;
+      // };
+      // filterWeeklyData = filterWeeklyData.sort(sortFunction);
+
+      // await filterWeeklyData.forEach(async (item, index) => {
+      //   let _tempOneToOneMeetingPerson: string = "";
+      //   if (item.oneToOneMeetingPerson.length > 1) {
+      //     await item.oneToOneMeetingPerson.forEach((_per: any, i: number) => {
+      //       if (i == item.oneToOneMeetingPerson.length - 1) {
+      //         _tempOneToOneMeetingPerson = _tempOneToOneMeetingPerson + _per;
+      //       } else {
+      //         _tempOneToOneMeetingPerson =
+      //           _tempOneToOneMeetingPerson + _per + ",";
+      //       }
+      //     });
+      //   } else {
+      //     _tempOneToOneMeetingPerson = item.oneToOneMeetingPerson[0];
+      //   }
+
+      //   if (item.totalHours != "") {
+      //     let timeSplit = item.totalHours.split(":");
+      //     TotalHour += parseInt(timeSplit[0]);
+      //     if (TotalMin < 60) {
+      //       TotalMin += parseInt(timeSplit[1]);
+      //     } else {
+      //       TotalHour += 1;
+      //       TotalMin = 0;
+      //     }
+      //   }
+      //   if (crmFlag && item.CRMActivity == "Yes") {
+      //     CRMworksheet.addRow({
+      //       perName: item.PersonName,
+      //       email: item.Email,
+      //       telNo: item.TelNumber,
+      //       cmts: item.Comments,
+      //       name: item.Name,
+      //       date: item.Date,
+      //       client: item.Client,
+      //       meetingConducted: item.MeetingCon,
+      //       conversationType: item.ConversationType,
+      //     });
+      //   }
+
+      //   if (item.serviceDetails.length) {
+      //     let firstIndex = worksheet._rows.length + 1;
+      //     let lastIndex = worksheet._rows.length + item.serviceDetails.length;
+
+      //     for (let i = 0; i < item.serviceDetails.length; i++) {
+      //       let _i = item.serviceDetails[i];
+
+      //       worksheet.addRow({
+      //         week: item.week ? item.week : "-",
+      //         date: item.date ? dateFormater(item.date) : "-",
+      //         city: item.city ? item.city : "-",
+      //         supervisor: item.supervisor ? item.supervisor : "-",
+      //         siteCode:
+      //           _i.sitecode == "Other"
+      //             ? _i.otherSiteCode
+      //             : _i.sitecode
+      //             ? _i.sitecode
+      //             : "-",
+      //         client: _i.client ? _i.client : "-",
+      //         serCode: _i.serCode ? _i.serCode : "-",
+      //         serDescription: _i.serDescription ? _i.serDescription : "-",
+      //         startTime: _i.startTime ? _i.startTime : "-",
+      //         finishTime: _i.finishTime ? _i.finishTime : "-",
+      //         costCenter: item.costCenter ? item.costCenter : "-",
+      //         totalHours: item.totalHours ? item.totalHours : "-",
+      //         ifOverTime: item.overTime ? "Yes" : "No",
+      //         overTime:
+      //           item.overTime && item.overtimeSts == "Approved"
+      //             ? item.overTime
+      //             : "-",
+      //         status: item.status ? item.status : "-",
+      //         mobilization: item.mobilization ? item.mobilization : "-",
+      //         travel: item.travel ? item.travel : "-",
+      //         otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
+      //         comments: item.comments ? item.comments.toString() : "-",
+      //         reviewComments: item.reviewComments ? item.reviewComments : "-",
+      //         kmWithPrivateCar: item.kmWithPrivateCar
+      //           ? item.kmWithPrivateCar
+      //           : "-",
+      //         cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
+      //         travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
+      //         overTimeComments: item.overTimeComments
+      //           ? item.overTimeComments
+      //           : "-",
+      //         expense: item.expense ? item.expense : "-",
+      //         AtcCreditAmount: item.AtcCreditAmount
+      //           ? item.AtcCreditAmount
+      //           : "-",
+      //         personalCardAmount: item.personalCardAmount
+      //           ? item.personalCardAmount
+      //           : "-",
+      //         isRefund: item.isRefund,
+      //         overtimecommentsDrp: item.overtimecommentsDrp
+      //           ? item.overtimecommentsDrp.join(",")
+      //           : "-",
+      //         country: item.Country ? item.Country : "-",
+      //         orgCity: item.originCity ? item.originCity : "-",
+      //         orgCountry: item.originCountry ? item.originCountry : "-",
+      //         CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
+      //         oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+      //         meetingPerson: _tempOneToOneMeetingPerson
+      //           ? _tempOneToOneMeetingPerson
+      //           : "-",
+      //         onCall: item.onCallVisible ? "Yes" : "No",
+      //       });
+      //     }
+      //     worksheet._rows[0]._cells.forEach((cell) => {
+      //       let cellName: any = "";
+      //       if (cell._address.split("").length == 2) {
+      //         cellName = cell._address.split("")[0];
+      //       } else {
+      //         cellName =
+      //           cell._address.split("")[0] + cell._address.split("")[1];
+      //       }
+      //       if (
+      //         cellName == "D" ||
+      //         cellName == "E" ||
+      //         cellName == "F" ||
+      //         cellName == "G" ||
+      //         cellName == "H" ||
+      //         cellName == "I"
+      //       ) {
+      //         worksheet.mergeCells(
+      //           `${cellName}${firstIndex}:${cellName}${firstIndex}`
+      //         );
+      //       } else {
+      //         worksheet.mergeCells(
+      //           `${cellName}${firstIndex}:${cellName}${lastIndex}`
+      //         );
+      //       }
+      //     });
+      //   } else {
+      //     worksheet.addRow({
+      //       week: item.week ? item.week : "-",
+      //       date: item.date ? dateFormater(item.date) : "-",
+      //       city: item.city ? item.city : "-",
+      //       supervisor: item.supervisor ? item.supervisor : "-",
+      //       siteCode: item.siteCode ? item.siteCode : "-",
+      //       client: item.client ? item.client : "-",
+      //       serCode: item.serCode ? item.serCode : "-",
+      //       serDescription: item.serDescription ? item.serDescription : "-",
+      //       startTime: item.startTime ? item.startTime : "-",
+      //       finishTime: item.finishTime ? item.finishTime : "-",
+      //       costCenter: item.costCenter ? item.costCenter : "-",
+      //       totalHours: item.totalHours ? item.totalHours : "-",
+      //       ifOverTime: item.overTime ? "Yes" : "No",
+      //       overTime:
+      //         item.overTime && item.overtimeSts == "Approved"
+      //           ? item.overTime
+      //           : "-",
+      //       status: item.status ? item.status : "-",
+      //       mobilization: item.mobilization ? item.mobilization : "-",
+      //       travel: item.travel ? item.travel : "-",
+      //       otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
+      //       comments: item.comments ? item.comments.toString() : "-",
+      //       reviewComments: item.reviewComments ? item.reviewComments : "-",
+      //       kmWithPrivateCar: item.kmWithPrivateCar
+      //         ? item.kmWithPrivateCar
+      //         : "-",
+      //       cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
+      //       travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
+      //       overTimeComments: item.overTimeComments
+      //         ? item.overTimeComments
+      //         : "-",
+      //       expense: item.expense ? item.expense : "-",
+      //       AtcCreditAmount: item.AtcCreditAmount
+      //         ? item.AtcCreditAmount
+      //         : "-",
+      //       personalCardAmount: item.personalCardAmount
+      //         ? item.personalCardAmount
+      //         : "-",
+      //       isRefund: item.isRefund,
+      //       overtimecommentsDrp: item.overtimecommentsDrp
+      //         ? item.overtimecommentsDrp.join(",")
+      //         : "-",
+      //       country: item.Country ? item.Country : "-",
+      //       orgCity: item.originCity ? item.originCity : "-",
+      //       orgCountry: item.originCountry ? item.originCountry : "-",
+      //       CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
+      //       oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+      //       meetingPerson: _tempOneToOneMeetingPerson
+      //         ? _tempOneToOneMeetingPerson
+      //         : "-",
+      //       onCall: item.onCallVisible ? "Yes" : "No",
+      //     });
+      //   }
+
+      //   if (filterWeeklyData.length - 1 == index) {
+      //     worksheet.addRow({
+      //       totalHours: `Total = ${TotalHour}:${TotalMin}`,
+      //     });
+      //     worksheet.getCell(`J + ${worksheet._rows.length}`).fill = {
+      //       type: "pattern",
+      //       pattern: "solid",
+      //       fgColor: { argb: "f8696b" },
+      //     };
+      //   }
+      // });
+      // for (let i = 0; i < filterWeeklyData.length; i++) {
+      //   let date = new Date(filterWeeklyData[i].date);
+      //   let isMobilization = EmployeeConfig.some(
+      //     (a) => a.Name == filterWeeklyData[i].supervisor && a.Mobilization
+      //   );
+      //   let day = date.toLocaleString("en-us", { weekday: "long" });
+      //   if (day == "Saturday" || day == "Sunday") {
+      //     worksheet.getCell("B" + (i + excelCount)).fill = {
+      //       type: "pattern",
+      //       pattern: "solid",
+      //       fgColor: { argb: "f8696b" },
+      //     };
+      //   }
+
+      //   if (isMobilization) {
+      //     worksheet.getCell("C" + (i + excelCount)).fill = {
+      //       type: "pattern",
+      //       pattern: "solid",
+      //       fgColor: { argb: "f8696b" },
+      //     };
+      //   }
+
+      //   if (excelCount + filterWeeklyData.length === excelCount + i + 1) {
+      //     worksheet.getCell("J" + (filterWeeklyData.length + 1)).fill = {
+      //       type: "pattern",
+      //       pattern: "solid",
+      //       fgColor: { argb: "f8696b" },
+      //     };
+      //   }
+      //   if (filterWeeklyData[i].overTime) {
+      //     worksheet.getCell("K" + (i + excelCount)).fill = {
+      //       type: "pattern",
+      //       pattern: "solid",
+      //       fgColor: { argb: "f8696b" },
+      //     };
+      //   }
+      //   if (filterWeeklyData[i].status == "Submitted") {
+      //     worksheet.getCell("M" + (i + excelCount)).fill = {
+      //       type: "pattern",
+      //       pattern: "solid",
+      //       fgColor: { argb: "90EE90" },
+      //     };
+      //   } else if (filterWeeklyData[i].status == "Draft") {
+      //     worksheet.getCell("M" + (i + excelCount)).fill = {
+      //       type: "pattern",
+      //       pattern: "solid",
+      //       fgColor: { argb: "d3d3d3" },
+      //     };
+      //   } else if (filterWeeklyData[i].status == "Pending Approval") {
+      //     worksheet.getCell("M" + (i + excelCount)).fill = {
+      //       type: "pattern",
+      //       pattern: "solid",
+      //       fgColor: { argb: "f4f2bf" },
+      //     };
+      //   } else if (filterWeeklyData[i].status == "InReview") {
+      //     worksheet.getCell("M" + (i + excelCount)).fill = {
+      //       type: "pattern",
+      //       pattern: "solid",
+      //       fgColor: { argb: "f4f2bf" },
+      //     };
+      //   }
+      // }
+      // excelCount += filterWeeklyData.length + 1;
+      // });
+
       [
         "A1",
         "B1",
@@ -1678,6 +2171,15 @@ export default function TimeSheetDashboard(props): JSX.Element {
         };
       });
 
+      worksheet.eachRow((row) => {
+        row.eachCell((cell) => {
+          cell.alignment = {
+            vertical: "middle",
+            horizontal: "center",
+          };
+        });
+      });
+
       // new changes
       if (crmFlag) {
         ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", "I1"].map((key) => {
@@ -1708,31 +2210,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
     } else {
       setIsPopupVisible(true);
     }
-  };
-
-  const getHistoryData = () => {
-    let getQuery = `<View Scope='RecursiveAll'>
-<Query>
-<OrderBy>
-<FieldRef Name='ID' Ascending='FALSE'/>
-</OrderBy>
-</Query>
-<ViewFields>
-<FieldRef Name='ID' />
-</ViewFields>
-<RowLimit Paged='TRUE'>5000</RowLimit>
-</View>`;
-    spweb.lists
-      .getByTitle(`Timesheet_History`)
-      .renderListDataAsStream({
-        ViewXml: getQuery,
-      })
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
   };
 
   const uploadApprove = (id, json) => {
@@ -2038,8 +2515,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
       .then((res) => {
         res.forEach((users) => {
           EmployeeConfig.push({
-            Email: users.Employee.EMail ? users.Employee.EMail : "",
-            Name: users.Employee.Title ? users.Employee.Title : null,
+            Email: users.Employee ? users.Employee.EMail : "",
+            Name: users.Employee ? users.Employee.Title : null,
             Mobilization: users.IsMobilization,
           });
         });
@@ -2199,14 +2676,20 @@ export default function TimeSheetDashboard(props): JSX.Element {
       localArr.push({
         Id: timesheetData.Id,
         week: timesheetData.Week ? timesheetData.Week : "",
-        date: timesheetData.Date ? timesheetData.Date : "",
+        // date: timesheetData.Date ? moment(timesheetData.Date).format() : "",
+        date: timesheetData.FieldValuesAsText
+          ? moment(
+              timesheetData.FieldValuesAsText.Date,
+              "DD/MM/YYYY"
+            ).toISOString()
+          : "",
         supervisor: timesheetData.Name ? timesheetData.Name.Title : "",
         startTime: timesheetData.StartTime ? timesheetData.StartTime : "",
-        // finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
-        // overTime: timesheetData.OverTime ? timesheetData.OverTime : "",
+        finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
+        overTime: timesheetData.OverTime ? timesheetData.OverTime : "",
         ifOverTime: timesheetData.OverTime ? "Yes" : "No",
         status: timesheetData.Status ? timesheetData.Status : "",
-        // siteCode: timesheetData.SiteCode ? timesheetData.SiteCode : "",
+        siteCode: timesheetData.SiteCode ? timesheetData.SiteCode : "",
         mobilization: timesheetData.Mobilization
           ? timesheetData.Mobilization
           : "",
@@ -2233,7 +2716,10 @@ export default function TimeSheetDashboard(props): JSX.Element {
           ? timesheetData.OverTimeComments
           : "",
         expense: timesheetData.Expense ? timesheetData.Expense : "",
-        totalHours: compareTime ? compareTime : "",
+        // totalHours: compareTime ? compareTime : "",
+        totalHours: timesheetData.TotalWHrs
+          ? timesheetData.TotalWHrs
+          : compareTime,
         AtcCreditAmount: timesheetData.TotalAtcCredit,
         personalCardAmount: timesheetData.TotalPersonalCard,
         ison: timesheetData.ison,
@@ -2293,14 +2779,20 @@ export default function TimeSheetDashboard(props): JSX.Element {
       localArr.push({
         Id: timesheetData.Id,
         week: timesheetData.Week ? timesheetData.Week : "",
-        date: timesheetData.Date ? timesheetData.Date : "",
+        // date: timesheetData.Date ? moment(timesheetData.Date).format() : "",
+        date: timesheetData.FieldValuesAsText
+          ? moment(
+              timesheetData.FieldValuesAsText.Date,
+              "DD/MM/YYYY"
+            ).toISOString()
+          : "",
         supervisor: timesheetData.Name ? timesheetData.Name.Title : "",
-        // startTime: timesheetData.StartTime ? timesheetData.StartTime : "",
-        // finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
+        startTime: timesheetData.StartTime ? timesheetData.StartTime : "",
+        finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
         overTime: timesheetData.OverTime ? timesheetData.OverTime : "",
         ifOverTime: timesheetData.OverTime ? "Yes" : "No",
         status: timesheetData.Status ? timesheetData.Status : "",
-        // siteCode: timesheetData.SiteCode ? timesheetData.SiteCode : "",
+        siteCode: timesheetData.SiteCode ? timesheetData.SiteCode : "",
         mobilization: timesheetData.Mobilization
           ? timesheetData.Mobilization
           : "",
@@ -2327,7 +2819,10 @@ export default function TimeSheetDashboard(props): JSX.Element {
           ? timesheetData.OverTimeComments
           : "",
         expense: timesheetData.Expense ? timesheetData.Expense : "",
-        totalHours: compareTime ? compareTime : "",
+        // totalHours: compareTime ? compareTime : "",
+        totalHours: timesheetData.TotalWHrs
+          ? timesheetData.TotalWHrs
+          : compareTime,
         AtcCreditAmount: timesheetData.TotalAtcCredit,
         personalCardAmount: timesheetData.TotalPersonalCard,
         ison: timesheetData.ison,
@@ -3293,7 +3788,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
               options={dropDownOptions.overTimeReason}
               styles={dropdownStyles}
             />
-            <Dropdown
+            {/* <Dropdown
               label="Tracking"
               selectedKey={FilterKey.overTimeReason}
               onChange={(e, option) => {
@@ -3302,7 +3797,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
               placeholder="Select an option"
               options={dropDownOptions.overTimeReason}
               styles={dropdownStyles}
-            />
+            /> */}
             {otherOptions ? (
               <IconButton
                 className={styles.resetbtn}
