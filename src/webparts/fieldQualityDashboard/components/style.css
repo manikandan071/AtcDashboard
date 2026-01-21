@@ -53,3 +53,33 @@ input[type="text" i] {
   font-size: 12px !important;
   padding: 0.5rem 0.5rem;
 }
+
+/* export data styles */
+.p-button,
+.p-datepicker table td > span.p-highlight {
+  background-color: #a83037 !important;
+  border: none !important;
+}
+.p-calendar:not(.p-calendar-disabled).p-focus > .p-inputtext {
+  box-shadow: unset !important;
+}
+
+/*  alertify */
+.alertify-notifier .ajs-message.ajs-success {
+  color: #fff;
+  border: 1px solid #fff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-box-shadow: -2px 10px 10px -10px #ffffff;
+  -moz-box-shadow: -2px 10px 10px -10px #ffffff;
+  box-shadow: -2px 10px 10px -10px #ffffff;
+}
+
+.alertify-notifier .ajs-message.ajs-error {
+  background: #fa5032;
+  color: #fff;
+  border: 1px solid #fff;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-box-shadow: -2px 10px 10px -10px #ffffff;
+  -moz-box-shadow: -2px 10px 10px -10px #ffffff;
+  box-shadow: -2px 10px 10px -10px #ffffff;
+}

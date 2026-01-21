@@ -31,7 +31,6 @@ export default function Dashboard(props: any): JSX.Element {
       .getByName("Timesheet_HR")
       .users.get()
       .then((Response) => {
-        // console.log(Response);
         let onlyTSPermission = Response.filter((user) => {
           return user.Email == loggedinuser;
         });
@@ -109,7 +108,7 @@ export default function Dashboard(props: any): JSX.Element {
         // )
         <TimeSheetView Id={timeSheetId} />
       )}
-      <div style={{ fontWeight: 700, textAlign: "right" }}>V-Prod: 1.1</div>
+      <div style={{ fontWeight: 700, textAlign: "right" }}>V-Prod: 1.9</div>
     </div>
   );
 }

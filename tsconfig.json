@@ -19,6 +19,7 @@
     "lib": [
       "es5",
       "dom",
+      "ES2016",
       "es2015.collection",
       "es2015.promise",
       "es6",

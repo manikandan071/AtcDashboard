@@ -10,15 +10,15 @@ import {
   SelectionMode,
   IDetailsListStyles,
   IColumn,
+  values,
 } from "@fluentui/react";
 import { FontIcon } from "@fluentui/react/lib/Icon";
 import { mergeStyles, mergeStyleSets } from "@fluentui/react/lib/Styling";
 import styles from "../FieldQualityDashboard.module.scss";
-import { Folder, log } from "sp-pnp-js";
 
 let spweb = Web(
-  // "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
-  "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
+  "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 const iconClass = mergeStyles({
   fontSize: 15,
@@ -293,13 +293,31 @@ export default function TimeSheetView(props: any): JSX.Element {
       .getByTitle("TMST_ServiceDetails")
       .items.select("*,ServiceCode/Title,ServiceDescription/ServiceDescription")
       .expand("ServiceCode,ServiceDescription")
-      .filter(`TMST_IDId eq ${Id}`)
       .orderBy("ID", false)
-      .get()
+      .top(5000)
+      .getPaged()
       .then(async (data: any) => {
+        let res = [...data.results];
+        let nextRef = data.hasNext;
+        // get more than 5000 data
+        while (nextRef) {
+          await data
+            .getNext()
+            .then(async (_res) => {
+              data = _res;
+              await res.push(..._res.results);
+              nextRef = _res.hasNext;
+            })
+            .catch((err) => {
+              console.log(err, "getEmployeeList");
+            });
+        }
+
         let _tempTMSTSServiceDetails = [];
-        if (data.length) {
-          data.forEach((ser: any, i: number) => {
+        res = res.filter((val) => val.TMST_IDId == Id);
+
+        if (res.length) {
+          res.forEach((ser: any, i: number) => {
             _tempTMSTSServiceDetails.push({
               sitecode: ser.SiteCode ? ser.SiteCode : "",
               client: ser.Client ? ser.Client : "",
@@ -312,7 +330,7 @@ export default function TimeSheetView(props: any): JSX.Element {
               serviceID: ser.TMST_IDId,
               otherSitecode: ser.OtherSiteCode ? ser.OtherSiteCode : "",
             });
-            if (data.length - 1 == i) {
+            if (res.length - 1 == i) {
               setTimeSheetObj({ ...timeSheetObject });
               setServiceDetails([..._tempTMSTSServiceDetails]);
             }
