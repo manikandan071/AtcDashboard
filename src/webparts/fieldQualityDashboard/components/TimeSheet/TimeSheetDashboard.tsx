@@ -6,16 +6,12 @@ import CustomLoader from "../Loder/CustomLoder";
 import { Web } from "@pnp/sp/presets/all";
 import { Icon } from "@fluentui/react";
 import styles from "../FieldQualityDashboard.module.scss";
-import { useEffect, useState, useCallback, cloneElement } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
-  DetailsList,
-  DetailsListLayoutMode,
-  SelectionMode,
   DefaultButton,
   IDropdownStyles,
   Dropdown,
   IIconProps,
-  IDetailsListStyles,
   IconButton,
   DatePicker,
   FocusTrapZone,
@@ -30,11 +26,17 @@ import { TextField } from "@material-ui/core";
 import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { camlQueryFunc } from "../Config";
+import ExportExcel from "../ExportExcel/ExportExcel";
 
 interface IEmployee {
   Email: string;
   Name: string;
   Mobilization: string;
+  reportsToEmail: string;
+  reportsToName: string;
+  team: string;
+  orginCountry: string;
 }
 interface ICRM {
   PersonName: string;
@@ -61,24 +63,37 @@ interface IServiceDetails {
   serviceID: number;
   otherSitecode: string;
 }
+interface ICamlRange {
+  startDate: string;
+  endDate: string;
+}
 
 let localArr = [];
 let tempCount: number = 0;
+let start: number = null;
 let spweb = Web(
-  // "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
-  "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
+  "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 
 let tsWeb = Web(
-  // "https://atclogisticsie.sharepoint.com/sites/FieldQualityDashboard"
-  "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
+  "https://atclogisticsie.sharepoint.com/sites/FieldQualityDashboard"
+  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 let currentUrl = window.location.href;
 let EmployeeConfig: IEmployee[] = [];
 let directReportsArr: IDirRep[] = [];
 
+const defaultCamlRange: ICamlRange = {
+  startDate: moment().subtract(3, "months").startOf("month").toISOString(),
+  // .format("YYYY-MM-DD"),
+  // endDate: moment().add(23, "hours").format("YYYY-MM-DD"),
+  // endDate: moment().add(1, "day").format("YYYY-MM-DD"),
+  endDate: moment().add(1, "days").endOf("day").toISOString(),
+};
+
 export default function TimeSheetDashboard(props): JSX.Element {
-  let loggedinuser = props.spcontext.pageContext.user.email;
+  let loggedinuser: string = props.spcontext.pageContext.user.email;
 
   let currpage = 1;
   let totalPageItems = 30;
@@ -92,13 +107,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
     costCenter: [{ key: "All", text: "All" }],
     city: [{ key: "All", text: "All" }],
     mobilization: [{ key: "All", text: "All" }],
-    // loggedinuser != "davor.salkanovic@atc-logistics.de"
-    //   ? [
-    //       { key: "All", text: "All" },
-    //       { key: "Yes", text: "Yes" },
-    //       { key: "No", text: "No" },
-    //     ]
-    //   : [{ key: "Yes", text: "Yes" }],
     ifOverTime: [
       { key: "All", text: "All" },
       { key: "Yes", text: "Yes" },
@@ -127,8 +135,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
     travel: "All",
     city: "All",
     overTimeReason: "All",
-    // mobilization:
-    //   loggedinuser != "davor.salkanovic@atc-logistics.de" ? "All" : "Yes",
   };
 
   let approvelJSON = [
@@ -165,42 +171,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
   const CloudUpload: IIconProps = { iconName: "SkypeCircleCheck" };
   const Close: IIconProps = { iconName: "ChromeClose" };
   const Equalizer: IIconProps = { iconName: "Equalizer" };
-  const gridStyles: Partial<IDetailsListStyles> = {
-    root: {
-      selectors: {
-        "& [role=grid]": {
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "start",
-          ".ms-DetailsRow-cell": {
-            display: "flex",
-            alignItems: "center",
-            height: 50,
-            minHeight: 50,
-            padding: "5px 10px",
-            margin: "auto",
-          },
-          ".ms-DetailsHeader-cellName": {
-            color: "#c56b70",
-          },
-          ".ms-DetailsHeader-cellTitle": {
-            padding: "0px 8px 0px 10px",
-          },
-        },
-        ".root-140": {
-          borderBottom: "1px solid #b8bbde",
-        },
-      },
-    },
-    headerWrapper: {
-      flex: "0 0 auto",
-    },
-    contentWrapper: {
-      flex: "1 1 auto",
-      overflowY: "auto",
-      overflowX: "hidden",
-    },
-  };
   const dropdownStyles: Partial<IDropdownStyles> = {
     root: { width: "9%", marginRight: "22px" },
     dropdown: { width: "100%" },
@@ -307,11 +277,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
           fontSize: "15px",
         },
       },
-      MuiFormControl: {
-        // root: {
-        //   padding: "28px 0px 0px 0px",
-        // },
-      },
+      MuiFormControl: {},
       MuiInputBase: {
         root: {
           padding: "7px!important",
@@ -342,275 +308,8 @@ export default function TimeSheetDashboard(props): JSX.Element {
       },
     },
   });
-  let columns = [
-    {
-      key: "columns1",
-      name: "Week",
-      fieldName: "week",
-      minWidth: 20,
-      maxWidth: 30,
-      onRender: (item) => (
-        <>
-          <div>{item.week}</div>
-        </>
-      ),
-    },
-    {
-      key: "columns2",
-      name: "Date",
-      fieldName: "date",
-      minWidth: 40,
-      maxWidth: 50,
-      onRender: (item) => (
-        <>
-          <div>{dateFormater(item.date)}</div>
-        </>
-      ),
-    },
-    {
-      key: "columns3",
-      name: "Supervisor",
-      fieldName: "name",
-      minWidth: 90,
-      maxWidth: 110,
-      onRender: (item) => (
-        <>
-          <div>{item.supervisor}</div>
-        </>
-      ),
-    },
-    {
-      key: "columns4",
-      name: "Start Time",
-      fieldName: "startTime",
-      minWidth: 30,
-      maxWidth: 40,
-      onRender: (item) => (
-        <>
-          <div>{item.startTime ? item.startTime : "-"}</div>
-        </>
-      ),
-    },
-    {
-      key: "columns5",
-      name: "Finish Time",
-      fieldName: "finishTime",
-      minWidth: 30,
-      maxWidth: 40,
-      onRender: (item) => (
-        <>
-          <div>{item.finishTime ? item.finishTime : "-"}</div>
-        </>
-      ),
-    },
-    {
-      key: "columns6",
-      name: "Total hours",
-      fieldName: "finishTime",
-      minWidth: 40,
-      maxWidth: 70,
-      onRender: (item) => (
-        <>
-          <div>{item.totalHours ? item.totalHours : "-"}</div>
-        </>
-      ),
-    },
-    {
-      key: "columns7",
-      name: "Over Time",
-      fieldName: "overTime",
-      minWidth: 40,
-      maxWidth: 70,
-      onRender: (item) => (
-        <>
-          <div
-            style={{
-              width: "100%",
-              textAlign: "center",
-              backgroundColor: item.overTime != "" ? "#6aad6ac7" : "#be3535ed",
-              padding: "3px 5px 5px 5px",
-              borderRadius: "50px",
-              color: item.overTime != "" ? "#000" : "#fff",
-            }}
-          >
-            {item.overTime ? "Yes" : "No"}
-          </div>
-        </>
-      ),
-    },
-    {
-      key: "columns8",
-      name: "Over Time",
-      fieldName: "overTime",
-      minWidth: 40,
-      maxWidth: 70,
-      onRender: (item) => (
-        <>
-          <div>
-            {item.overTime && item.overtimeSts == "Approved"
-              ? item.overTime
-              : "-"}
-          </div>
-        </>
-      ),
-    },
-    {
-      key: "columns9",
-      name: "Over time reason",
-      fieldName: "overtimecommentsDrp",
-      minWidth: 70,
-      maxWidth: 90,
-      onRender: (item) => (
-        <>
-          <div>
-            {item.overtimecommentsDrp
-              ? item.overtimecommentsDrp.map((data, index) => {
-                  return data + ",";
-                })
-              : "-"}
-          </div>
-        </>
-      ),
-    },
-    {
-      key: "columns10",
-      name: "Status",
-      fieldName: "status",
-      minWidth: 90,
-      maxWidth: 120,
-      onRender: (item) => (
-        <>
-          <div
-            style={{
-              width: "100%",
-              textAlign: "center",
-              fontSize: "11px",
-              backgroundColor:
-                item.status == "Submitted"
-                  ? "#c3ff68cf"
-                  : item.status == "Draft"
-                  ? "#d3d3d3"
-                  : item.status == "Pending Approval"
-                  ? "#f3d78a"
-                  : item.status == "InReview"
-                  ? "#f3d78a"
-                  : "",
-              padding: "3px 5px 5px 5px",
-              borderRadius: "50px",
-              color:
-                item.status == "Completed"
-                  ? "#000"
-                  : item.status == "Draft"
-                  ? "#5960a3"
-                  : item.status == "Pending approval" ||
-                    item.status == "InReview"
-                  ? "#000"
-                  : "",
-            }}
-          >
-            {item.status}
-          </div>
-        </>
-      ),
-    },
-    {
-      key: "columns11",
-      name: "Cost Center",
-      fieldName: "costCenter",
-      minWidth: 40,
-      maxWidth: 60,
-      onRender: (item) => (
-        <>
-          <div>{item.costCenter ? item.costCenter : "-"}</div>
-        </>
-      ),
-    },
-    {
-      key: "columns12",
-      name: "Site Code",
-      fieldName: "siteCode",
-      minWidth: 100,
-      maxWidth: 140,
-      onRender: (item) => (
-        <>
-          <div>{item.siteCode}</div>
-        </>
-      ),
-    },
-    {
-      key: "columns13",
-      name: "Mobilization",
-      fieldName: "mobilization",
-      minWidth: 70,
-      maxWidth: 120,
-      onRender: (item) => (
-        <>
-          <div>{item.mobilization ? item.mobilization : "-"}</div>
-        </>
-      ),
-    },
-    {
-      key: "columns14",
-      name: "Travel",
-      fieldName: "travel",
-      minWidth: 50,
-      maxWidth: 70,
-      onRender: (item) => (
-        <>
-          <div>{item.travel ? item.travel : "-"}</div>
-        </>
-      ),
-    },
-    {
-      key: "columns15",
-      name: "City",
-      fieldName: "city",
-      minWidth: 50,
-      maxWidth: 70,
-      onRender: (item) => {
-        let cityName: string = "";
-        if (item.city) {
-          cityName = item.city;
-        } else if (item.originCity) {
-          cityName = item.originCity;
-        }
-        return (
-          <>
-            <div>{cityName}</div>
-          </>
-        );
-      },
-    },
-    {
-      key: "columns16",
-      name: "Approve/Review",
-      fieldName: "json",
-      minWidth: 50,
-      maxWidth: 70,
-      isResizable: true,
-      onRender: (item) => (
-        <>
-          <div>
-            {item.status == "Pending Approval" ? (
-              <IconButton
-                iconProps={CloudUpload}
-                style={{ cursor: "pointer" }}
-                title="Approve"
-                ariaLabel="Approve"
-                onClick={(ev) => (
-                  ev.stopPropagation(),
-                  uploadApprove(item.Id, item.json),
-                  setIsApprovePopup(true)
-                )}
-              />
-            ) : (
-              ""
-            )}
-          </div>
-        </>
-      ),
-    },
-  ];
+
+  const workerRef = useRef(null);
 
   const [masterData, setMasterData] = useState([]);
   const [duplicateData, setDuplicateData] = useState([]);
@@ -632,9 +331,11 @@ export default function TimeSheetDashboard(props): JSX.Element {
   const [appprovelId, setApprovelID] = useState(null);
   const [otherOptions, setOtherOptions] = useState(false);
   const [expandedRows, setExpandedRows] = useState(null);
+  const [isExportExcel, setIsExportExcel] = useState<boolean>(false);
 
   const dateFormater = (date: Date): string => {
-    return !date ? "" : moment(date).format("DD/MM/YYYY");
+    // return !date ? "" : moment(date).add(5, "hours").format("DD/MM/YYYY");
+    return !date ? "" : moment(date).add(7, "hours").format("DD/MM/YYYY");
   };
 
   const onItemInvoked = useCallback((item) => {
@@ -654,252 +355,96 @@ export default function TimeSheetDashboard(props): JSX.Element {
     );
   };
 
-  const getEmployeeList = (allCitys, directReportees) => {
-    spweb.lists
-      .getByTitle(`Timesheet`)
-      .items.top(5000)
-      .select(
-        "*,Name/Title,Name/EMail,OvertimecommentsDrp,OneToOneMeetingParticipants/Title,FieldValuesAsText/Date"
-      )
-      .expand("Name,OneToOneMeetingParticipants,FieldValuesAsText")
-      .orderBy("ID", false)
-      .getPaged()
-      .then(async (Response) => {
-        let res = [...Response.results];
-        let nextRef = Response.hasNext;
-        // get more than 5000 data
-        while (nextRef) {
-          await Response.getNext()
-            .then(async (_res) => {
-              Response = _res;
-              await res.push(..._res.results);
-              nextRef = _res.hasNext;
-            })
-            .catch((err) => {
-              console.log(err, "getEmployeeList");
-            });
-        }
+  // const getEmployeeList = async (allCitys, directReportees): Promise<any[]> => {
+  const getEmployeeList = async (directEmployee: string[]): Promise<any[]> => {
+    try {
+      const allItems: any[] = await fetchAllItems();
 
+      if (allItems.length) {
         tempCount = 0;
         localArr = [];
-        let timeFilterData = [];
-        let DirRepData = [];
+        let TimesheetData = [];
         // new changes
-        // get direct reports array
-        if (directReportees.length) {
-          DirRepData = res.filter((rep) => {
-            return directReportees.some((per) => {
-              return per.Email == rep && rep.Name.EMail;
-            });
-          });
+        if (directEmployee.length) {
+          const directEmails = directEmployee;
+          TimesheetData = allItems.filter(
+            (rep) =>
+              Array.isArray(rep.Name) &&
+              rep.Name.some((_u) =>
+                directEmails.some((e: string) => e == _u.email)
+              )
+          );
         }
-        // console.log(DirRepData);
-        allCitys.forEach((city) => {
-          let filterCitys = res.filter((filres) => {
-            return filres.City == city.City || filres.OrginCity == city.City;
-          });
-          if (filterCitys.length > 0) {
-            filterCitys.forEach((citys) => {
-              if (
-                userPermissionCitys.findIndex((dd) => {
-                  return dd.city == citys.City;
-                }) == -1
-              ) {
-                userPermissionCitys.push({
-                  city: citys.City,
-                });
-              }
+        getTMSTServiceDetails(TimesheetData);
+      }
+    } catch (error) {
+      console.error("Error in getEmployeeList:", error);
+      return [];
+    }
+
+    async function fetchAllItems(): Promise<any[]> {
+      const allItems: any[] = [];
+      let nextHref: string | null = null;
+
+      do {
+        try {
+          const response = await spweb.lists
+            .getByTitle("Timesheet")
+            .renderListDataAsStream({
+              ViewXml: camlQueryFunc(defaultCamlRange).timesheet,
+              ...(nextHref ? { Paging: nextHref.substring(1) } : {}),
             });
-            if (filterCitys.length > 0) {
-              filterCitys.forEach((data) => {
-                timeFilterData.push(data);
-              });
-            }
-          }
-        });
-        // new changes params
-        getTimeSheetHistory(
-          allCitys,
-          timeFilterData,
-          DirRepData,
-          directReportees
-        );
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+
+          allItems.push(...response.Row);
+          nextHref = response.NextHref || null;
+        } catch (err) {
+          console.error("Error fetching items:", err);
+          break;
+        }
+      } while (nextHref);
+
+      return allItems;
+    }
   };
 
-  const getTimeSheetHistory = (
-    allCitys,
-    oldData,
-    DirRepData,
-    directReportees
-  ) => {
-    spweb.lists
-      .getByTitle(`Timesheet_History`)
-      .items.select("*,Name/Title,Name/EMail,OvertimecommentsDrp")
-      .expand("Name")
-      .orderBy("Modified", false)
-      .top(5000)
-      // .get()
-      .getPaged()
-      .then(async (data) => {
-        // get more than 5000 items
-        let res = [...data.results];
-        let nextRef = data.hasNext;
-        // get more than 5000 data
-        while (nextRef) {
-          await data
-            .getNext()
-            .then(async (_res) => {
-              data = _res;
-              await res.push(..._res.results);
-              nextRef = _res.hasNext;
-            })
-            .catch((err) => {
-              console.log(err, "getTimeSheetHistory");
-            });
-        }
-
-        // dont forgot
-        // new changes
-
-        let dirReportersArr = [];
-        if (res.length) {
-          dirReportersArr = res.filter((rep) => {
-            return directReportees.some((per) => {
-              return per.Email == rep.Name.EMail;
-            });
-          });
-          dirReportersArr = [...dirReportersArr, ...DirRepData];
-          allCitys.forEach((city) => {
-            let filterCitys = res.filter((res) => {
-              return res.City == city.City || res.OrginCity == city.City;
-            });
-            if (filterCitys.length > 0) {
-              filterCitys.forEach((citys) => {
-                if (
-                  userPermissionCitys.findIndex((dd) => {
-                    return dd.city == citys.City;
-                  }) == -1
-                ) {
-                  userPermissionCitys.push({
-                    city: citys.City,
-                  });
-                }
-              });
-              if (filterCitys.length > 0) {
-                filterCitys.forEach((data) => {
-                  oldData.push(data);
-                });
-                // dont forgot
-                getEmployeeConfig(oldData, dirReportersArr);
-              }
-            } else {
-              // setLoader(false);
-            }
-            // new changes params
-          });
-          // getEmployeeConfig(oldData, dirReportersArr);
-        } else {
-          dirReportersArr = DirRepData;
-          getEmployeeConfig(oldData, dirReportersArr);
-        }
-        // console.log(dirReportersArr);
-        // allCitys.forEach((city) => {
-        //   let filterCitys = data.filter((res) => {
-        //     return res.City == city.City || res.OrginCity == city.City;
-        //   });
-        //   if (filterCitys.length > 0) {
-        //     filterCitys.forEach((citys) => {
-        //       if (
-        //         userPermissionCitys.findIndex((dd) => {
-        //           return dd.city == citys.City;
-        //         }) == -1
-        //       ) {
-        //         userPermissionCitys.push({
-        //           city: citys.City,
-        //         });
-        //       }
-        //     });
-        //     if (filterCitys.length > 0) {
-        //       filterCitys.forEach((data) => {
-        //         oldData.push(data);
-        //       });
-        //       // dont forgot
-        //       getEmployeeConfig(oldData, dirReportersArr);
-        //     }
-        //   } else {
-        //     setLoader(false);
-        //   }
-        //   // new changes params
-        // });
-        // getEmployeeConfig(oldData, dirReportersArr);
-      })
-      .catch((err) => {
-        console.log(err, "timeSheetHistory");
-      });
-  };
-
-  const getAdmin = () => {
-    spweb.siteGroups
+  const getAdmin = async (): Promise<void> => {
+    await spweb.siteGroups
       .getByName("ATC FQT Owners")
       .users.get()
-      .then((users) => {
+      .then(async (users) => {
         let tempUser = users.filter((_user) => {
           return _user.Email == loggedinuser;
         });
-        if (tempUser.length > 0) {
-          spweb.lists
-            .getByTitle(`TimesheetConfig`)
-            .items.top(5000)
-            .get()
-            .then((Response) => {
-              let allCitys = [];
-              if (Response.length > 0) {
-                Response.forEach((data) => {
-                  if (
-                    allCitys.findIndex((dd) => {
-                      return dd.City == data.Title;
-                    }) == -1
-                  ) {
-                    allCitys.push({ City: data.Title });
-                  }
-                });
-              }
-              // new changes
-              getDirReports(allCitys);
-            })
 
-            .catch((err) => {
-              console.log(err);
-            });
+        let _employeeConfigdata: IEmployee[] = await getEmployeeConfig();
+        const curUserCountry: string = _employeeConfigdata.find(
+          (_u: IEmployee) => _u.Email == loggedinuser
+        )?.orginCountry;
+
+        let _directEmployee: string[] = [];
+
+        if (tempUser.length > 0) {
+          _directEmployee = _employeeConfigdata.map(
+            (_u: IEmployee) => _u.Email
+          );
+        } else if (
+          loggedinuser == "daniel.zrnic@atc-logistics.com" ||
+          loggedinuser == "Daniel.zrnic@atc.arvato.com"
+        ) {
+          _directEmployee = _employeeConfigdata
+            .filter((_u: IEmployee) => _u.team == "DCT Cabling Team")
+            .map((_e: IEmployee) => _e.Email);
         } else {
-          spweb.lists
-            .getByTitle(`TimesheetConfig`)
-            .items.top(5000)
-            .filter("Manager/EMail eq '" + loggedinuser + "' ")
-            .get()
-            .then((Response) => {
-              let allCitys = [];
-              if (Response.length > 0) {
-                Response.forEach((data) => {
-                  if (
-                    allCitys.findIndex((dd) => {
-                      return dd.City == data.Title;
-                    }) == -1
-                  ) {
-                    allCitys.push({ City: data.Title });
-                  }
-                });
-              }
-              getDirReports(allCitys);
-            })
-            .catch((err) => {
-              console.log(err);
-            });
+          _directEmployee = _employeeConfigdata
+            .filter(
+              (_u: IEmployee) =>
+                (_u.reportsToEmail == loggedinuser &&
+                  _u.team != "DCT Cabling Team") ||
+                _u.orginCountry == curUserCountry
+            )
+            .map((_e: IEmployee) => _e.Email);
         }
+        await getEmployeeList(_directEmployee);
       })
       .catch((error) => {
         console.log(error);
@@ -919,33 +464,9 @@ export default function TimeSheetDashboard(props): JSX.Element {
         console.log(err);
       });
   };
-  // new changes
-  // get direct reportes using graph
-  const getDirReports = async (allCitys) => {
-    await props.spcontext._msGraphClientFactory
-      .getClient()
-      .then(async (client: any) => {
-        await client
-          .api("/me/directReports")
-          .top(999)
-          .get()
-          .then(async (member) => {
-            if (member.value.length) {
-              await member.value.forEach(async (per) => {
-                directReportsArr.push({
-                  Email: per.mail,
-                });
-              });
-            }
-            // new changes params
-            await getEmployeeList(allCitys, directReportsArr);
-          });
-      })
-      .catch((err) => {
-        console.log(err, "getATCTransportMembers");
-      });
-  };
+
   useEffect(() => {
+    start = performance.now();
     getAdmin();
     getOnlyTimeSheetPermissions();
   }, []);
@@ -996,7 +517,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
       }
     }
   }
-
   const allFilterOptions = (data) => {
     data.forEach((_data) => {
       if (
@@ -1166,7 +686,12 @@ export default function TimeSheetDashboard(props): JSX.Element {
       setDeliveryStartDate(tempKey.filterStartDate);
       if (tempKey.filterStartDate) {
         tempArr = tempArr.filter((arr) => {
-          return new Date(arr.date) >= new Date(tempKey.filterStartDate);
+          // return new Date(arr.date) >= new Date(tempKey.filterStartDate);
+          return (
+            // moment(arr.date).add(5, "hours").format() >=
+            moment(arr.date).add(7, "hours").format() >=
+            moment(tempKey.filterStartDate).format()
+          );
         });
         setDuplicateData(tempArr);
       }
@@ -1180,7 +705,12 @@ export default function TimeSheetDashboard(props): JSX.Element {
 
         tempArr = tempArr.filter((arr) => {
           // return moment(tempKey.filterEndDate).add("d", 1) >= moment(arr.date)
-          return new Date(arr.date) <= new Date(modifydate);
+          // return new Date(arr.date) <= new Date(modifydate);
+          return (
+            // moment(arr.date).add(5, "hours").format() <=
+            moment(arr.date).add(7, "hours").format() <=
+            moment(modifydate).format()
+          );
         });
         setDuplicateData(tempArr);
       }
@@ -1202,7 +732,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
     setDuplicateData([...masterData]);
     timeSheetPaginateFunction(currpage, tempArr);
   };
-
   const resetFilterOptions = () => {
     setDisplayData(masterData);
     timeSheetPaginateFunction(currpage, masterData);
@@ -1227,7 +756,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
       overTimeReason: "All",
     });
   };
-
   const timeSheetPaginateFunction = (pagenumber, data: any[]) => {
     if (data.length > 0) {
       let lastIndex: number = pagenumber * totalPageItems;
@@ -1242,974 +770,925 @@ export default function TimeSheetDashboard(props): JSX.Element {
     }
   };
 
+  // const generateTimeSheetExcel = async (list) => {
+  //   if (list.length != 0) {
+  //     let arrExport = list;
+  //     let excelCount = 2;
+  //     const getAllWeeks = arrExport.map((data) => data.week);
+
+  //     let getUniqeWeek = getAllWeeks.filter(
+  //       (item, index) => getAllWeeks.indexOf(item) === index
+  //     );
+
+  //     // let crmFlag: boolean = false;
+  //     const crmFlag = list.some((value) => value.CRMId !== "-");
+
+  //     // list.forEach((value) => {
+  //     //   if (value.CRMId != "-") {
+  //     //     crmFlag = true;
+  //     //   }
+  //     // });
+  //     const workbook = new Excel.Workbook();
+  //     const worksheet = workbook.addWorksheet("My Sheet");
+  //     let CRMworksheet: any;
+  //     if (crmFlag) {
+  //       CRMworksheet = workbook.addWorksheet("CRM_Activity");
+  //     }
+  //     worksheet.columns = [
+  //       { header: "Week", key: "week", width: 25 },
+  //       { header: "Date", key: "date", width: 25 },
+  //       { header: "Supervisor", key: "supervisor", width: 25 },
+  //       {
+  //         header: "Sitecode",
+  //         key: "siteCode",
+  //         width: 25,
+  //       },
+  //       { header: "Client", key: "client", width: 25 },
+  //       { header: "Service Code", key: "serCode", width: 25 },
+  //       { header: "Service Description", key: "serDescription", width: 25 },
+  //       { header: "Start time", key: "startTime", width: 25 },
+  //       { header: "Finish time", key: "finishTime", width: 25 },
+  //       { header: "Total hours", key: "totalHours", width: 25 },
+  //       { header: "Over time", key: "ifOverTime", width: 25 },
+  //       { header: "Over time", key: "overTime", width: 25 },
+  //       { header: "Status", key: "status", width: 25 },
+  //       { header: "Cost center", key: "costCenter", width: 25 },
+
+  //       { header: "MobilizationJob", key: "mobilization", width: 25 },
+  //       { header: "Travel", key: "travel", width: 25 },
+  //       { header: "City", key: "city", width: 25 },
+  //       { header: "Other sitecode", key: "otherSiteCode", width: 25 },
+  //       {
+  //         header: "Comments",
+  //         key: "comments",
+  //         width: 25,
+  //       },
+  //       { header: "Review comments", key: "reviewComments", width: 25 },
+  //       { header: "Km with private car", key: "kmWithPrivateCar", width: 25 },
+  //       { header: "Travel with car", key: "travelWithCar", width: 25 },
+  //       {
+  //         header: "City over night",
+  //         key: "cityOverNight",
+  //         width: 25,
+  //       },
+  //       {
+  //         header: "Over time comments",
+  //         key: "overTimeComments",
+  //         width: 25,
+  //       },
+  //       {
+  //         header: "Over time reason",
+  //         key: "overtimecommentsDrp",
+  //         width: 25,
+  //       },
+  //       { header: "Expense", key: "expense", width: 25 },
+  //       { header: "ATCCreditCardAmount", key: "AtcCreditAmount", width: 25 },
+  //       {
+  //         header: "PersonalCreditCardAmount",
+  //         key: "personalCardAmount",
+  //         width: 25,
+  //       },
+  //       { header: "ReFundApproved", key: "isRefund", width: 25 },
+  //       { header: "Country", key: "country", width: 25 },
+  //       { header: "OrginCity", key: "orgCity", width: 25 },
+  //       { header: "OrginCountry", key: "orgCountry", width: 25 },
+  //       { header: "CRM Activity", key: "CRMActivity", width: 25 },
+  //       { header: "One To One Meeting", key: "oneToOneMeeting", width: 25 },
+  //       {
+  //         header: "One To One Meeting Participants",
+  //         key: "meetingPerson",
+  //         width: 25,
+  //       },
+  //       { header: "OnCall", key: "onCall", width: 25 },
+  //     ];
+  //     if (crmFlag) {
+  //       CRMworksheet.columns = [
+  //         { header: "Person Name", key: "perName", width: 25 },
+  //         { header: "Email Address", key: "email", width: 50 },
+  //         { header: "Tel Number", key: "telNo", width: 25 },
+  //         { header: "Comments", key: "cmts", width: 25 },
+  //         { header: "Name", key: "name", width: 25 },
+  //         { header: "Date", key: "date", width: 25 },
+  //         { header: "Client", key: "client", width: 25 },
+  //         { header: "Meeting Conducted", key: "meetingConducted", width: 25 },
+  //         { header: "Conversation Type", key: "conversationType", width: 25 },
+  //       ];
+  //     }
+
+  //     for (let i = 0; i < getUniqeWeek.length; i++) {
+  //       let TotalHour: number = 0;
+  //       let TotalMin: number = 0;
+  //       let week = getUniqeWeek[i];
+
+  //       let filterWeeklyData = arrExport.filter((item) => item.week == week);
+
+  //       for (let index = 0; index < filterWeeklyData.length; index++) {
+  //         let _tempOneToOneMeetingPerson: string = "";
+  //         let item = filterWeeklyData[index];
+  //         if (item.oneToOneMeetingPerson.length > 1) {
+  //           // await item.oneToOneMeetingPerson.map((_per: any, i: number) => {
+  //           for (const _per of item.oneToOneMeetingPerson) {
+  //             if (i == item.oneToOneMeetingPerson.length - 1) {
+  //               _tempOneToOneMeetingPerson = _tempOneToOneMeetingPerson + _per;
+  //             } else {
+  //               _tempOneToOneMeetingPerson =
+  //                 _tempOneToOneMeetingPerson + _per + ",";
+  //             }
+  //           }
+  //           // });
+  //         } else {
+  //           _tempOneToOneMeetingPerson = item.oneToOneMeetingPerson[0];
+  //         }
+
+  //         // if (item.totalHours != "") {
+  //         //   let timeSplit = item.totalHours.split(":");
+  //         //   TotalHour += parseInt(timeSplit[0]);
+  //         //   if (TotalMin < 60) {
+  //         //     TotalMin += parseInt(timeSplit[1]);
+  //         //   } else {
+  //         //     TotalHour += 1;
+  //         //     TotalMin = 0;
+  //         //   }
+  //         // }
+
+  //         if (item.totalHours) {
+  //           const [hours, minutes] = item.totalHours.split(":").map(Number);
+  //           TotalHour += hours;
+  //           TotalMin += minutes;
+  //         }
+  //         if (TotalMin >= 60) {
+  //           TotalHour += Math.floor(TotalMin / 60);
+  //           TotalMin %= 60;
+  //         }
+
+  //         if (crmFlag && item.CRMActivity == "Yes") {
+  //           CRMworksheet.addRow({
+  //             perName: item.PersonName,
+  //             email: item.Email,
+  //             telNo: item.TelNumber,
+  //             cmts: item.Comments,
+  //             name: item.Name,
+  //             date: item.Date,
+  //             client: item.Client,
+  //             meetingConducted: item.MeetingCon,
+  //             conversationType: item.ConversationType,
+  //           });
+  //         }
+
+  //         if (item.serviceDetails && item.serviceDetails.length) {
+  //           let firstIndex = worksheet._rows.length + 1;
+  //           let lastIndex = worksheet._rows.length + item.serviceDetails.length;
+
+  //           for (let k = 0; k < item.serviceDetails.length; k++) {
+  //             let _i = item.serviceDetails[k];
+  //             worksheet.addRow({
+  //               week: item.week ? item.week : "-",
+  //               date: item.date ? dateFormater(item.date) : "-",
+  //               city: item.city ? item.city : "-",
+  //               supervisor: item.supervisor ? item.supervisor : "-",
+  //               siteCode: _i.sitecode
+  //                 ? _i.otherSiteCode
+  //                 : _i.sitecode
+  //                 ? _i.sitecode
+  //                 : "-",
+  //               client: _i.client ? _i.client : "-",
+  //               serCode: _i.serCode ? _i.serCode : "-",
+  //               serDescription: _i.serDescription ? _i.serDescription : "-",
+  //               startTime: _i.startTime ? _i.startTime : "-",
+  //               finishTime: _i.finishTime ? _i.finishTime : "-",
+  //               costCenter: item.costCenter ? item.costCenter : "-",
+  //               totalHours: item.totalHours ? item.totalHours : "-",
+  //               ifOverTime: item.overTime ? "Yes" : "No",
+  //               overTime:
+  //                 item.overTime && item.overtimeSts == "Approved"
+  //                   ? item.overTime
+  //                   : "-",
+  //               status: item.status ? item.status : "-",
+  //               mobilization: item.mobilization ? item.mobilization : "-",
+  //               travel: item.travel ? item.travel : "-",
+  //               otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
+  //               comments: item.comments ? item.comments.toString() : "-",
+  //               reviewComments: item.reviewComments ? item.reviewComments : "-",
+  //               kmWithPrivateCar: item.kmWithPrivateCar
+  //                 ? item.kmWithPrivateCar
+  //                 : "-",
+  //               cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
+  //               travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
+  //               overTimeComments: item.overTimeComments
+  //                 ? item.overTimeComments
+  //                 : "-",
+  //               expense: item.expense ? item.expense : "-",
+  //               AtcCreditAmount: item.AtcCreditAmount
+  //                 ? item.AtcCreditAmount
+  //                 : "-",
+  //               personalCardAmount: item.personalCardAmount
+  //                 ? item.personalCardAmount
+  //                 : "-",
+  //               isRefund: item.isRefund,
+  //               overtimecommentsDrp: item.overtimecommentsDrp
+  //                 ? item.overtimecommentsDrp.join(",")
+  //                 : "-",
+  //               country: item.Country ? item.Country : "-",
+  //               orgCity: item.originCity ? item.originCity : "-",
+  //               orgCountry: item.originCountry ? item.originCountry : "-",
+  //               CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
+  //               oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+  //               meetingPerson: _tempOneToOneMeetingPerson
+  //                 ? _tempOneToOneMeetingPerson
+  //                 : "-",
+  //               onCall: item.onCallVisible ? "Yes" : "No",
+  //             });
+  //           }
+  //           // worksheet._rows[0]._cells.forEach((cell) => {
+  //           for (const cell of worksheet._rows[0]._cells) {
+  //             let cellName: any = "";
+  //             if (cell._address.split("").length == 2) {
+  //               cellName = cell._address.split("")[0];
+  //             } else {
+  //               cellName =
+  //                 cell._address.split("")[0] + cell._address.split("")[1];
+  //             }
+  //             // if (
+  //             //   cellName == "C" ||
+  //             //   cellName == "D" ||
+  //             //   cellName == "E" ||
+  //             //   cellName == "F" ||
+  //             //   cellName == "G" ||
+  //             //   cellName == "H" ||
+  //             //   cellName == "I"
+  //             // )
+  //             //  {
+  //             //   worksheet.mergeCells(
+  //             //     `${cellName}${firstIndex}:${cellName}${firstIndex}`
+  //             //   );
+  //             // }
+  //             if (["C", "D", "E", "F", "G", "H", "I"].includes(cellName)) {
+  //               worksheet.mergeCells(
+  //                 `${cellName}${firstIndex}:${cellName}${lastIndex}`
+  //               );
+  //             } else {
+  //               worksheet.mergeCells(
+  //                 `${cellName}${firstIndex}:${cellName}${lastIndex}`
+  //               );
+  //             }
+  //             // });
+  //           }
+  //         } else {
+  //           worksheet.addRow({
+  //             week: item.week ? item.week : "-",
+  //             date: item.date ? dateFormater(item.date) : "-",
+  //             city: item.city ? item.city : "-",
+  //             supervisor: item.supervisor ? item.supervisor : "-",
+  //             siteCode: item.siteCode ? item.siteCode : "-",
+  //             client: item.client ? item.client : "-",
+  //             serCode: item.serCode ? item.serCode : "-",
+  //             serDescription: item.serDescription ? item.serDescription : "-",
+  //             startTime: item.startTime ? item.startTime : "-",
+  //             finishTime: item.finishTime ? item.finishTime : "-",
+  //             costCenter: item.costCenter ? item.costCenter : "-",
+  //             totalHours: item.totalHours ? item.totalHours : "-",
+  //             ifOverTime: item.overTime ? "Yes" : "No",
+  //             overTime:
+  //               item.overTime && item.overtimeSts == "Approved"
+  //                 ? item.overTime
+  //                 : "-",
+  //             status: item.status ? item.status : "-",
+  //             mobilization: item.mobilization ? item.mobilization : "-",
+  //             travel: item.travel ? item.travel : "-",
+  //             otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
+  //             comments: item.comments ? item.comments.toString() : "-",
+  //             reviewComments: item.reviewComments ? item.reviewComments : "-",
+  //             kmWithPrivateCar: item.kmWithPrivateCar
+  //               ? item.kmWithPrivateCar
+  //               : "-",
+  //             cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
+  //             travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
+  //             overTimeComments: item.overTimeComments
+  //               ? item.overTimeComments
+  //               : "-",
+  //             expense: item.expense ? item.expense : "-",
+  //             AtcCreditAmount: item.AtcCreditAmount
+  //               ? item.AtcCreditAmount
+  //               : "-",
+  //             personalCardAmount: item.personalCardAmount
+  //               ? item.personalCardAmount
+  //               : "-",
+  //             isRefund: item.isRefund,
+  //             overtimecommentsDrp: item.overtimecommentsDrp
+  //               ? item.overtimecommentsDrp.join(",")
+  //               : "-",
+  //             country: item.Country ? item.Country : "-",
+  //             orgCity: item.originCity ? item.originCity : "-",
+  //             orgCountry: item.originCountry ? item.originCountry : "-",
+  //             CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
+  //             oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+  //             meetingPerson: _tempOneToOneMeetingPerson
+  //               ? _tempOneToOneMeetingPerson
+  //               : "-",
+  //             onCall: item.onCallVisible ? "Yes" : "No",
+  //           });
+  //         }
+
+  //         if (filterWeeklyData.length - 1 == index) {
+  //           worksheet.addRow({
+  //             totalHours: `Total = ${TotalHour}:${TotalMin}`,
+  //           });
+  //           worksheet.getCell(`J + ${worksheet._rows.length}`).fill = {
+  //             type: "pattern",
+  //             pattern: "solid",
+  //             fgColor: { argb: "f8696b" },
+  //           };
+  //         }
+  //       }
+
+  //       for (let l = 0; l < filterWeeklyData.length; l++) {
+  //         let date = new Date(filterWeeklyData[l].date);
+  //         let isMobilization = EmployeeConfig.some(
+  //           (a) => a.Name == filterWeeklyData[l].supervisor && a.Mobilization
+  //         );
+  //         let day = date.toLocaleString("en-us", { weekday: "long" });
+  //         if (day == "Saturday" || day == "Sunday") {
+  //           worksheet.getCell("B" + (l + excelCount)).fill = {
+  //             type: "pattern",
+  //             pattern: "solid",
+  //             fgColor: { argb: "f8696b" },
+  //           };
+  //         }
+
+  //         if (isMobilization) {
+  //           worksheet.getCell("C" + (l + excelCount)).fill = {
+  //             type: "pattern",
+  //             pattern: "solid",
+  //             fgColor: { argb: "f8696b" },
+  //           };
+  //         }
+
+  //         if (filterWeeklyData[l].overTime) {
+  //           worksheet.getCell("K" + (l + excelCount)).fill = {
+  //             type: "pattern",
+  //             pattern: "solid",
+  //             fgColor: { argb: "f8696b" },
+  //           };
+  //         }
+  //         if (filterWeeklyData[l].status == "Submitted") {
+  //           worksheet.getCell("M" + (l + excelCount)).fill = {
+  //             type: "pattern",
+  //             pattern: "solid",
+  //             fgColor: { argb: "90EE90" },
+  //           };
+  //         } else if (filterWeeklyData[l].status == "Draft") {
+  //           worksheet.getCell("M" + (l + excelCount)).fill = {
+  //             type: "pattern",
+  //             pattern: "solid",
+  //             fgColor: { argb: "d3d3d3" },
+  //           };
+  //         } else if (filterWeeklyData[l].status == "Pending Approval") {
+  //           worksheet.getCell("M" + (l + excelCount)).fill = {
+  //             type: "pattern",
+  //             pattern: "solid",
+  //             fgColor: { argb: "f4f2bf" },
+  //           };
+  //         } else if (filterWeeklyData[l].status == "InReview") {
+  //           worksheet.getCell("M" + (l + excelCount)).fill = {
+  //             type: "pattern",
+  //             pattern: "solid",
+  //             fgColor: { argb: "f4f2bf" },
+  //           };
+  //         }
+  //       }
+  //       excelCount += filterWeeklyData.length + 1;
+  //     }
+
+  //     await [
+  //       "A1",
+  //       "B1",
+  //       "C1",
+  //       "D1",
+  //       "E1",
+  //       "F1",
+  //       "G1",
+  //       "H1",
+  //       "I1",
+  //       "J1",
+  //       "K1",
+  //       "L1",
+  //       "M1",
+  //       "N1",
+  //       "O1",
+  //       "P1",
+  //       "Q1",
+  //       "R1",
+  //       "S1",
+  //       "T1",
+  //       "U1",
+  //       "V1",
+  //       "W1",
+  //       "X1",
+  //       "Y1",
+  //       "Z1",
+  //       "AA1",
+  //       "AB1",
+  //       "AC1",
+  //       "AD1",
+  //       "AE1",
+  //       "AF1",
+  //       "AG1",
+  //       "AH1",
+  //       "AI1",
+  //       "AJ1",
+  //       "AK1",
+  //     ].map((key) => {
+  //       worksheet.getCell(key).fill = {
+  //         type: "pattern",
+  //         pattern: "solid",
+  //         fgColor: { argb: "C5D9F1" },
+  //       };
+  //     });
+  //     await [
+  //       "A1",
+  //       "B1",
+  //       "C1",
+  //       "D1",
+  //       "E1",
+  //       "F1",
+  //       "G1",
+  //       "H1",
+  //       "I1",
+  //       "J1",
+  //       "K1",
+  //       "L1",
+  //       "M1",
+  //       "N1",
+  //       "O1",
+  //       "P1",
+  //       "Q1",
+  //       "R1",
+  //       "S1",
+  //       "T1",
+  //       "U1",
+  //       "V1",
+  //       "W1",
+  //       "X1",
+  //       "Y1",
+  //       "Z1",
+  //       "AA1",
+  //       "AB1",
+  //       "AC1",
+  //       "AD1",
+  //       "AE1",
+  //       "AF1",
+  //       "AG1",
+  //       "AH1",
+  //       "AI1",
+  //       "AJ1",
+  //       "AK1",
+  //     ].map((key) => {
+  //       worksheet.getCell(key).color = {
+  //         type: "pattern",
+  //         pattern: "solid",
+  //         fgColor: { argb: "FFFFFF" },
+  //       };
+  //     });
+
+  //     worksheet.eachRow((row) => {
+  //       row.eachCell((cell) => {
+  //         cell.alignment = {
+  //           vertical: "middle",
+  //           horizontal: "center",
+  //         };
+  //       });
+  //     });
+
+  //     // new changes
+  //     if (crmFlag) {
+  //       ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", "I1"].map((key) => {
+  //         CRMworksheet.getCell(key).fill = {
+  //           type: "pattern",
+  //           pattern: "solid",
+  //           fgColor: { argb: "C5D9F1" },
+  //         };
+  //         CRMworksheet.getCell(key).color = {
+  //           type: "pattern",
+  //           pattern: "solid",
+  //           fgColor: { argb: "FFFFFF" },
+  //         };
+  //       });
+  //     }
+
+  //     await workbook.xlsx
+  //       .writeBuffer()
+  //       .then((buffer) => {
+  //         FileSaver.saveAs(
+  //           new Blob([buffer]),
+  //           `ATC_Time_Sheet_${moment().format("DDMMYYYY_HH:mm")}.xlsx`
+  //         );
+  //       })
+  //       .catch((err) => {
+  //         console.log(err);
+  //       });
+  //   } else {
+  //     setIsPopupVisible(true);
+  //   }
+  // };
+
   const generateTimeSheetExcel = async (list) => {
-    if (list.length != 0) {
-      let arrExport = list;
-      let excelCount = 2;
-      const getAllWeeks = arrExport.map((data) => data.week);
-      let getUniqeWeek = getAllWeeks.filter(
-        (item, index) => getAllWeeks.indexOf(item) === index
-      );
-      let crmFlag: boolean = false;
-      list.forEach((value) => {
-        if (value.CRMId != "-") {
-          crmFlag = true;
-        }
-      });
-      const workbook = new Excel.Workbook();
-      const worksheet = workbook.addWorksheet("My Sheet");
-      let CRMworksheet: any;
-      if (crmFlag) {
-        CRMworksheet = workbook.addWorksheet("CRM_Activity");
-      }
-      worksheet.columns = [
-        { header: "Week", key: "week", width: 25 },
+    if (!list.length) {
+      setIsPopupVisible(true);
+      return;
+    }
+
+    // if (!workerRef.current) {
+    //   workerRef.current = new Worker("./ExcelExportWorker.js", {
+    //     type: "module",
+    //   });
+
+    //   workerRef.current.onmessage = ({ data: { buffer, fileName } }) => {
+    //     FileSaver.saveAs(new Blob([buffer]), fileName);
+    //   };
+    // }
+
+    // // send raw data
+    // workerRef.current.postMessage({ list });
+
+    // return;
+
+    const workbook = new Excel.Workbook();
+    const worksheet = workbook.addWorksheet("TimeSheet");
+
+    const crmFlag = list.some((item) => item.CRMId !== "-");
+    const CRMworksheet = crmFlag ? workbook.addWorksheet("CRM_Activity") : null;
+
+    // Define worksheet columns
+    worksheet.columns = [
+      { header: "Week", key: "week", width: 25 },
+      { header: "Date", key: "date", width: 25 },
+      { header: "Supervisor", key: "supervisor", width: 25 },
+      { header: "Sitecode", key: "siteCode", width: 25 },
+      { header: "Client", key: "client", width: 25 },
+      { header: "Service Code", key: "serCode", width: 25 },
+      { header: "Service Description", key: "serDescription", width: 25 },
+      { header: "Start time", key: "startTime", width: 25 },
+      { header: "Finish time", key: "finishTime", width: 25 },
+      { header: "Total hours", key: "totalHours", width: 25 },
+      { header: "Over time", key: "ifOverTime", width: 25 },
+      { header: "Over time", key: "overTime", width: 25 },
+      { header: "Status", key: "status", width: 25 },
+      { header: "Cost center", key: "costCenter", width: 25 },
+      { header: "MobilizationJob", key: "mobilization", width: 25 },
+      { header: "Travel", key: "travel", width: 25 },
+      { header: "City", key: "city", width: 25 },
+      { header: "Other sitecode", key: "otherSiteCode", width: 25 },
+      {
+        header: "Comments",
+        key: "comments",
+        width: 25,
+      },
+      { header: "Review comments", key: "reviewComments", width: 25 },
+      { header: "Km with private car", key: "kmWithPrivateCar", width: 25 },
+      { header: "Travel with car", key: "travelWithCar", width: 25 },
+      {
+        header: "City over night",
+        key: "cityOverNight",
+        width: 25,
+      },
+      {
+        header: "Over time comments",
+        key: "overTimeComments",
+        width: 25,
+      },
+      {
+        header: "Over time reason",
+        key: "overtimecommentsDrp",
+        width: 25,
+      },
+      { header: "Expense", key: "expense", width: 25 },
+      { header: "ATCCreditCardAmount", key: "AtcCreditAmount", width: 25 },
+      {
+        header: "PersonalCreditCardAmount",
+        key: "personalCardAmount",
+        width: 25,
+      },
+      { header: "ReFundApproved", key: "isRefund", width: 25 },
+      { header: "Country", key: "country", width: 25 },
+      { header: "OrginCity", key: "orgCity", width: 25 },
+      { header: "OrginCountry", key: "orgCountry", width: 25 },
+      { header: "CRM Activity", key: "CRMActivity", width: 25 },
+      { header: "One To One Meeting", key: "oneToOneMeeting", width: 25 },
+      {
+        header: "One To One Meeting Participants",
+        key: "meetingPerson",
+        width: 25,
+      },
+      { header: "OnCall", key: "onCall", width: 25 },
+    ];
+
+    if (crmFlag) {
+      CRMworksheet.columns = [
+        { header: "Person Name", key: "perName", width: 25 },
+        { header: "Email Address", key: "email", width: 50 },
+        { header: "Tel Number", key: "telNo", width: 25 },
+        { header: "Comments", key: "cmts", width: 25 },
+        { header: "Name", key: "name", width: 25 },
         { header: "Date", key: "date", width: 25 },
-        { header: "Supervisor", key: "supervisor", width: 25 },
-        {
-          header: "Sitecode",
-          key: "siteCode",
-          width: 25,
-        },
         { header: "Client", key: "client", width: 25 },
-        { header: "Service Code", key: "serCode", width: 25 },
-        { header: "Service Description", key: "serDescription", width: 25 },
-        { header: "Start time", key: "startTime", width: 25 },
-        { header: "Finish time", key: "finishTime", width: 25 },
-        { header: "Total hours", key: "totalHours", width: 25 },
-        { header: "Over time", key: "ifOverTime", width: 25 },
-        { header: "Over time", key: "overTime", width: 25 },
-        { header: "Status", key: "status", width: 25 },
-        { header: "Cost center", key: "costCenter", width: 25 },
-
-        { header: "MobilizationJob", key: "mobilization", width: 25 },
-        { header: "Travel", key: "travel", width: 25 },
-        { header: "City", key: "city", width: 25 },
-        { header: "Other sitecode", key: "otherSiteCode", width: 25 },
-        {
-          header: "Comments",
-          key: "comments",
-          width: 25,
-        },
-        { header: "Review comments", key: "reviewComments", width: 25 },
-        { header: "Km with private car", key: "kmWithPrivateCar", width: 25 },
-        { header: "Travel with car", key: "travelWithCar", width: 25 },
-        {
-          header: "City over night",
-          key: "cityOverNight",
-          width: 25,
-        },
-        {
-          header: "Over time comments",
-          key: "overTimeComments",
-          width: 25,
-        },
-        {
-          header: "Over time reason",
-          key: "overtimecommentsDrp",
-          width: 25,
-        },
-        { header: "Expense", key: "expense", width: 25 },
-        { header: "ATCCreditCardAmount", key: "AtcCreditAmount", width: 25 },
-        {
-          header: "PersonalCreditCardAmount",
-          key: "personalCardAmount",
-          width: 25,
-        },
-        { header: "ReFundApproved", key: "isRefund", width: 25 },
-        { header: "Country", key: "country", width: 25 },
-        { header: "OrginCity", key: "orgCity", width: 25 },
-        { header: "OrginCountry", key: "orgCountry", width: 25 },
-        { header: "CRM Activity", key: "CRMActivity", width: 25 },
-        { header: "One To One Meeting", key: "oneToOneMeeting", width: 25 },
-        {
-          header: "One To One Meeting Participants",
-          key: "meetingPerson",
-          width: 25,
-        },
-        { header: "OnCall", key: "onCall", width: 25 },
+        { header: "Meeting Conducted", key: "meetingConducted", width: 25 },
       ];
-      if (crmFlag) {
-        CRMworksheet.columns = [
-          { header: "Person Name", key: "perName", width: 25 },
-          { header: "Email Address", key: "email", width: 50 },
-          { header: "Tel Number", key: "telNo", width: 25 },
-          { header: "Comments", key: "cmts", width: 25 },
-          { header: "Name", key: "name", width: 25 },
-          { header: "Date", key: "date", width: 25 },
-          { header: "Client", key: "client", width: 25 },
-          { header: "Meeting Conducted", key: "meetingConducted", width: 25 },
-          { header: "Conversation Type", key: "conversationType", width: 25 },
-        ];
+    }
+
+    list.sort((a, b) => {
+      // const numA = parseInt(a.week.replace("W", ""));
+      // const numB = parseInt(b.week.replace("W", ""));
+      // return numB - numA;
+      return b.date - a.date;
+    });
+
+    let rowCounter = 2;
+    let totalHours = 0;
+    let totalMinutes = 0;
+
+    for (let i = 0; i < list.length; i++) {
+      const item = list[i];
+
+      // Time calculations
+      if (item.totalHours) {
+        const [hrs, mins] = item.totalHours.split(":").map(Number);
+        totalHours += hrs;
+        totalMinutes += mins;
       }
 
-      // await getUniqeWeek.forEach(async (week) => {
-      for (let i = 0; i < getUniqeWeek.length; i++) {
-        var TotalHour = 0;
-        var TotalMin = 0;
-        let week = getUniqeWeek[i];
-        var filterWeeklyData = arrExport.filter((item) => item.week == week);
-        // await filterWeeklyData.forEach(async (item, index) => {
-        for (let index = 0; index < filterWeeklyData.length; index++) {
-          let _tempOneToOneMeetingPerson: string = "";
-          let item = filterWeeklyData[index];
-          if (item.oneToOneMeetingPerson.length > 1) {
-            await item.oneToOneMeetingPerson.forEach((_per: any, i: number) => {
-              if (i == item.oneToOneMeetingPerson.length - 1) {
-                _tempOneToOneMeetingPerson = _tempOneToOneMeetingPerson + _per;
-              } else {
-                _tempOneToOneMeetingPerson =
-                  _tempOneToOneMeetingPerson + _per + ",";
-              }
-            });
-          } else {
-            _tempOneToOneMeetingPerson = item.oneToOneMeetingPerson[0];
-          }
+      const meetingPersons = item.oneToOneMeetingPerson?.join(",") || "-";
 
-          if (item.totalHours != "") {
-            let timeSplit = item.totalHours.split(":");
-            TotalHour += parseInt(timeSplit[0]);
-            if (TotalMin < 60) {
-              TotalMin += parseInt(timeSplit[1]);
-            } else {
-              TotalHour += 1;
-              TotalMin = 0;
-            }
-          }
-          if (crmFlag && item.CRMActivity == "Yes") {
-            CRMworksheet.addRow({
-              perName: item.PersonName,
-              email: item.Email,
-              telNo: item.TelNumber,
-              cmts: item.Comments,
-              name: item.Name,
-              date: item.Date,
-              client: item.Client,
-              meetingConducted: item.MeetingCon,
-              conversationType: item.ConversationType,
-            });
-          }
-
-          if (item.serviceDetails.length) {
-            let firstIndex = worksheet._rows.length + 1;
-            let lastIndex = worksheet._rows.length + item.serviceDetails.length;
-
-            for (let i = 0; i < item.serviceDetails.length; i++) {
-              let _i = item.serviceDetails[i];
-
-              worksheet.addRow({
-                week: item.week ? item.week : "-",
-                date: item.date ? dateFormater(item.date) : "-",
-                city: item.city ? item.city : "-",
-                supervisor: item.supervisor ? item.supervisor : "-",
-                siteCode:
-                  _i.sitecode == "Other"
-                    ? _i.otherSiteCode
-                    : _i.sitecode
-                    ? _i.sitecode
-                    : "-",
-                client: _i.client ? _i.client : "-",
-                serCode: _i.serCode ? _i.serCode : "-",
-                serDescription: _i.serDescription ? _i.serDescription : "-",
-                startTime: _i.startTime ? _i.startTime : "-",
-                finishTime: _i.finishTime ? _i.finishTime : "-",
-                costCenter: item.costCenter ? item.costCenter : "-",
-                totalHours: item.totalHours ? item.totalHours : "-",
-                ifOverTime: item.overTime ? "Yes" : "No",
-                overTime:
-                  item.overTime && item.overtimeSts == "Approved"
-                    ? item.overTime
-                    : "-",
-                status: item.status ? item.status : "-",
-                mobilization: item.mobilization ? item.mobilization : "-",
-                travel: item.travel ? item.travel : "-",
-                otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
-                comments: item.comments ? item.comments.toString() : "-",
-                reviewComments: item.reviewComments ? item.reviewComments : "-",
-                kmWithPrivateCar: item.kmWithPrivateCar
-                  ? item.kmWithPrivateCar
-                  : "-",
-                cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
-                travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
-                overTimeComments: item.overTimeComments
-                  ? item.overTimeComments
-                  : "-",
-                expense: item.expense ? item.expense : "-",
-                AtcCreditAmount: item.AtcCreditAmount
-                  ? item.AtcCreditAmount
-                  : "-",
-                personalCardAmount: item.personalCardAmount
-                  ? item.personalCardAmount
-                  : "-",
-                isRefund: item.isRefund,
-                overtimecommentsDrp: item.overtimecommentsDrp
-                  ? item.overtimecommentsDrp.join(",")
-                  : "-",
-                country: item.Country ? item.Country : "-",
-                orgCity: item.originCity ? item.originCity : "-",
-                orgCountry: item.originCountry ? item.originCountry : "-",
-                CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
-                oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
-                meetingPerson: _tempOneToOneMeetingPerson
-                  ? _tempOneToOneMeetingPerson
-                  : "-",
-                onCall: item.onCallVisible ? "Yes" : "No",
-              });
-            }
-            worksheet._rows[0]._cells.forEach((cell) => {
-              let cellName: any = "";
-              if (cell._address.split("").length == 2) {
-                cellName = cell._address.split("")[0];
-              } else {
-                cellName =
-                  cell._address.split("")[0] + cell._address.split("")[1];
-              }
-              if (
-                cellName == "C" ||
-                cellName == "D" ||
-                cellName == "E" ||
-                cellName == "F" ||
-                cellName == "G" ||
-                cellName == "H" ||
-                cellName == "I"
-              ) {
-                worksheet.mergeCells(
-                  `${cellName}${firstIndex}:${cellName}${firstIndex}`
-                );
-              } else {
-                worksheet.mergeCells(
-                  `${cellName}${firstIndex}:${cellName}${lastIndex}`
-                );
-              }
-            });
-          } else {
-            worksheet.addRow({
-              week: item.week ? item.week : "-",
-              date: item.date ? dateFormater(item.date) : "-",
-              city: item.city ? item.city : "-",
-              supervisor: item.supervisor ? item.supervisor : "-",
-              siteCode: item.siteCode ? item.siteCode : "-",
-              client: item.client ? item.client : "-",
-              serCode: item.serCode ? item.serCode : "-",
-              serDescription: item.serDescription ? item.serDescription : "-",
-              startTime: item.startTime ? item.startTime : "-",
-              finishTime: item.finishTime ? item.finishTime : "-",
-              costCenter: item.costCenter ? item.costCenter : "-",
-              totalHours: item.totalHours ? item.totalHours : "-",
-              ifOverTime: item.overTime ? "Yes" : "No",
-              overTime:
-                item.overTime && item.overtimeSts == "Approved"
-                  ? item.overTime
-                  : "-",
-              status: item.status ? item.status : "-",
-              mobilization: item.mobilization ? item.mobilization : "-",
-              travel: item.travel ? item.travel : "-",
-              otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
-              comments: item.comments ? item.comments.toString() : "-",
-              reviewComments: item.reviewComments ? item.reviewComments : "-",
-              kmWithPrivateCar: item.kmWithPrivateCar
-                ? item.kmWithPrivateCar
-                : "-",
-              cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
-              travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
-              overTimeComments: item.overTimeComments
-                ? item.overTimeComments
-                : "-",
-              expense: item.expense ? item.expense : "-",
-              AtcCreditAmount: item.AtcCreditAmount
-                ? item.AtcCreditAmount
-                : "-",
-              personalCardAmount: item.personalCardAmount
-                ? item.personalCardAmount
-                : "-",
-              isRefund: item.isRefund,
-              overtimecommentsDrp: item.overtimecommentsDrp
-                ? item.overtimecommentsDrp.join(",")
-                : "-",
-              country: item.Country ? item.Country : "-",
-              orgCity: item.originCity ? item.originCity : "-",
-              orgCountry: item.originCountry ? item.originCountry : "-",
-              CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
-              oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
-              meetingPerson: _tempOneToOneMeetingPerson
-                ? _tempOneToOneMeetingPerson
-                : "-",
-              onCall: item.onCallVisible ? "Yes" : "No",
-            });
-          }
-
-          if (filterWeeklyData.length - 1 == index) {
-            worksheet.addRow({
-              totalHours: `Total = ${TotalHour}:${TotalMin}`,
-            });
-            worksheet.getCell(`J + ${worksheet._rows.length}`).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "f8696b" },
-            };
-          }
-        }
-        // let _tempOneToOneMeetingPerson: string = "";
-        // if (item.oneToOneMeetingPerson.length > 1) {
-        //   await item.oneToOneMeetingPerson.forEach((_per: any, i: number) => {
-        //     if (i == item.oneToOneMeetingPerson.length - 1) {
-        //       _tempOneToOneMeetingPerson = _tempOneToOneMeetingPerson + _per;
-        //     } else {
-        //       _tempOneToOneMeetingPerson =
-        //         _tempOneToOneMeetingPerson + _per + ",";
-        //     }
-        //   });
-        // } else {
-        //   _tempOneToOneMeetingPerson = item.oneToOneMeetingPerson[0];
-        // }
-
-        // if (item.totalHours != "") {
-        //   let timeSplit = item.totalHours.split(":");
-        //   TotalHour += parseInt(timeSplit[0]);
-        //   if (TotalMin < 60) {
-        //     TotalMin += parseInt(timeSplit[1]);
-        //   } else {
-        //     TotalHour += 1;
-        //     TotalMin = 0;
-        //   }
-        // }
-        // if (crmFlag && item.CRMActivity == "Yes") {
-        //   CRMworksheet.addRow({
-        //     perName: item.PersonName,
-        //     email: item.Email,
-        //     telNo: item.TelNumber,
-        //     cmts: item.Comments,
-        //     name: item.Name,
-        //     date: item.Date,
-        //     client: item.Client,
-        //     meetingConducted: item.MeetingCon,
-        //     conversationType: item.ConversationType,
-        //   });
-        // }
-
-        // if (item.serviceDetails.length) {
-        //   let firstIndex = worksheet._rows.length + 1;
-        //   let lastIndex = worksheet._rows.length + item.serviceDetails.length;
-
-        //   for (let i = 0; i < item.serviceDetails.length; i++) {
-        //     let _i = item.serviceDetails[i];
-
-        //     worksheet.addRow({
-        //       week: item.week ? item.week : "-",
-        //       date: item.date ? dateFormater(item.date) : "-",
-        //       city: item.city ? item.city : "-",
-        //       supervisor: item.supervisor ? item.supervisor : "-",
-        //       siteCode:
-        //         _i.sitecode == "Other"
-        //           ? _i.otherSiteCode
-        //           : _i.sitecode
-        //           ? _i.sitecode
-        //           : "-",
-        //       client: _i.client ? _i.client : "-",
-        //       serCode: _i.serCode ? _i.serCode : "-",
-        //       serDescription: _i.serDescription ? _i.serDescription : "-",
-        //       startTime: _i.startTime ? _i.startTime : "-",
-        //       finishTime: _i.finishTime ? _i.finishTime : "-",
-        //       costCenter: item.costCenter ? item.costCenter : "-",
-        //       totalHours: item.totalHours ? item.totalHours : "-",
-        //       ifOverTime: item.overTime ? "Yes" : "No",
-        //       overTime:
-        //         item.overTime && item.overtimeSts == "Approved"
-        //           ? item.overTime
-        //           : "-",
-        //       status: item.status ? item.status : "-",
-        //       mobilization: item.mobilization ? item.mobilization : "-",
-        //       travel: item.travel ? item.travel : "-",
-        //       otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
-        //       comments: item.comments ? item.comments.toString() : "-",
-        //       reviewComments: item.reviewComments ? item.reviewComments : "-",
-        //       kmWithPrivateCar: item.kmWithPrivateCar
-        //         ? item.kmWithPrivateCar
-        //         : "-",
-        //       cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
-        //       travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
-        //       overTimeComments: item.overTimeComments
-        //         ? item.overTimeComments
-        //         : "-",
-        //       expense: item.expense ? item.expense : "-",
-        //       AtcCreditAmount: item.AtcCreditAmount
-        //         ? item.AtcCreditAmount
-        //         : "-",
-        //       personalCardAmount: item.personalCardAmount
-        //         ? item.personalCardAmount
-        //         : "-",
-        //       isRefund: item.isRefund,
-        //       overtimecommentsDrp: item.overtimecommentsDrp
-        //         ? item.overtimecommentsDrp.join(",")
-        //         : "-",
-        //       country: item.Country ? item.Country : "-",
-        //       orgCity: item.originCity ? item.originCity : "-",
-        //       orgCountry: item.originCountry ? item.originCountry : "-",
-        //       CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
-        //       oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
-        //       meetingPerson: _tempOneToOneMeetingPerson
-        //         ? _tempOneToOneMeetingPerson
-        //         : "-",
-        //       onCall: item.onCallVisible ? "Yes" : "No",
-        //     });
-        //   }
-        //   worksheet._rows[0]._cells.forEach((cell) => {
-        //     let cellName: any = "";
-        //     if (cell._address.split("").length == 2) {
-        //       cellName = cell._address.split("")[0];
-        //     } else {
-        //       cellName =
-        //         cell._address.split("")[0] + cell._address.split("")[1];
-        //     }
-        //     if (
-        //       cellName == "D" ||
-        //       cellName == "E" ||
-        //       cellName == "F" ||
-        //       cellName == "G" ||
-        //       cellName == "H" ||
-        //       cellName == "I"
-        //     ) {
-        //       worksheet.mergeCells(
-        //         `${cellName}${firstIndex}:${cellName}${firstIndex}`
-        //       );
-        //     } else {
-        //       worksheet.mergeCells(
-        //         `${cellName}${firstIndex}:${cellName}${lastIndex}`
-        //       );
-        //     }
-        //   });
-        // } else {
-        //   worksheet.addRow({
-        //     week: item.week ? item.week : "-",
-        //     date: item.date ? dateFormater(item.date) : "-",
-        //     city: item.city ? item.city : "-",
-        //     supervisor: item.supervisor ? item.supervisor : "-",
-        //     siteCode: item.siteCode ? item.siteCode : "-",
-        //     client: item.client ? item.client : "-",
-        //     serCode: item.serCode ? item.serCode : "-",
-        //     serDescription: item.serDescription ? item.serDescription : "-",
-        //     startTime: item.startTime ? item.startTime : "-",
-        //     finishTime: item.finishTime ? item.finishTime : "-",
-        //     costCenter: item.costCenter ? item.costCenter : "-",
-        //     totalHours: item.totalHours ? item.totalHours : "-",
-        //     ifOverTime: item.overTime ? "Yes" : "No",
-        //     overTime:
-        //       item.overTime && item.overtimeSts == "Approved"
-        //         ? item.overTime
-        //         : "-",
-        //     status: item.status ? item.status : "-",
-        //     mobilization: item.mobilization ? item.mobilization : "-",
-        //     travel: item.travel ? item.travel : "-",
-        //     otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
-        //     comments: item.comments ? item.comments.toString() : "-",
-        //     reviewComments: item.reviewComments ? item.reviewComments : "-",
-        //     kmWithPrivateCar: item.kmWithPrivateCar
-        //       ? item.kmWithPrivateCar
-        //       : "-",
-        //     cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
-        //     travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
-        //     overTimeComments: item.overTimeComments
-        //       ? item.overTimeComments
-        //       : "-",
-        //     expense: item.expense ? item.expense : "-",
-        //     AtcCreditAmount: item.AtcCreditAmount
-        //       ? item.AtcCreditAmount
-        //       : "-",
-        //     personalCardAmount: item.personalCardAmount
-        //       ? item.personalCardAmount
-        //       : "-",
-        //     isRefund: item.isRefund,
-        //     overtimecommentsDrp: item.overtimecommentsDrp
-        //       ? item.overtimecommentsDrp.join(",")
-        //       : "-",
-        //     country: item.Country ? item.Country : "-",
-        //     orgCity: item.originCity ? item.originCity : "-",
-        //     orgCountry: item.originCountry ? item.originCountry : "-",
-        //     CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
-        //     oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
-        //     meetingPerson: _tempOneToOneMeetingPerson
-        //       ? _tempOneToOneMeetingPerson
-        //       : "-",
-        //     onCall: item.onCallVisible ? "Yes" : "No",
-        //   });
-        // }
-
-        // if (filterWeeklyData.length - 1 == index) {
-        //   worksheet.addRow({
-        //     totalHours: `Total = ${TotalHour}:${TotalMin}`,
-        //   });
-        //   worksheet.getCell(`J + ${worksheet._rows.length}`).fill = {
-        //     type: "pattern",
-        //     pattern: "solid",
-        //     fgColor: { argb: "f8696b" },
-        //   };
-        // }
-        // });
-        for (let i = 0; i < filterWeeklyData.length; i++) {
-          let date = new Date(filterWeeklyData[i].date);
-          let isMobilization = EmployeeConfig.some(
-            (a) => a.Name == filterWeeklyData[i].supervisor && a.Mobilization
-          );
-          let day = date.toLocaleString("en-us", { weekday: "long" });
-          if (day == "Saturday" || day == "Sunday") {
-            worksheet.getCell("B" + (i + excelCount)).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "f8696b" },
-            };
-          }
-
-          if (isMobilization) {
-            worksheet.getCell("C" + (i + excelCount)).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "f8696b" },
-            };
-          }
-
-          if (filterWeeklyData[i].overTime) {
-            worksheet.getCell("K" + (i + excelCount)).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "f8696b" },
-            };
-          }
-          if (filterWeeklyData[i].status == "Submitted") {
-            worksheet.getCell("M" + (i + excelCount)).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "90EE90" },
-            };
-          } else if (filterWeeklyData[i].status == "Draft") {
-            worksheet.getCell("M" + (i + excelCount)).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "d3d3d3" },
-            };
-          } else if (filterWeeklyData[i].status == "Pending Approval") {
-            worksheet.getCell("M" + (i + excelCount)).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "f4f2bf" },
-            };
-          } else if (filterWeeklyData[i].status == "InReview") {
-            worksheet.getCell("M" + (i + excelCount)).fill = {
-              type: "pattern",
-              pattern: "solid",
-              fgColor: { argb: "f4f2bf" },
-            };
-          }
-        }
-        excelCount += filterWeeklyData.length + 1;
+      // CRM Data
+      if (crmFlag && item.CRMActivity === "Yes") {
+        CRMworksheet.addRow({
+          perName: item.PersonName || "-",
+          email: item.Email || "-",
+          telNo: item.TelNumber || "-",
+          cmts: item.Comments || "-",
+          name: item.Name || "-",
+          date: item.Date || "-",
+          client: item.Client || "-",
+          meetingConducted: item.MeetingCon || "-",
+        });
       }
-      // var TotalHour = 0;
-      // var TotalMin = 0;
-      // var filterWeeklyData = arrExport.filter((item) => item.week == week);
-      // const sortFunction = (a, b) => {
-      //   let firstvalue = a.supervisor.toLowerCase(),
-      //     lastValue = b.supervisor.toLowerCase();
-      //   if (firstvalue < lastValue) {
-      //     return -1;
-      //   }
-      //   if (firstvalue > lastValue) {
-      //     return 1;
-      //   }
-      //   return 0;
-      // };
-      // filterWeeklyData = filterWeeklyData.sort(sortFunction);
 
-      // await filterWeeklyData.forEach(async (item, index) => {
-      //   let _tempOneToOneMeetingPerson: string = "";
-      //   if (item.oneToOneMeetingPerson.length > 1) {
-      //     await item.oneToOneMeetingPerson.forEach((_per: any, i: number) => {
-      //       if (i == item.oneToOneMeetingPerson.length - 1) {
-      //         _tempOneToOneMeetingPerson = _tempOneToOneMeetingPerson + _per;
-      //       } else {
-      //         _tempOneToOneMeetingPerson =
-      //           _tempOneToOneMeetingPerson + _per + ",";
-      //       }
-      //     });
-      //   } else {
-      //     _tempOneToOneMeetingPerson = item.oneToOneMeetingPerson[0];
-      //   }
+      if (item.serviceDetails?.length) {
+        const startRow = worksheet._rows.length + 1;
+        const endRow = startRow + item.serviceDetails.length - 1;
+        for (const service of item.serviceDetails) {
+          worksheet.addRow({
+            week: item.week || "-",
+            date: item.date ? dateFormater(item.date) : "-",
+            city: item.city || "-",
+            supervisor: item.supervisor || "-",
+            siteCode:
+              service.sitecode == "Others"
+                ? service.otherSitecode
+                : service.sitecode || "-",
+            client: service.client || "-",
+            serCode: service.serCode || "-",
+            serDescription: service.serDescription || "-",
+            startTime: service.startTime || "-",
+            finishTime: service.finishTime || "-",
+            costCenter: item.costCenter || "-",
+            totalHours: item.totalHours || "-",
+            ifOverTime: item.overTime ? "Yes" : "No",
+            overTime:
+              item.overTime && item.overtimeSts === "Approved"
+                ? item.overTime
+                : "-",
+            status: item.status || "-",
+            mobilization: item.mobilization || "-",
+            travel: item.travel || "-",
+            otherSiteCode: item.otherSiteCode || "-",
+            comments: item.comments?.toString() || "-",
+            reviewComments: item.reviewComments || "-",
+            kmWithPrivateCar: item.kmWithPrivateCar || "-",
+            cityOverNight: item.cityOverNight || "-",
+            travelWithCar: item.travelWithCar || "-",
+            overTimeComments: item.overTimeComments || "-",
+            expense: item.expense || "-",
+            AtcCreditAmount: item.AtcCreditAmount || "-",
+            personalCardAmount: item.personalCardAmount || "-",
+            isRefund: item.isRefund,
+            overtimecommentsDrp: item.overtimecommentsDrp
+              ? item.overtimecommentsDrp.join(",")
+              : "-",
+            country: item.Country || "-",
+            orgCity: item.originCity || "-",
+            orgCountry: item.originCountry || "-",
+            CRMActivity: item.CRMActivity || "-",
+            oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+            meetingPerson: meetingPersons,
+            onCall: item.onCallVisible == "Yes" ? "Yes" : "No",
+          });
+        }
+        // ["C", "D", "E", "F", "G", "H", "I"].forEach((col) => {
+        //           worksheet.mergeCells(`${col}${startRow}:${col}${endRow}`);
+        //         });
+        worksheet.mergeCells(`L${startRow}:L${endRow}`);
+      } else {
+        worksheet.addRow({
+          week: item.week || "-",
+          date: item.date ? dateFormater(item.date) : "-",
+          city: item.city || "-",
+          supervisor: item.supervisor || "-",
+          siteCode: item.siteCode || "-",
+          client: item.client || "-",
+          serCode: item.serCode || "-",
+          serDescription: item.serDescription || "-",
+          startTime: item.startTime || "-",
+          finishTime: item.finishTime || "-",
+          costCenter: item.costCenter || "-",
+          totalHours: item.totalHours || "-",
+          ifOverTime: item.overTime ? "Yes" : "No",
+          overTime:
+            item.overTime && item.overtimeSts === "Approved"
+              ? item.overTime
+              : "-",
+          status: item.status || "-",
+          mobilization: item.mobilization || "-",
+          travel: item.travel || "-",
+          otherSiteCode: item.otherSiteCode || "-",
+          comments: item.comments?.toString() || "-",
+          reviewComments: item.reviewComments || "-",
+          kmWithPrivateCar: item.kmWithPrivateCar || "-",
+          cityOverNight: item.cityOverNight || "-",
+          travelWithCar: item.travelWithCar || "-",
+          overTimeComments: item.overTimeComments || "-",
+          expense: item.expense || "-",
+          AtcCreditAmount: item.AtcCreditAmount || "-",
+          personalCardAmount: item.personalCardAmount || "-",
+          isRefund: item.isRefund,
+          overtimecommentsDrp: item.overtimecommentsDrp
+            ? item.overtimecommentsDrp.join(",")
+            : "-",
+          country: item.Country || "-",
+          orgCity: item.originCity || "-",
+          orgCountry: item.originCountry || "-",
+          CRMActivity: item.CRMActivity || "-",
+          oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
+          meetingPerson: meetingPersons,
+          onCall: item.onCallVisible == "Yes" ? "Yes" : "No",
+        });
+      }
 
-      //   if (item.totalHours != "") {
-      //     let timeSplit = item.totalHours.split(":");
-      //     TotalHour += parseInt(timeSplit[0]);
-      //     if (TotalMin < 60) {
-      //       TotalMin += parseInt(timeSplit[1]);
-      //     } else {
-      //       TotalHour += 1;
-      //       TotalMin = 0;
-      //     }
-      //   }
-      //   if (crmFlag && item.CRMActivity == "Yes") {
-      //     CRMworksheet.addRow({
-      //       perName: item.PersonName,
-      //       email: item.Email,
-      //       telNo: item.TelNumber,
-      //       cmts: item.Comments,
-      //       name: item.Name,
-      //       date: item.Date,
-      //       client: item.Client,
-      //       meetingConducted: item.MeetingCon,
-      //       conversationType: item.ConversationType,
-      //     });
-      //   }
+      // Color coding
+      const rowIndex = worksheet._rows.length;
+      const date = new Date(item.date);
+      const day = date.toLocaleString("en-us", { weekday: "long" });
+      const isMobilization = EmployeeConfig.some(
+        (a) => a.Name === item.supervisor && a.Mobilization
+      );
 
-      //   if (item.serviceDetails.length) {
-      //     let firstIndex = worksheet._rows.length + 1;
-      //     let lastIndex = worksheet._rows.length + item.serviceDetails.length;
+      if (day === "Saturday" || day === "Sunday") {
+        worksheet.getCell(`B${rowIndex}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "f8696b" },
+        };
+      }
 
-      //     for (let i = 0; i < item.serviceDetails.length; i++) {
-      //       let _i = item.serviceDetails[i];
+      if (isMobilization) {
+        worksheet.getCell(`C${rowIndex}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "f8696b" },
+        };
+      }
 
-      //       worksheet.addRow({
-      //         week: item.week ? item.week : "-",
-      //         date: item.date ? dateFormater(item.date) : "-",
-      //         city: item.city ? item.city : "-",
-      //         supervisor: item.supervisor ? item.supervisor : "-",
-      //         siteCode:
-      //           _i.sitecode == "Other"
-      //             ? _i.otherSiteCode
-      //             : _i.sitecode
-      //             ? _i.sitecode
-      //             : "-",
-      //         client: _i.client ? _i.client : "-",
-      //         serCode: _i.serCode ? _i.serCode : "-",
-      //         serDescription: _i.serDescription ? _i.serDescription : "-",
-      //         startTime: _i.startTime ? _i.startTime : "-",
-      //         finishTime: _i.finishTime ? _i.finishTime : "-",
-      //         costCenter: item.costCenter ? item.costCenter : "-",
-      //         totalHours: item.totalHours ? item.totalHours : "-",
-      //         ifOverTime: item.overTime ? "Yes" : "No",
-      //         overTime:
-      //           item.overTime && item.overtimeSts == "Approved"
-      //             ? item.overTime
-      //             : "-",
-      //         status: item.status ? item.status : "-",
-      //         mobilization: item.mobilization ? item.mobilization : "-",
-      //         travel: item.travel ? item.travel : "-",
-      //         otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
-      //         comments: item.comments ? item.comments.toString() : "-",
-      //         reviewComments: item.reviewComments ? item.reviewComments : "-",
-      //         kmWithPrivateCar: item.kmWithPrivateCar
-      //           ? item.kmWithPrivateCar
-      //           : "-",
-      //         cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
-      //         travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
-      //         overTimeComments: item.overTimeComments
-      //           ? item.overTimeComments
-      //           : "-",
-      //         expense: item.expense ? item.expense : "-",
-      //         AtcCreditAmount: item.AtcCreditAmount
-      //           ? item.AtcCreditAmount
-      //           : "-",
-      //         personalCardAmount: item.personalCardAmount
-      //           ? item.personalCardAmount
-      //           : "-",
-      //         isRefund: item.isRefund,
-      //         overtimecommentsDrp: item.overtimecommentsDrp
-      //           ? item.overtimecommentsDrp.join(",")
-      //           : "-",
-      //         country: item.Country ? item.Country : "-",
-      //         orgCity: item.originCity ? item.originCity : "-",
-      //         orgCountry: item.originCountry ? item.originCountry : "-",
-      //         CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
-      //         oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
-      //         meetingPerson: _tempOneToOneMeetingPerson
-      //           ? _tempOneToOneMeetingPerson
-      //           : "-",
-      //         onCall: item.onCallVisible ? "Yes" : "No",
-      //       });
-      //     }
-      //     worksheet._rows[0]._cells.forEach((cell) => {
-      //       let cellName: any = "";
-      //       if (cell._address.split("").length == 2) {
-      //         cellName = cell._address.split("")[0];
-      //       } else {
-      //         cellName =
-      //           cell._address.split("")[0] + cell._address.split("")[1];
-      //       }
-      //       if (
-      //         cellName == "D" ||
-      //         cellName == "E" ||
-      //         cellName == "F" ||
-      //         cellName == "G" ||
-      //         cellName == "H" ||
-      //         cellName == "I"
-      //       ) {
-      //         worksheet.mergeCells(
-      //           `${cellName}${firstIndex}:${cellName}${firstIndex}`
-      //         );
-      //       } else {
-      //         worksheet.mergeCells(
-      //           `${cellName}${firstIndex}:${cellName}${lastIndex}`
-      //         );
-      //       }
-      //     });
-      //   } else {
-      //     worksheet.addRow({
-      //       week: item.week ? item.week : "-",
-      //       date: item.date ? dateFormater(item.date) : "-",
-      //       city: item.city ? item.city : "-",
-      //       supervisor: item.supervisor ? item.supervisor : "-",
-      //       siteCode: item.siteCode ? item.siteCode : "-",
-      //       client: item.client ? item.client : "-",
-      //       serCode: item.serCode ? item.serCode : "-",
-      //       serDescription: item.serDescription ? item.serDescription : "-",
-      //       startTime: item.startTime ? item.startTime : "-",
-      //       finishTime: item.finishTime ? item.finishTime : "-",
-      //       costCenter: item.costCenter ? item.costCenter : "-",
-      //       totalHours: item.totalHours ? item.totalHours : "-",
-      //       ifOverTime: item.overTime ? "Yes" : "No",
-      //       overTime:
-      //         item.overTime && item.overtimeSts == "Approved"
-      //           ? item.overTime
-      //           : "-",
-      //       status: item.status ? item.status : "-",
-      //       mobilization: item.mobilization ? item.mobilization : "-",
-      //       travel: item.travel ? item.travel : "-",
-      //       otherSiteCode: item.otherSiteCode ? item.otherSiteCode : "-",
-      //       comments: item.comments ? item.comments.toString() : "-",
-      //       reviewComments: item.reviewComments ? item.reviewComments : "-",
-      //       kmWithPrivateCar: item.kmWithPrivateCar
-      //         ? item.kmWithPrivateCar
-      //         : "-",
-      //       cityOverNight: item.cityOverNight ? item.cityOverNight : "-",
-      //       travelWithCar: item.travelWithCar ? item.travelWithCar : "-",
-      //       overTimeComments: item.overTimeComments
-      //         ? item.overTimeComments
-      //         : "-",
-      //       expense: item.expense ? item.expense : "-",
-      //       AtcCreditAmount: item.AtcCreditAmount
-      //         ? item.AtcCreditAmount
-      //         : "-",
-      //       personalCardAmount: item.personalCardAmount
-      //         ? item.personalCardAmount
-      //         : "-",
-      //       isRefund: item.isRefund,
-      //       overtimecommentsDrp: item.overtimecommentsDrp
-      //         ? item.overtimecommentsDrp.join(",")
-      //         : "-",
-      //       country: item.Country ? item.Country : "-",
-      //       orgCity: item.originCity ? item.originCity : "-",
-      //       orgCountry: item.originCountry ? item.originCountry : "-",
-      //       CRMActivity: item.CRMActivity ? item.CRMActivity : "-",
-      //       oneToOneMeeting: item.oneTOoneMeeting ? "Yes" : "No",
-      //       meetingPerson: _tempOneToOneMeetingPerson
-      //         ? _tempOneToOneMeetingPerson
-      //         : "-",
-      //       onCall: item.onCallVisible ? "Yes" : "No",
-      //     });
-      //   }
+      if (item.overTime) {
+        worksheet.getCell(`K${rowIndex}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "f8696b" },
+        };
+      }
 
-      //   if (filterWeeklyData.length - 1 == index) {
-      //     worksheet.addRow({
-      //       totalHours: `Total = ${TotalHour}:${TotalMin}`,
-      //     });
-      //     worksheet.getCell(`J + ${worksheet._rows.length}`).fill = {
-      //       type: "pattern",
-      //       pattern: "solid",
-      //       fgColor: { argb: "f8696b" },
-      //     };
-      //   }
-      // });
-      // for (let i = 0; i < filterWeeklyData.length; i++) {
-      //   let date = new Date(filterWeeklyData[i].date);
-      //   let isMobilization = EmployeeConfig.some(
-      //     (a) => a.Name == filterWeeklyData[i].supervisor && a.Mobilization
-      //   );
-      //   let day = date.toLocaleString("en-us", { weekday: "long" });
-      //   if (day == "Saturday" || day == "Sunday") {
-      //     worksheet.getCell("B" + (i + excelCount)).fill = {
-      //       type: "pattern",
-      //       pattern: "solid",
-      //       fgColor: { argb: "f8696b" },
-      //     };
-      //   }
+      const statusColorMap = {
+        Submitted: "90EE90",
+        Draft: "d3d3d3",
+        "Pending Approval": "f4f2bf",
+        InReview: "f4f2bf",
+      };
 
-      //   if (isMobilization) {
-      //     worksheet.getCell("C" + (i + excelCount)).fill = {
-      //       type: "pattern",
-      //       pattern: "solid",
-      //       fgColor: { argb: "f8696b" },
-      //     };
-      //   }
+      if (item.status && statusColorMap[item.status]) {
+        worksheet.getCell(`M${rowIndex}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: statusColorMap[item.status] },
+        };
+      }
 
-      //   if (excelCount + filterWeeklyData.length === excelCount + i + 1) {
-      //     worksheet.getCell("J" + (filterWeeklyData.length + 1)).fill = {
-      //       type: "pattern",
-      //       pattern: "solid",
-      //       fgColor: { argb: "f8696b" },
-      //     };
-      //   }
-      //   if (filterWeeklyData[i].overTime) {
-      //     worksheet.getCell("K" + (i + excelCount)).fill = {
-      //       type: "pattern",
-      //       pattern: "solid",
-      //       fgColor: { argb: "f8696b" },
-      //     };
-      //   }
-      //   if (filterWeeklyData[i].status == "Submitted") {
-      //     worksheet.getCell("M" + (i + excelCount)).fill = {
-      //       type: "pattern",
-      //       pattern: "solid",
-      //       fgColor: { argb: "90EE90" },
-      //     };
-      //   } else if (filterWeeklyData[i].status == "Draft") {
-      //     worksheet.getCell("M" + (i + excelCount)).fill = {
-      //       type: "pattern",
-      //       pattern: "solid",
-      //       fgColor: { argb: "d3d3d3" },
-      //     };
-      //   } else if (filterWeeklyData[i].status == "Pending Approval") {
-      //     worksheet.getCell("M" + (i + excelCount)).fill = {
-      //       type: "pattern",
-      //       pattern: "solid",
-      //       fgColor: { argb: "f4f2bf" },
-      //     };
-      //   } else if (filterWeeklyData[i].status == "InReview") {
-      //     worksheet.getCell("M" + (i + excelCount)).fill = {
-      //       type: "pattern",
-      //       pattern: "solid",
-      //       fgColor: { argb: "f4f2bf" },
-      //     };
-      //   }
-      // }
-      // excelCount += filterWeeklyData.length + 1;
-      // });
+      // Total for week
+      const isLastOfWeek =
+        i === list.findLastIndex((_item) => _item.week === item.week);
 
-      [
-        "A1",
-        "B1",
-        "C1",
-        "D1",
-        "E1",
-        "F1",
-        "G1",
-        "H1",
-        "I1",
-        "J1",
-        "K1",
-        "L1",
-        "M1",
-        "N1",
-        "O1",
-        "P1",
-        "Q1",
-        "R1",
-        "S1",
-        "T1",
-        "U1",
-        "V1",
-        "W1",
-        "X1",
-        "Y1",
-        "Z1",
-        "AA1",
-        "AB1",
-        "AC1",
-        "AD1",
-        "AE1",
-        "AF1",
-        "AG1",
-        "AH1",
-        "AI1",
-        "AJ1",
-        "AK1",
-      ].map((key) => {
-        worksheet.getCell(key).fill = {
+      if (isLastOfWeek) {
+        // Convert minutes to hours if needed
+        if (totalMinutes >= 60) {
+          totalHours += Math.floor(totalMinutes / 60);
+          totalMinutes %= 60;
+        }
+
+        worksheet.addRow({
+          totalHours: `Total = ${totalHours}:${totalMinutes}`,
+        });
+
+        const lastRowIndex = worksheet._rows.length;
+        worksheet.getCell(`J${lastRowIndex}`).fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "f8696b" },
+        };
+
+        rowCounter +=
+          list.filter((_item) => _item.week === item.week).length + 1;
+
+        // Reset total counters for the next week
+        totalHours = 0;
+        totalMinutes = 0;
+      }
+    }
+
+    const headerCells = [
+      "A1",
+      "B1",
+      "C1",
+      "D1",
+      "E1",
+      "F1",
+      "G1",
+      "H1",
+      "I1",
+      "J1",
+      "K1",
+      "L1",
+      "M1",
+      "N1",
+      "O1",
+      "P1",
+      "Q1",
+      "R1",
+      "S1",
+      "T1",
+      "U1",
+      "V1",
+      "W1",
+      "X1",
+      "Y1",
+      "Z1",
+      "AA1",
+      "AB1",
+      "AC1",
+      "AD1",
+      "AE1",
+      "AF1",
+      "AG1",
+      "AH1",
+      "AI1",
+      "AJ1",
+      "AK1",
+    ];
+    headerCells.forEach((cell) => {
+      const c = worksheet.getCell(cell);
+      c.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "C5D9F1" },
+      };
+      c.color = { argb: "FFFFFF" };
+    });
+
+    worksheet.eachRow((row) => {
+      row.eachCell((cell) => {
+        cell.alignment = {
+          vertical: "middle",
+          horizontal: "center",
+        };
+      });
+    });
+
+    if (crmFlag) {
+      ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", "I1"].map((key) => {
+        CRMworksheet.getCell(key).fill = {
           type: "pattern",
           pattern: "solid",
           fgColor: { argb: "C5D9F1" },
         };
-      });
-      await [
-        "A1",
-        "B1",
-        "C1",
-        "D1",
-        "E1",
-        "F1",
-        "G1",
-        "H1",
-        "I1",
-        "J1",
-        "K1",
-        "L1",
-        "M1",
-        "N1",
-        "O1",
-        "P1",
-        "Q1",
-        "R1",
-        "S1",
-        "T1",
-        "U1",
-        "V1",
-        "W1",
-        "X1",
-        "Y1",
-        "Z1",
-        "AA1",
-        "AB1",
-        "AC1",
-        "AD1",
-        "AE1",
-        "AF1",
-        "AG1",
-        "AH1",
-        "AI1",
-        "AJ1",
-        "AK1",
-      ].map((key) => {
-        worksheet.getCell(key).color = {
+        CRMworksheet.getCell(key).color = {
           type: "pattern",
           pattern: "solid",
           fgColor: { argb: "FFFFFF" },
         };
       });
-
-      worksheet.eachRow((row) => {
-        row.eachCell((cell) => {
-          cell.alignment = {
-            vertical: "middle",
-            horizontal: "center",
-          };
-        });
-      });
-
-      // new changes
-      if (crmFlag) {
-        ["A1", "B1", "C1", "D1", "E1", "F1", "G1", "H1", "I1"].map((key) => {
-          CRMworksheet.getCell(key).fill = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "C5D9F1" },
-          };
-          CRMworksheet.getCell(key).color = {
-            type: "pattern",
-            pattern: "solid",
-            fgColor: { argb: "FFFFFF" },
-          };
-        });
-      }
-
-      await workbook.xlsx
-        .writeBuffer()
-        .then((buffer) => {
-          FileSaver.saveAs(
-            new Blob([buffer]),
-            `ATC_Time_Sheet_${moment().format("DDMMYYYY_HH:mm")}.xlsx`
-          );
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      setIsPopupVisible(true);
     }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    FileSaver.saveAs(
+      new Blob([buffer]),
+      `Time_Sheet_${moment().format("DDMMYYYY_HH:mm")}.xlsx`
+    );
   };
 
   const uploadApprove = (id, json) => {
@@ -2503,129 +1982,152 @@ export default function TimeSheetDashboard(props): JSX.Element {
       approvelComment.style.color = "red";
     }
   };
-  const getEmployeeConfig = (TimesheetData, dirReportersArr) => {
-    spweb.lists
-      .getByTitle("EmployeeConfig")
-      .items.select("*,Employee/Title,Employee/EMail")
-      .expand("Employee")
-      .orderBy("Modified", false)
-      // .filter(`EmployeeId eq 457`)
-      .top(5000)
-      .get()
-      .then((res) => {
-        res.forEach((users) => {
-          EmployeeConfig.push({
-            Email: users.Employee ? users.Employee.EMail : "",
-            Name: users.Employee ? users.Employee.Title : null,
-            Mobilization: users.IsMobilization,
-          });
+  const getEmployeeConfig = async (): // TimesheetData,
+  // dirReportersArr
+  Promise<IEmployee[]> => {
+    try {
+      const res = await spweb.lists
+        .getByTitle("EmployeeConfig")
+        .items.select(
+          "*,Employee/Title,Employee/EMail,ReportsTo/EMail,ReportsTo/Title"
+        )
+        .expand("Employee", "ReportsTo")
+        .orderBy("Modified", false)
+        .top(5000)
+        .get();
+
+      EmployeeConfig = [];
+      for (const users of res) {
+        EmployeeConfig.push({
+          Email: users.Employee ? users.Employee.EMail : "",
+          Name: users.Employee ? users.Employee.Title : "",
+          Mobilization: users.IsMobilization,
+          reportsToEmail: users.ReportsTo ? users.ReportsTo.EMail : "",
+          reportsToName: users.ReportsTo ? users.ReportsTo.Title : "",
+          team: users.Team ? users.Team : "",
+          orginCountry: users.OrginCountry ? users.OrginCountry : "",
         });
-        // new changes params
-        getTMSTServiceDetails(TimesheetData, dirReportersArr);
-        // getCRMActivityData(TimesheetData, dirReportersArr);
-      })
-      .catch((err) => {
-        console.log(err, "getEmployeeConfig");
-      });
+      }
+      // new changes params
+      return EmployeeConfig;
+    } catch (err) {
+      console.log(err, "getEmployeeConfig");
+      return [];
+    }
   };
 
-  const getTMSTServiceDetails = (TimesheetData, dirReportersArr) => {
-    spweb.lists
-      .getByTitle("TMST_ServiceDetails")
-      .items.top(5000)
-      .select("*,ServiceCode/Title,ServiceDescription/ServiceDescription")
-      .expand("ServiceCode,ServiceDescription")
-      .orderBy("ID", false)
-      // .get()
-      .getPaged()
-      .then(async (data: any) => {
-        let res = [...data.results];
-        let nextRef = data.hasNext;
-        // get more than 5000 data
-        while (nextRef) {
-          await data
-            .getNext()
-            .then(async (_res) => {
-              data = _res;
-              await res.push(..._res.results);
-              nextRef = _res.hasNext;
-            })
-            .catch((err) => {
-              console.log(err, "getTMSTServiceDetailsgetNext");
+  const getTMSTServiceDetails = async (
+    TimesheetData
+    // directEmployeeArr
+  ): Promise<any[]> => {
+    try {
+      const allItems: any[] = await fetchAllItems();
+
+      if (allItems.length) {
+        let tmstServiceDetails = allItems;
+
+        getCRMActivityData(TimesheetData, tmstServiceDetails);
+      } else {
+        getCRMActivityData(TimesheetData, []);
+      }
+    } catch (error) {
+      console.error("Error in getTMSTServiceDetails:", error);
+      return [];
+    }
+
+    async function fetchAllItems(): Promise<any[]> {
+      const allItems: any[] = [];
+      let nextHref: string | null = null;
+
+      do {
+        try {
+          const response = await spweb.lists
+            .getByTitle("TMST_ServiceDetails")
+            .renderListDataAsStream({
+              ViewXml: camlQueryFunc(defaultCamlRange).serviceDetails,
+              ...(nextHref ? { Paging: nextHref.substring(1) } : {}),
             });
-        }
 
-        if (res.length) {
-          let tmstServiceDetails = res;
-          getCRMActivityData(
-            TimesheetData,
-            dirReportersArr,
-            tmstServiceDetails
-          );
-        } else {
-          getCRMActivityData(TimesheetData, dirReportersArr, []);
+          allItems.push(...response.Row);
+          nextHref = response.NextHref || null;
+        } catch (err) {
+          console.error("Error fetching items:", err);
+          break;
         }
-      })
-      .catch((err) => console.log(err, "getTMSTServiceDetails"));
+      } while (nextHref);
+
+      return allItems;
+    }
   };
 
-  const getCRMActivityData = (
+  const getCRMActivityData = async (
     TimesheetData,
-    dirReportersArr,
     tmstServiceDetails
-  ) => {
-    spweb.lists
-      .getByTitle("TMST_CRM_ActivityDetails")
-      .items.select("*,Name/Title")
-      .expand("Name")
-      .orderBy("ID", false)
-      .top(5000)
-      .get()
-      .then((res: any) => {
-        // new changes start
-        let masterTimesheetArr = [];
-        if (dirReportersArr.length) {
-          dirReportersArr.forEach((val) => {
-            TimesheetData.push(val);
-          });
-        }
+  ): Promise<any[]> => {
+    try {
+      const allItems: any[] = await fetchAllItems();
+      let masterTimesheetArr = [];
 
-        if (TimesheetData.length) {
-          masterTimesheetArr = TimesheetData.filter(
-            (item, index) => TimesheetData.indexOf(item) === index
-          );
+      TimesheetData = [...TimesheetData];
+
+      if (TimesheetData.length) {
+        masterTimesheetArr = TimesheetData.filter(
+          (item, index) => TimesheetData.indexOf(item) === index
+        );
+      } else {
+        masterTimesheetArr = [];
+      }
+      // else {
+      //   masterTimesheetArr = dirReportersArr;
+      // }
+
+      let tempLocalArr = masterTimesheetArr;
+      start = performance.now();
+      const allItemsMap = new Map<number, any>();
+      for (const item of allItems) {
+        if (item.TMST_CRM_IDId !== 0) {
+          allItemsMap.set(item.TMST_CRM_IDId, item);
+        }
+      }
+
+      for (const localItem of tempLocalArr) {
+        const crmId = parseInt(localItem.Id);
+        const matchedItem = allItemsMap.get(crmId);
+
+        if (localItem.CRM_Activity === "Yes" && matchedItem) {
+          arrCreator(localItem, matchedItem, tempLocalArr, tmstServiceDetails);
         } else {
-          masterTimesheetArr = dirReportersArr;
+          arrCreator(localItem, "", tempLocalArr, tmstServiceDetails);
         }
+      }
+    } catch (error) {
+      console.error("Error in getCRMActivityData:", error);
+      return [];
+    }
 
-        let tempLocalArr = masterTimesheetArr;
+    async function fetchAllItems(): Promise<any[]> {
+      const allItems: any[] = [];
+      let nextHref: string | null = null;
 
-        // new changes end
-        for (let i = 0; i < tempLocalArr.length; i++) {
-          let _isValueId: boolean = false;
-          for (let j = 0; j < res.length; j++) {
-            if (
-              tempLocalArr[i].CRM_Activity == "Yes" &&
-              res[j].TMST_CRM_IDId != 0 &&
-              res[j].TMST_CRM_IDId == tempLocalArr[i].Id
-            ) {
-              _isValueId = true;
-              arrCreator(
-                tempLocalArr[i],
-                res[j],
-                tempLocalArr,
-                tmstServiceDetails
-              );
-            }
-          }
-          if (!_isValueId) {
-            arrCreator(tempLocalArr[i], "", tempLocalArr, tmstServiceDetails);
-          }
+      do {
+        try {
+          const response = await spweb.lists
+            .getByTitle("TMST_CRM_ActivityDetails")
+            .renderListDataAsStream({
+              ViewXml: camlQueryFunc(defaultCamlRange).crmActivity,
+              ...(nextHref ? { Paging: nextHref.substring(1) } : {}),
+            });
+
+          allItems.push(...response.Row);
+          nextHref = response.NextHref || null;
+        } catch (err) {
+          console.error("Error fetching items:", err);
+          break;
         }
-      })
-      .catch((err) => {
-        console.log(err, "getCRMActivityData");
-      });
+      } while (nextHref);
+
+      return allItems;
+    }
   };
 
   const findServiceDetails = (
@@ -2635,7 +2137,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
     let _tempTMSTSServiceDetails: IServiceDetails[] = [];
 
     let findServices = tmstServiceDetails.filter(
-      (item: any) => item.TMST_IDId == tmstId
+      (item: any) => item.TMST_ID != "" && item.TMST_ID[0].lookupId == tmstId
     );
 
     if (findServices.length) {
@@ -2643,9 +2145,9 @@ export default function TimeSheetDashboard(props): JSX.Element {
         _tempTMSTSServiceDetails.push({
           sitecode: ser.SiteCode ? ser.SiteCode : "",
           client: ser.Client ? ser.Client : "",
-          serCode: ser.ServiceCode ? ser.ServiceCode.Title : "",
+          serCode: ser.ServiceCode ? ser.ServiceCode[0].lookupValue : "",
           serDescription: ser.ServiceDescription
-            ? ser.ServiceDescription.ServiceDescription
+            ? ser.ServiceDescription[0].lookupValue
             : "",
           startTime: ser.StartTime ? ser.StartTime : "",
           finishTime: ser.FinishTime ? ser.FinishTime : "",
@@ -2669,21 +2171,19 @@ export default function TimeSheetDashboard(props): JSX.Element {
       timesheetData.FinishTime
     );
 
-    let tmstServices = findServiceDetails(tmstServiceDetails, timesheetData.Id);
+    let tmstServices = findServiceDetails(
+      tmstServiceDetails,
+      parseInt(timesheetData.ID)
+    );
 
     if (CRMData) {
       tempCount++;
       localArr.push({
-        Id: timesheetData.Id,
+        Id: timesheetData.ID,
         week: timesheetData.Week ? timesheetData.Week : "",
         // date: timesheetData.Date ? moment(timesheetData.Date).format() : "",
-        date: timesheetData.FieldValuesAsText
-          ? moment(
-              timesheetData.FieldValuesAsText.Date,
-              "DD/MM/YYYY"
-            ).toISOString()
-          : "",
-        supervisor: timesheetData.Name ? timesheetData.Name.Title : "",
+        date: timesheetData["Date."] ? timesheetData["Date."] : "",
+        supervisor: timesheetData.Name ? timesheetData.Name[0].title : "",
         startTime: timesheetData.StartTime ? timesheetData.StartTime : "",
         finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
         overTime: timesheetData.OverTime ? timesheetData.OverTime : "",
@@ -2754,7 +2254,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         Email: CRMData.EmailAddress ? CRMData.EmailAddress : "-",
         TelNumber: CRMData.TelNumber ? CRMData.TelNumber : "-",
         Comments: CRMData.Comments ? CRMData.Comments : "-",
-        Name: CRMData.Name ? CRMData.Name.Title : "-",
+        Name: CRMData.Name ? CRMData.Name[0].title : "-",
         Date: CRMData.Date ? moment(CRMData.Date).format("DD/MM/YYYY") : "-",
         Client: CRMData.Client ? CRMData.Client : "-",
         MeetingCon: CRMData.MeetingConducted ? CRMData.MeetingConducted : "-",
@@ -2777,16 +2277,11 @@ export default function TimeSheetDashboard(props): JSX.Element {
     } else {
       tempCount++;
       localArr.push({
-        Id: timesheetData.Id,
+        Id: timesheetData.ID,
         week: timesheetData.Week ? timesheetData.Week : "",
         // date: timesheetData.Date ? moment(timesheetData.Date).format() : "",
-        date: timesheetData.FieldValuesAsText
-          ? moment(
-              timesheetData.FieldValuesAsText.Date,
-              "DD/MM/YYYY"
-            ).toISOString()
-          : "",
-        supervisor: timesheetData.Name ? timesheetData.Name.Title : "",
+        date: timesheetData["Date."] ? timesheetData["Date."] : "",
+        supervisor: timesheetData.Name ? timesheetData.Name[0].title : "",
         startTime: timesheetData.StartTime ? timesheetData.StartTime : "",
         finishTime: timesheetData.FinishTime ? timesheetData.FinishTime : "",
         overTime: timesheetData.OverTime ? timesheetData.OverTime : "",
@@ -2876,6 +2371,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
         serviceDetails: tmstServices,
       });
     }
+
     if (tempCount == masterData.length) {
       localArr = localArr.sort(function (a, b) {
         return moment(a.date) > moment(b.date)
@@ -2887,9 +2383,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
 
       // if (loggedinuser == "admin.sharepoint@atc-logistics.ie") {
       if (loggedinuser == "davor.salkanovic@atc-logistics.de") {
-        // let onlyMobilizationYes = timeSheetData.filter(
-        //   (yes) => yes.mobilization == "Yes"
-        // );
         let onlyMobilizationYes = [];
         localArr.forEach((data) => {
           if (
@@ -2915,7 +2408,10 @@ export default function TimeSheetDashboard(props): JSX.Element {
             }
           }
         });
-        // getEmployeeConfig(onlyMobilizationYes);
+
+        console.log(
+          ((performance.now() - start) / 1000).toFixed(2) + " seconds"
+        );
         allFilterOptions([...onlyMobilizationYes]);
         setMasterData([...onlyMobilizationYes]);
         setDuplicateData([...onlyMobilizationYes]);
@@ -2924,6 +2420,9 @@ export default function TimeSheetDashboard(props): JSX.Element {
         timeSheetPaginateFunction(1, [...onlyMobilizationYes]);
         setLoader(false);
       } else {
+        console.log(
+          ((performance.now() - start) / 1000).toFixed(2) + " seconds"
+        );
         allFilterOptions([...localArr]);
         setMasterData([...localArr]);
         setDuplicateData([...localArr]);
@@ -2958,7 +2457,10 @@ export default function TimeSheetDashboard(props): JSX.Element {
   const dateTemplate = (rowData) => {
     return (
       <div>
-        {rowData.date ? moment(rowData.date).format("DD/MM/YYYY") : "-"}
+        {rowData.date
+          ? moment(rowData.date).add(7, "hours").format("DD/MM/YYYY")
+          : // ? moment(rowData.date).add(5, "hours").format("DD/MM/YYYY")
+            "-"}
       </div>
     );
   };
@@ -3619,7 +3121,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
             }}
           /> */}
         </div>
-        <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {/* <DefaultButton
             iconProps={History}
             text={"History"}
@@ -3633,8 +3135,22 @@ export default function TimeSheetDashboard(props): JSX.Element {
           /> */}
           <DefaultButton
             iconProps={Save}
+            text={"Export more data"}
+            onClick={() => {
+              setIsExportExcel(true);
+            }}
+            style={{
+              backgroundColor: "#a83037",
+              color: "#fff",
+              border: "none",
+            }}
+          />
+          <DefaultButton
+            iconProps={Save}
             text={"Export"}
-            onClick={() => generateTimeSheetExcel(exportExcel)}
+            onClick={() => {
+              generateTimeSheetExcel(exportExcel);
+            }}
             style={{
               backgroundColor: "#a83037",
               color: "#fff",
@@ -3656,7 +3172,7 @@ export default function TimeSheetDashboard(props): JSX.Element {
             styles={dropdownStyles}
           />
           <div style={{ margin: "5px 22px 0px 0px", width: "30%" }}>
-            <span style={{ fontWeight: "500" }}>Supervisor</span>
+            <span style={{ fontWeight: 500 }}>Supervisor</span>
             <Autocomplete
               id="combo-box-demo"
               options={dropDownOptions.supervisor}
@@ -3669,16 +3185,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
               onChange={(e, value) => {
                 filterHandleFunction("supervisor", value);
               }}
-              // onBlur={() => {
-              //   FilterKey.supervisor
-              //     ? null
-              //     : filterHandleFunction("supervisor", [
-              //         // {
-              //         //   text: "All",
-              //         //   key: "All",
-              //         // },
-              //       ]);
-              // }}
               inputValue={supervisor}
               onInputChange={(event, newInputValue: any) => {
                 setSupervisor(newInputValue);
@@ -3816,15 +3322,6 @@ export default function TimeSheetDashboard(props): JSX.Element {
         )}
       </div>
       <div>
-        {/* <DetailsList
-          items={displayData}
-          columns={columns}
-          setKey="set"
-          layoutMode={DetailsListLayoutMode.justified}
-          selectionMode={SelectionMode.none}
-          styles={gridStyles}
-          onRenderRow={onRenderRow}
-        /> */}
         <DataTable
           value={displayData}
           expandedRows={expandedRows}
@@ -3891,6 +3388,15 @@ export default function TimeSheetDashboard(props): JSX.Element {
           </div>
         )}
       </div>
+
+      {isExportExcel && (
+        <ExportExcel
+          loggedinuser={loggedinuser}
+          context={props.spcontext}
+          spweb={spweb}
+          exportExcelFlag={setIsExportExcel}
+        />
+      )}
     </div>
   );
 }

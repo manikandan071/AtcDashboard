@@ -27,8 +27,8 @@ interface IFiles {
 }
 
 let spweb = Web(
-  // "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
-  "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
+  "https://atclogisticsie.sharepoint.com/sites/PlanningOperations/Field%20Quality"
+  // "https://atclogisticsie.sharepoint.com/sites/TechnoRUCS_Dev_Site"
 );
 
 let currentUrl = window.location.href;
@@ -276,40 +276,90 @@ export default function FieldQualityView(props): JSX.Element {
         console.log(err);
       });
   };
+  // const getRacksCabledAttachements = (planningData, wrappingData): void => {
+  //   let siteUrl: string = "";
+  //   spweb
+  //     .get()
+  //     .then((w) => {
+  //       siteUrl = w.ServerRelativeUrl;
+  //       spweb
+  //         .getFolderByServerRelativeUrl(
+  //           `${siteUrl}/Shared Documents/Field Quality Tool/${
+  //             planningData.Client
+  //           }/${planningData.Id || planningData.trackingNumber}/CablingReport`
+  //         )
+  //         .files.get()
+  //         .then((res: any) => {
+  //           let _tempfiles: IFiles[] = [];
+  //           if (res.length) {
+  //             res.forEach((_item: any, i: number) => {
+  //               _tempfiles.push({
+  //                 filename: _item.Name ? _item.Name : "",
+  //                 url: _item.ServerRelativeUrl ? _item.ServerRelativeUrl : "",
+  //               });
+  //               if (res.length - 1 == i) {
+  //                 getResponsibitydata(planningData, wrappingData, [
+  //                   ..._tempfiles,
+  //                 ]);
+  //               }
+  //             });
+  //           } else {
+  //             getResponsibitydata(planningData, wrappingData, _tempfiles);
+  //           }
+  //         })
+  //         .catch((err) => console.log(err, "getRacksCabledAttachements"));
+  //     })
+  //     .catch((err) => console.log(err, "get-spweb-err"));
+  // };
   const getRacksCabledAttachements = (planningData, wrappingData): void => {
     let siteUrl: string = "";
+
     spweb
       .get()
       .then((w) => {
         siteUrl = w.ServerRelativeUrl;
-        spweb
-          .getFolderByServerRelativeUrl(
-            `${siteUrl}/Shared Documents/Field Quality Tool/${planningData.Client}/${planningData.trackingNumber}/CablingReport`
-            // `${props.spcontext.pageContext.web.serverRelativeUrl}/Shared Documents/Field Quality Tool/MSFT/40000509/CablingReport`
-          )
-          .files.get()
-          .then((res: any) => {
-            let _tempfiles: IFiles[] = [];
-            if (res.length) {
-              res.forEach((_item: any, i: number) => {
-                _tempfiles.push({
-                  filename: _item.Name ? _item.Name : "",
-                  url: _item.ServerRelativeUrl ? _item.ServerRelativeUrl : "",
-                });
-                if (res.length - 1 == i) {
-                  getResponsibitydata(planningData, wrappingData, [
-                    ..._tempfiles,
-                  ]);
-                }
-              });
-            } else {
-              getResponsibitydata(planningData, wrappingData, _tempfiles);
-            }
-          })
-          .catch((err) => console.log(err, "getRacksCabledAttachements"));
+
+        const baseFolder = `${siteUrl}/Shared Documents/Field Quality Tool/${planningData.Client}`;
+        const poFolderPath = `${baseFolder}/${planningData.trackingNumber}/CablingReport`;
+        const idFolderPath = `${baseFolder}/${planningData.Id}/CablingReport`;
+
+        // Function to try loading files from a folder
+        const tryLoadFiles = (folderPath: string) => {
+          return spweb
+            .getFolderByServerRelativeUrl(folderPath)
+            .files.get()
+            .then((res: any) => res)
+            .catch(() => null); // If folder doesn't exist or error, return null
+        };
+
+        // Try PO folder first, then fallback to ID
+        tryLoadFiles(poFolderPath).then((poFiles) => {
+          if (poFiles && poFiles.length) {
+            processFiles(poFiles);
+          } else {
+            tryLoadFiles(idFolderPath).then((idFiles) => {
+              if (idFiles && idFiles.length) {
+                processFiles(idFiles);
+              } else {
+                getResponsibitydata(planningData, wrappingData, []);
+              }
+            });
+          }
+        });
+
+        // Helper to process files and call next function
+        const processFiles = (res: any) => {
+          const _tempfiles: IFiles[] = res.map((_item: any) => ({
+            filename: _item.Name || "",
+            url: _item.ServerRelativeUrl || "",
+          }));
+
+          getResponsibitydata(planningData, wrappingData, _tempfiles);
+        };
       })
       .catch((err) => console.log(err, "get-spweb-err"));
   };
+
   const getResponsibitydata = (planningData, wrappingData, racksCableFiles) => {
     spweb.lists
       .getByTitle(`Operational Responsibilities`)

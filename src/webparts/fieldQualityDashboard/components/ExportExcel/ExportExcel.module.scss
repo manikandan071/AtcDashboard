@@ -1,0 +1,14 @@
+.exportContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+  .fieldsFlex {
+    width: 48%;
+  }
+}
+
+.exportbtnContainer {
+  margin: 20px 0px 0px 0px;
+  text-align: center;
+}
